@@ -141,11 +141,16 @@ class OutputVariables {
 
 public class LinkLayerModel  {
 
+  private static final Random rand = new Random();
+
   public static void main (String args[]) {
-    if (args.length != 1) {
+    if (args.length != 2) {
       usage();
       return;
     }
+
+    rand.setSeed(Integer.parseInt(args[1]));
+
     // variable that contains input parameters
     InputVariables inVar = new InputVariables();
     // parse configuration file and store parameters in inVar
@@ -157,21 +162,21 @@ public class LinkLayerModel  {
     // variable that contains output data
     OutputVariables outVar = new OutputVariables( inVar.numNodes ); 
     // create topology
-    System.out.print("Topology ...\t\t\t");
+    //System.out.print("Topology ...\t\t\t");
     obtainTopology ( inVar, outVar );
-    System.out.println("done");
+    //System.out.println("done");
     // obtain ouput power and noise floor for all nodes
-    System.out.print("Radio Pt and Pn ...\t\t");
+    //System.out.print("Radio Pt and Pn ...\t\t");
     obtainRadioPtPn ( inVar, outVar );
-    System.out.println("done");
+    //System.out.println("done");
     // obtain link gains 
-    System.out.print("Links Gain .....\t\t");
+    //System.out.print("Links Gain .....\t\t");
     obtainLinkGain ( inVar, outVar);
-    System.out.println("done");
+    //System.out.println("done");
     // print linkgain.out (link gains and noise floor) and topology.out (x/y coordinates)
-    System.out.print("Printing Output File ...\t");
+    //System.out.print("Printing Output File ...\t");
     printFile  ( inVar, outVar);
-    System.out.println("done");
+    //System.out.println("done");
   }
 
 
@@ -468,7 +473,6 @@ public class LinkLayerModel  {
   protected static boolean correctTopology ( InputVariables  inVar, 
                                              OutputVariables outVar )
   {
-    Random rand = new Random();
     int i, j;
     double Xdist, Ydist, dist, avgDecay;
 
@@ -499,7 +503,6 @@ public class LinkLayerModel  {
   protected static boolean obtainRadioPtPn ( InputVariables  inVar, 
                                              OutputVariables outVar )
   {
-    Random rand = new Random();
     int i, j;
     double t11, t12, t21, t22;
     double rn1, rn2;
@@ -552,7 +555,6 @@ public class LinkLayerModel  {
   protected static boolean obtainLinkGain ( InputVariables  inVar, 
                                             OutputVariables outVar )
   {
-    Random rand = new Random();
     int i, j;
     double Xdist, Ydist, dist, pathloss;
 
@@ -597,7 +599,7 @@ public class LinkLayerModel  {
      * Output file for xy coordinates.
      */
 
-    try{
+    /*try{
       FileOutputStream fout =  new FileOutputStream("topology.out");
       try {
         PrintStream myOutput = new PrintStream(fout);
@@ -612,16 +614,14 @@ public class LinkLayerModel  {
     }
     catch (Exception e) {
       System.out.println("\nError : Failed to open the link gain file linkgains.out:" + e);
-    }
+    }*/
 
    
     /*
      * Output file for link gains.
      */
-    try{
-      FileOutputStream fout =  new FileOutputStream("linkgain.out");
       try {
-        PrintStream myOutput = new PrintStream(fout);
+      PrintStream myOutput = System.out;
         for (i = 0; i < inVar.numNodes; i = i+1) {
           for (j = (i+1); j < inVar.numNodes; j = j+1 ) {
             if ( i != j) {
@@ -637,11 +637,6 @@ public class LinkLayerModel  {
       catch (Exception e) {
         System.out.println("\nError : Failed to open a print stream to the linkgain file" + e);
       }
-
-    }
-    catch (Exception e) {
-      System.out.println("\nError : Failed to open the link gain file linkgains.out:" + e);
-    }
 
     return true;
   }
