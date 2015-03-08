@@ -216,7 +216,7 @@ void sim_noise_dist(uint16_t node_id)__attribute__ ((C, spontaneous))
       bin = noise_hash->elements[i] - NOISE_MIN_QUANTIZE; //search_bin_num(noise_hash->elements[i]) - 1;
 //      printf("Bin %i, Noise %i\n", bin, (NOISE_MIN_QUANTIZE + bin));
       val = noise_hash->dist[bin];
-      val += (float)1.0;
+      val += 1.0f;
       noise_hash->dist[bin] = val;
     }
 
@@ -288,7 +288,7 @@ void sim_noise_alarm() {
 char sim_noise_gen(uint16_t node_id)__attribute__ ((C, spontaneous))
 {
   int i;
-  int noiseIndex = 0;
+  //int noiseIndex = 0;
   char noise;
   struct hashtable *pnoiseTable = noiseData[node_id].noiseTable;
   char *pKey = noiseData[node_id].key;
@@ -342,14 +342,14 @@ char sim_noise_gen(uint16_t node_id)__attribute__ ((C, spontaneous))
     dbg("HASH", "IN:for i=%d\n", i);
     if (i == 0) {	
       if (ranNum <= noise_hash->dist[i]) {
-	noiseIndex = i;
+	//noiseIndex = i;
 	dbg_clear("HASH", "Selected Bin = %d -> ", i+1);
 	break;
       }
     }
     else if ( (noise_hash->dist[i-1] < ranNum) && 
 	      (ranNum <= noise_hash->dist[i])   ) {
-      noiseIndex = i;
+      //noiseIndex = i;
       dbg_clear("HASH", "Selected Bin = %d -> ", i+1);
       break;
     }

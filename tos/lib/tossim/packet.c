@@ -83,8 +83,8 @@ int Packet::length() {
   return sim_packet_length(msgPtr);
 }
 
-void Packet::setType(int type) {
-  sim_packet_set_type(msgPtr, (uint8_t)type);
+void Packet::setType(int packet_type) {
+  sim_packet_set_type(msgPtr, (uint8_t)packet_type);
 }
 int Packet::type() {
   return sim_packet_type(msgPtr);
@@ -95,9 +95,9 @@ char* Packet::data() {
   return val;
 }
 
-void Packet::setData(char* data, int len) {
+void Packet::setData(char* packet_data, int len) {
   len = (len > maxLength())? maxLength():len;
-  memcpy(sim_packet_data(msgPtr), data, len);
+  memcpy(sim_packet_data(msgPtr), packet_data, len);
   setLength(len);
 }
 

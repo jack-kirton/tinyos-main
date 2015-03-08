@@ -43,8 +43,8 @@
 Radio::Radio() {}
 Radio::~Radio() {}
 
-void Radio::add(int src, int dest, double gain) {
-  sim_gain_add(src, dest, gain);
+void Radio::add(int src, int dest, double radio_gain) {
+  sim_gain_add(src, dest, radio_gain);
 }
 
 double Radio::gain(int src, int dest) {

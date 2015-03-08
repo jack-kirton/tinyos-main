@@ -56,8 +56,8 @@
 
 uint16_t TOS_NODE_ID = 1;
 
-Variable::Variable(char* str, char* formatStr, int array, int which) {
-  name = str;
+Variable::Variable(char* name_string, char* formatStr, int array, int which) {
+  name = name_string;
   format = formatStr;
   isArray = array;
   mote = which;
