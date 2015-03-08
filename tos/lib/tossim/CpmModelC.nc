@@ -390,19 +390,19 @@ implementation {
     // the signal strength.
 
     if (!sim_mote_is_on(sim_node())) { 
-      dbg("CpmModelC", "Lost packet from %i due to %i being off\n", source, sim_node());
+      dbg("CpmModelC,PacketLoss", "Lost packet from %i due to %i being off\n", source, sim_node());
       rcv->lost = 1;
     }
     else if (!shouldReceive(power - noiseStr)) {
-      dbg("CpmModelC,SNRLoss", "Lost packet from %i to %i due to SNR being too low (%i)\n", source, sim_node(), (int)(power - noiseStr));
+      dbg("CpmModelC,SNRLoss,PacketLoss", "Lost packet from %i to %i due to SNR being too low (%i)\n", source, sim_node(), (int)(power - noiseStr));
       rcv->lost = 1;
     }
     else if (receiving) {
-      dbg("CpmModelC,SNRLoss", "Lost packet from %i due to %i being mid-reception\n", source, sim_node());
+      dbg("CpmModelC,SNRLoss,PacketLoss", "Lost packet from %i due to %i being mid-reception\n", source, sim_node());
       rcv->lost = 1;
     }
     else if (transmitting && (rcv->start < transmissionEndTime) && (transmissionEndTime <= rcv->end)) {
-      dbg("CpmModelC,SNRLoss", "Lost packet from %i due to %i being mid-transmission, transmissionEndTime %llu\n", source, sim_node(), transmissionEndTime);
+      dbg("CpmModelC,SNRLoss,PacketLoss", "Lost packet from %i due to %i being mid-transmission, transmissionEndTime %llu\n", source, sim_node(), transmissionEndTime);
       rcv->lost = 1;
     }
     else {
