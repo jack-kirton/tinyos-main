@@ -85,8 +85,9 @@ static void fillInOutput(int id, char* name) {
   char* termination = name;
   char* namePos = name;
   int count = 0;
-  char* newName = (char*)malloc(strlen(name) + 1);
-  memset(newName, 0, strlen(name) + 1);
+  size_t nameLen = strlen(name);
+  char* newName = (char*)malloc(nameLen + 1);
+  memset(newName, 0, nameLen + 1);
   // Count the outputs
   while (termination != NULL) {
     sim_log_channel_t* channel;
@@ -136,24 +137,25 @@ static void fillInOutput(int id, char* name) {
     if (channel != NULL) {
       int i, j;
       for (i = 0; i < channel->numOutputs; i++) {
-	int duplicate = 0;
-	int outputCount = outputs[id].num;
-	// Check if we already have this file descriptor in the output
-	// set, and if so, ignore it.
-	for (j = 0; j < outputCount; j++) {
-	  if (fileno(outputs[id].files[j]) == fileno(channel->outputs[i])) {
-	    duplicate = 1;
-	    j = outputCount;
-	  }
-	}
-	if (!duplicate) {
-	  outputs[id].files[outputCount] = channel->outputs[i];
-	  outputs[id].num++;
-	}
+        int duplicate = 0;
+        int outputCount = outputs[id].num;
+        // Check if we already have this file descriptor in the output
+        // set, and if so, ignore it.
+        for (j = 0; j < outputCount; j++) {
+          if (fileno(outputs[id].files[j]) == fileno(channel->outputs[i])) {
+            duplicate = 1;
+            j = outputCount;
+          }
+        }
+        if (!duplicate) {
+          outputs[id].files[outputCount] = channel->outputs[i];
+          outputs[id].num++;
+        }
       }
     }
     namePos = termination + 1;
   }
+  free(newName);
 }
 
 void sim_log_init() {
