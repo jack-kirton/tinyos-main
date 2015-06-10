@@ -270,6 +270,7 @@ Mote* Tossim::getNode(unsigned long nodeID) {
   if (nodeID > TOSSIM_MAX_NODES) {
     nodeID = TOSSIM_MAX_NODES;
     // log an error, asked for an invalid node
+    return NULL;
   }
   else {
     if (motes[nodeID] == NULL) {
