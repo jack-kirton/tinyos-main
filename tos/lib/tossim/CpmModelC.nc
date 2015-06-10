@@ -64,11 +64,11 @@ implementation {
   typedef struct receive_message receive_message_t;
 
   struct receive_message {
-    int source;
     sim_time_t start;
     sim_time_t end;
     double power;
     double reversePower;
+    int source;
     int8_t strength;
     bool lost;
     bool ack;
@@ -96,7 +96,7 @@ implementation {
 
     secondBillionths = (ftime % sim_ticks_per_sec());
     if (sim_ticks_per_sec() > (sim_time_t)1000000000) {
-	secondBillionths /= (sim_ticks_per_sec() / (sim_time_t)1000000000);
+      secondBillionths /= (sim_ticks_per_sec() / (sim_time_t)1000000000);
     }
     else {
       secondBillionths *= ((sim_time_t)1000000000 / sim_ticks_per_sec());
@@ -104,7 +104,7 @@ implementation {
     temp_time = (int)(secondBillionths/10000);
     
     if (temp_time % 10 >= 5) {
-	temp_time += (10-(temp_time%10));
+      temp_time += (10-(temp_time%10));
     }
     else {
       temp_time -= (temp_time%10);
@@ -132,8 +132,8 @@ implementation {
 
     dbg("CpmModelC", "IN: noise_hash_generation()\n");
     if (5 <= remain && remain < 10) {
-	noise_val = (double)sim_noise_generate(node_id, quotient+1);
-      }
+      noise_val = (double)sim_noise_generate(node_id, quotient+1);
+    }
     else {
       noise_val = (double)sim_noise_generate(node_id, quotient);
     }

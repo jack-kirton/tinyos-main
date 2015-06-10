@@ -65,8 +65,8 @@ typedef struct sim_noise_hash_t {
   char key[NOISE_HISTORY];
   int numElements;
   int size;
-  char *elements;
   char flag;
+  char *elements;
   float dist[NOISE_NUM_VALUES];
 } sim_noise_hash_t;
 
@@ -74,12 +74,12 @@ typedef struct sim_noise_node_t {
   char key[NOISE_HISTORY];
   char freqKey[NOISE_HISTORY];
   char lastNoiseVal;
+  bool generated;
   uint32_t noiseGenTime;
   struct hashtable *noiseTable;
   char* noiseTrace;
   uint32_t noiseTraceLen;
   uint32_t noiseTraceIndex;
-  bool generated;
 } sim_noise_node_t;
 
 void sim_noise_init();

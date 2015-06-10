@@ -59,8 +59,8 @@
 #define HEAP_H_INCLUDED
 
 typedef struct heap {
-  int size;
   void* data;
+  int size;
   int private_size;
 } heap_t;
 

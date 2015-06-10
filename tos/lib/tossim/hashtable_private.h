@@ -9,13 +9,13 @@
 struct entry
 {
     void *k, *v;
-    unsigned int h;
     struct entry *next;
+    unsigned int h;
 };
 
 struct hashtable {
-    unsigned int tablelength;
     struct entry **table;
+    unsigned int tablelength;
     unsigned int entrycount;
     unsigned int loadlimit;
     unsigned int primeindex;

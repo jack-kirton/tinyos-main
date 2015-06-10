@@ -62,10 +62,10 @@ implementation {
   typedef struct receive_message receive_message_t;
   
   struct receive_message {
-    int source;
     sim_time_t start;
     sim_time_t end;
     double power;
+    int source;
     bool lost;
     bool ack;
     message_t* msg;
@@ -90,9 +90,9 @@ implementation {
     dbg("Gain", "Computing noise @ %s: %0.2f", sim_time_string(), localNoise);
     while (current != NULL) {
       sig += pow(10.0, current->power / 10.0);
-      	dbg_clear("Gain", " ");
+      dbg_clear("Gain", " ");
       if (current->power >= 0.0) {
-	dbg_clear("Gain", "+");
+        dbg_clear("Gain", "+");
       }
       dbg_clear("Gain", "%0.2f ", current->power);
       current = current->next;
