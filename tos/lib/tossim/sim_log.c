@@ -168,7 +168,6 @@ void sim_log_init() {
     outputs[i].files = (FILE**)malloc(sizeof(FILE*));
     outputs[i].files[0] = fdopen(1, "w"); // STDOUT
   }
-  
 }
 
 void sim_log_add_channel(char* name, FILE* file) {
@@ -178,9 +177,7 @@ void sim_log_add_channel(char* name, FILE* file) {
   // If there's no current entry, allocate one, initialize it,
   // and insert it.
   if (channel == NULL) {
-    char* newName = (char*)malloc(strlen(name) + 1);
-    strcpy(newName, name);
-    newName[strlen(name)] = 0;
+    char* newName = strdup(name);
     
     channel = (sim_log_channel_t*)malloc(sizeof(sim_log_channel_t));
     channel->name = newName;
