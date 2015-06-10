@@ -65,6 +65,8 @@ struct sim_event {
 sim_event_t* sim_queue_allocate_event();
 
 void sim_queue_init();
+void sim_queue_free();
+
 void sim_queue_insert(sim_event_t* event);
 bool sim_queue_is_empty();
 long long int sim_queue_peek_time();

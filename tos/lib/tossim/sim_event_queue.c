@@ -47,6 +47,10 @@ void sim_queue_init() __attribute__ ((C, spontaneous)) {
   init_heap(&eventHeap);
 }
 
+void sim_queue_free() __attribute__ ((C, spontaneous)) {
+  free_heap(&eventHeap);
+}
+
 void sim_queue_insert(sim_event_t* event) __attribute__ ((C, spontaneous)) {
   dbg("Queue", "Inserting 0x%p\n", event);
   heap_insert(&eventHeap, event, event->time);
@@ -54,7 +58,7 @@ void sim_queue_insert(sim_event_t* event) __attribute__ ((C, spontaneous)) {
 
 sim_event_t* sim_queue_pop() __attribute__ ((C, spontaneous)) {
   long long int key;
-  return (sim_event_t*)(heap_pop_min_data(&eventHeap, &key));
+  return (sim_event_t*)heap_pop_min_data(&eventHeap, &key);
 }
 
 bool sim_queue_is_empty() __attribute__ ((C, spontaneous)) {
@@ -83,15 +87,15 @@ void sim_queue_cleanup_event(sim_event_t* event) __attribute__ ((C, spontaneous)
 
 void sim_queue_cleanup_data(sim_event_t* event) __attribute__ ((C, spontaneous)) {
   dbg("Queue", "cleanup_data: 0x%p\n", event);
-  free (event->data);
+  free(event->data);
   event->data = NULL;
 }
     
 void sim_queue_cleanup_total(sim_event_t* event) __attribute__ ((C, spontaneous)) {
   dbg("Queue", "cleanup_total: 0x%p\n", event);
-  free (event->data);
+  free(event->data);
   event->data = NULL;
-  free (event);
+  free(event);
 }
 
 sim_event_t* sim_queue_allocate_event() {
