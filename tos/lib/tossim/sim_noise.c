@@ -236,7 +236,7 @@ void sim_noise_dist(uint16_t node_id)__attribute__ ((C, spontaneous))
       memcpy((void *)freqKey, (void *)key, NOISE_HISTORY);
       dbg("HashZeroDebug", "Setting most frequent key (%i): ", (int) FreqKeyNum);
       for (j = 0; j < NOISE_HISTORY; j++) {
-	dbg_clear("HashZeroDebug", "[%hhu] ", key[j]);
+        dbg_clear("HashZeroDebug", "[%hhu] ", key[j]);
       }
       dbg_clear("HashZeroDebug", "\n");
     }
