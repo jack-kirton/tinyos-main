@@ -78,15 +78,15 @@ Variable::Variable(char* name_string, char* formatStr, int array, int which) {
     data[len] = 0;
   }
   else {
-    printf("Could not find variable %s\n", realName);
+    fprintf(stderr, "Could not find variable %s\n", realName);
     data = NULL;
     ptr = NULL;
   }
-  //printf("Allocated variable %s\n", realName);
+  //fprintf(stderr, "Allocated variable %s\n", realName);
 }
 
 Variable::~Variable() {
-  printf("Freeing variable %s\n", realName);
+  //fprintf(stderr, "Freeing variable %s\n", realName);
   free(data);
   free(realName);
 }
@@ -132,9 +132,14 @@ Mote::Mote(nesc_app_t* n) {
   varTable = create_hashtable(128, tossim_hash, tossim_hash_eq);
 }
 
+static void delete_Variable(void* voidptr)
+{
+  Variable* var = static_cast<Variable*>(voidptr);
+  delete var;
+}
+
 Mote::~Mote(){
-  // TODO:
-  //hashtable_destroy(varTable, 0);
+  hashtable_destroy(varTable, &delete_Variable);
 }
 
 unsigned long Mote::id() {
@@ -195,7 +200,7 @@ Variable* Mote::getVariable(char* name) {
     }
     //  printf("Getting variable %s of type %s %s\n", name, typeStr, isArray? "[]" : "");
     var = new Variable(name, typeStr, isArray, nodeID);
-    hashtable_insert(varTable, name, var);
+    hashtable_insert(varTable, strdup(name), var);
   }
 
   return var;
