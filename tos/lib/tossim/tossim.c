@@ -63,9 +63,7 @@ Variable::Variable(char* name_string, char* formatStr, int array, int which) {
   mote = which;
   
   int sLen = strlen(name);
-  realName = (char*)malloc(sLen + 1);
-  memcpy(realName, name, sLen + 1);
-  realName[sLen] = 0;
+  realName = strndup(name, sLen);
 
   for (int i = 0; i < sLen; i++) {
     if (realName[i] == '.') {
@@ -84,7 +82,7 @@ Variable::Variable(char* name_string, char* formatStr, int array, int which) {
     data = NULL;
     ptr = NULL;
   }
-  printf("Allocated variable %s\n", realName);
+  //printf("Allocated variable %s\n", realName);
 }
 
 Variable::~Variable() {
@@ -134,7 +132,10 @@ Mote::Mote(nesc_app_t* n) {
   varTable = create_hashtable(128, tossim_hash, tossim_hash_eq);
 }
 
-Mote::~Mote(){}
+Mote::~Mote(){
+  // TODO:
+  //hashtable_destroy(varTable, 0);
+}
 
 unsigned long Mote::id() {
   return nodeID;
@@ -185,17 +186,18 @@ Variable* Mote::getVariable(char* name) {
     // in Tossim class or a more complex typemap.
     if (app != NULL) {
       for (int i = 0; i < app->numVariables; i++) {
-	if(strcmp(name, app->variableNames[i]) == 0) {
-	  typeStr = app->variableTypes[i];
-	  isArray = app->variableArray[i];
-	  break;
-	}
+        if(strcmp(name, app->variableNames[i]) == 0) {
+          typeStr = app->variableTypes[i];
+          isArray = app->variableArray[i];
+          break;
+        }
       }
     }
     //  printf("Getting variable %s of type %s %s\n", name, typeStr, isArray? "[]" : "");
     var = new Variable(name, typeStr, isArray, nodeID);
     hashtable_insert(varTable, name, var);
   }
+
   return var;
 }
 
@@ -213,17 +215,34 @@ int Mote::generateNoise(int when) {
 
 Tossim::Tossim(nesc_app_t* n) {
   app = n;
+  motes = NULL;
   init();
 }
 
+void Tossim::free_motes()
+{
+  if (motes != NULL)
+  {
+    for (size_t i = 0; i != (TOSSIM_MAX_NODES + 1); ++i)
+    {
+      if (motes[i] != NULL)
+        delete motes[i];
+    }
+    free(motes);
+  }
+  motes = NULL;
+}
+
 Tossim::~Tossim() {
+  free_motes();
   sim_end();
 }
 
 void Tossim::init() {
   sim_init();
+  free_motes();
   motes = (Mote**)malloc(sizeof(Mote*) * (TOSSIM_MAX_NODES + 1));
-  memset(motes, 0, sizeof(Mote*) * TOSSIM_MAX_NODES);
+  memset(motes, 0, sizeof(Mote*) * (TOSSIM_MAX_NODES + 1));
 }
 
 long long int Tossim::time() {
@@ -256,10 +275,10 @@ Mote* Tossim::getNode(unsigned long nodeID) {
     if (motes[nodeID] == NULL) {
       motes[nodeID] = new Mote(app);
       if (nodeID == TOSSIM_MAX_NODES) {
-	motes[nodeID]->setID(0xffff);
+        motes[nodeID]->setID(0xffff);
       }
       else {
-	motes[nodeID]->setID(nodeID);
+        motes[nodeID]->setID(nodeID);
       }
     }
     return motes[nodeID];

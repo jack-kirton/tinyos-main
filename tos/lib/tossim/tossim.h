@@ -138,6 +138,9 @@ class Tossim {
   Radio* radio();
   Packet* newPacket();
 
+private:
+  void free_motes();
+
  private:
   char timeBuf[256];
   nesc_app_t* app;
