@@ -65,6 +65,8 @@ typedef struct heap {
 } heap_t;
 
 void init_heap(heap_t* heap);
+void free_heap(heap_t* heap);
+
 int heap_size(heap_t* heap);
 int heap_is_empty(heap_t* heap);
 
