@@ -165,7 +165,7 @@ hashtable_count(struct hashtable *h);
  */
 
 void
-hashtable_destroy(struct hashtable *h, int free_values);
+hashtable_destroy(struct hashtable *h, void (*free_value)(void*));
 
 #ifdef __cplusplus
 }
