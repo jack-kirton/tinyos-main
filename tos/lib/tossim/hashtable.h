@@ -77,8 +77,8 @@ typedef struct hashtable hashtable_t;
 
 struct hashtable *
 create_hashtable(unsigned int minsize,
-                 unsigned int (*hashfunction) (void*),
-                 int (*key_eq_fn) (void*,void*));
+                 unsigned int (*hashfunction)(const void*),
+                 int (*key_eq_fn)(const void*, const void*));
 
 /*****************************************************************************
  * hashtable_insert

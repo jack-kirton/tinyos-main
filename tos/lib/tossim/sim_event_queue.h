@@ -62,15 +62,15 @@ struct sim_event {
   void (*cleanup)(sim_event_t* e);
 };
 
-sim_event_t* sim_queue_allocate_event();
+sim_event_t* sim_queue_allocate_event(void);
 
-void sim_queue_init();
-void sim_queue_free();
+void sim_queue_init(void);
+void sim_queue_free(void);
 
 void sim_queue_insert(sim_event_t* event);
-bool sim_queue_is_empty();
-long long int sim_queue_peek_time();
-sim_event_t* sim_queue_pop();
+bool sim_queue_is_empty(void);
+long long int sim_queue_peek_time(void);
+sim_event_t* sim_queue_pop(void);
 
 void sim_queue_cleanup_none(sim_event_t* e);
 void sim_queue_cleanup_event(sim_event_t* e);

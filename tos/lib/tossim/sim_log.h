@@ -62,10 +62,10 @@
 extern "C" {
 #endif
 
-void sim_log_init();
+void sim_log_init(void);
 void sim_log_add_channel(char* output, FILE* file);
 bool sim_log_remove_channel(char* output, FILE* file);
-void sim_log_commit_change();
+void sim_log_commit_change(void);
 
 void sim_log_debug(uint16_t id, char* string, const char* format, ...);
 void sim_log_error(uint16_t id, char* string, const char* format, ...);

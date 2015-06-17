@@ -57,8 +57,8 @@ uint32_t FreqKeyNum = 0;
 
 sim_noise_node_t noiseData[TOSSIM_MAX_NODES];
 
-static unsigned int sim_noise_hash(void *key);
-static int sim_noise_eq(void *key1, void *key2);
+static unsigned int sim_noise_hash(const void *key);
+static int sim_noise_eq(const void *key1, const void *key2);
 
 void makeNoiseModel(uint16_t node_id);
 void makePmfDistr(uint16_t node_id);
@@ -73,7 +73,7 @@ void sim_noise_init()__attribute__ ((C, spontaneous))
   for (j=0; j< TOSSIM_MAX_NODES; j++) {
     noiseData[j].noiseTable = create_hashtable(NOISE_HASHTABLE_SIZE, sim_noise_hash, sim_noise_eq);
     noiseData[j].noiseGenTime = 0;
-    noiseData[j].noiseTrace = (char*)(malloc(sizeof(char) * NOISE_MIN_TRACE));
+    noiseData[j].noiseTrace = (char*)malloc(sizeof(char) * NOISE_MIN_TRACE);
     noiseData[j].noiseTraceLen = NOISE_MIN_TRACE;
     noiseData[j].noiseTraceIndex = 0;
 
@@ -95,18 +95,15 @@ char sim_real_noise(uint16_t node_id, uint32_t cur_t) {
 }
 
 void sim_noise_trace_add(uint16_t node_id, char noiseVal)__attribute__ ((C, spontaneous)) {
-  // Need to double size of trace arra
-  if (noiseData[node_id].noiseTraceIndex ==
-      noiseData[node_id].noiseTraceLen) {
-    char* data = (char*)(malloc(sizeof(char) * noiseData[node_id].noiseTraceLen * 2));
-    memcpy(data, noiseData[node_id].noiseTrace, noiseData[node_id].noiseTraceLen);
-    free(noiseData[node_id].noiseTrace);
-    noiseData[node_id].noiseTraceLen *= 2;
-    noiseData[node_id].noiseTrace = data;
+  sim_noise_node_t* const noise = &noiseData[node_id];
+  // Need to double size of trace array
+  if (noise->noiseTraceIndex == noise->noiseTraceLen) {
+    noise->noiseTrace = (char*)realloc(noise->noiseTrace, sizeof(char) * noise->noiseTraceLen * 2);
+    noise->noiseTraceLen *= 2;
   }
-  noiseData[node_id].noiseTrace[noiseData[node_id].noiseTraceIndex] = noiseVal;
-  noiseData[node_id].noiseTraceIndex++;
-  dbg("Insert", "Adding noise value %i for %i of %i\n", (int)noiseData[node_id].noiseTraceIndex, (int)node_id, (int)noiseVal);
+  noise->noiseTrace[noise->noiseTraceIndex] = noiseVal;
+  noise->noiseTraceIndex++;
+  dbg("Insert", "Adding noise value %i for %i of %i\n", (int)noise->noiseTraceIndex, (int)node_id, (int)noiseVal);
 }
 
 
@@ -127,8 +124,8 @@ char search_noise_from_bin_num(int i)__attribute__ ((C, spontaneous))
   return noise;
 }
 
-static unsigned int sim_noise_hash(void *key) {
-  char *pt = (char *)key;
+static unsigned int sim_noise_hash(const void *key) {
+  const char *pt = (const char *)key;
   unsigned int hashVal = 0;
   int i;
   for (i=0; i< NOISE_HISTORY; i++) {
@@ -137,8 +134,8 @@ static unsigned int sim_noise_hash(void *key) {
   return hashVal;
 }
 
-static int sim_noise_eq(void *key1, void *key2) {
-  return (memcmp((void *)key1, (void *)key2, NOISE_HISTORY) == 0);
+static int sim_noise_eq(const void *key1, const void *key2) {
+  return (memcmp(key1, key2, NOISE_HISTORY) == 0);
 }
 
 void sim_noise_add(uint16_t node_id, char noise)__attribute__ ((C, spontaneous))
@@ -151,12 +148,11 @@ void sim_noise_add(uint16_t node_id, char noise)__attribute__ ((C, spontaneous))
   dbg("Insert", "Adding noise value %hhi\n", noise);
   if (noise_hash == NULL)	{
     noise_hash = (sim_noise_hash_t *)malloc(sizeof(sim_noise_hash_t));
-    memcpy((void *)(noise_hash->key), (void *)key, NOISE_HISTORY);
+    memcpy(noise_hash->key, key, NOISE_HISTORY);
     
     noise_hash->numElements = 0;
     noise_hash->size = NOISE_DEFAULT_ELEMENT_SIZE;
-    noise_hash->elements = (char *)malloc(sizeof(char)*noise_hash->size);
-    memset((void *)noise_hash->elements, 0, sizeof(char)*noise_hash->size);
+    noise_hash->elements = (char *)calloc(noise_hash->size, sizeof(char));
 
     noise_hash->flag = 0;
     for(i=0; i<NOISE_NUM_VALUES; i++) {
@@ -174,14 +170,8 @@ void sim_noise_add(uint16_t node_id, char noise)__attribute__ ((C, spontaneous))
 
   if (noise_hash->numElements == noise_hash->size)
   {
-    char *newElements;
-    int newSize = (noise_hash->size)*2;
-
-    newElements = (char *)malloc(sizeof(char)*newSize);
-    memcpy(newElements, noise_hash->elements, noise_hash->size);
-    free(noise_hash->elements);
-    noise_hash->elements = newElements;
-    noise_hash->size = newSize;
+    noise_hash->size *= 2;
+    noise_hash->elements = (char *)realloc(noise_hash->elements, sizeof(char) * noise_hash->size);
   }
 
   noise_hash->elements[noise_hash->numElements] = noise;
@@ -231,14 +221,19 @@ void sim_noise_dist(uint16_t node_id)__attribute__ ((C, spontaneous))
   //Find the most frequent key and store it in noiseData[node_id].freqKey[].
   if (noise_hash->numElements > FreqKeyNum)
   {
-    int j;
     FreqKeyNum = noise_hash->numElements;
-    memcpy((void *)freqKey, (void *)key, NOISE_HISTORY);
-    dbg("HashZeroDebug", "Setting most frequent key (%i): ", (int) FreqKeyNum);
-    for (j = 0; j < NOISE_HISTORY; j++) {
-      dbg_clear("HashZeroDebug", "[%hhu] ", key[j]);
+    memcpy(freqKey, key, NOISE_HISTORY);
+
+#ifdef DEBUG
+    {
+      int j;
+      dbg("HashZeroDebug", "Setting most frequent key (%i): ", (int)FreqKeyNum);
+      for (j = 0; j < NOISE_HISTORY; j++) {
+        dbg_clear("HashZeroDebug", "[%hhu] ", key[j]);
+      }
+      dbg_clear("HashZeroDebug", "\n");
     }
-    dbg_clear("HashZeroDebug", "\n");
+#endif
   }
 }
 
@@ -258,25 +253,29 @@ void makePmfDistr(uint16_t node_id)__attribute__ ((C, spontaneous))
   char *fKey = noiseData[node_id].freqKey;
 
   FreqKeyNum = 0;
-  for(i=0; i<NOISE_HISTORY; i++) {
+  for (i=0; i < NOISE_HISTORY; i++) {
     pKey[i] = /* noiseData[node_id].noiseTrace[i]; // */ search_bin_num(noiseData[node_id].noiseTrace[i]);
   }
 
-  for(i = NOISE_HISTORY; i < noiseData[node_id].noiseTraceIndex; i++) {
+  for (i = NOISE_HISTORY; i < noiseData[node_id].noiseTraceIndex; i++) {
+#ifdef DEBUG
     if (i == NOISE_HISTORY) {
       //printf("Inserting first element.\n");
     }
+#endif
     sim_noise_dist(node_id);
     arrangeKey(node_id);
     pKey[NOISE_HISTORY-1] =  search_bin_num(noiseData[node_id].noiseTrace[i]);
   }
 
+#ifdef DEBUG
   dbg_clear("HASH", "FreqKey = ");
   for (i=0; i< NOISE_HISTORY ; i++)
   {
     dbg_clear("HASH", "%d,", fKey[i]);
   }
   dbg_clear("HASH", "\n");
+#endif
 }
 
 int dummy;
@@ -304,10 +303,11 @@ char sim_noise_gen(uint16_t node_id)__attribute__ ((C, spontaneous))
     noise = 0;
     dbg_clear("HASH", "(N)Noise\n");
     dbg("HashZeroDebug", "Defaulting to common hash.\n");
-    memcpy((void *)pKey, (void *)fKey, NOISE_HISTORY);
+    memcpy(pKey, fKey, NOISE_HISTORY);
     noise_hash = (sim_noise_hash_t *)hashtable_search(pnoiseTable, pKey);
   }
   
+#ifdef DEBUG
   dbg_clear("HASH", "Key = ");
   for (i=0; i< NOISE_HISTORY ; i++) {
     dbg_clear("HASH", "%d,", pKey[i]);
@@ -316,19 +316,24 @@ char sim_noise_gen(uint16_t node_id)__attribute__ ((C, spontaneous))
   
   dbg("HASH", "Printing Key\n");
   dbg("HASH", "noise_hash->numElements=%d\n", noise_hash->numElements);
-  
+#endif
+
   //Tal Debug
   numTotal++;
   //End Tal Debug
 
   if (noise_hash->numElements == 1) {
     noise = noise_hash->elements[0];
+
+#ifdef DEBUG
     dbg_clear("HASH", "(E)Noise = %d\n", noise);
     //Tal Debug
     numCase1++;
     dbg("Noise_c", "In case 1: %i of %i\n", numCase1, numTotal);
     //End Tal Debug
     dbg("NoiseAudit", "Noise: %i\n", noise);
+#endif
+
     return noise;
   }
 
@@ -391,7 +396,7 @@ char sim_noise_generate(uint16_t node_id, uint32_t cur_t)__attribute__ ((C, spon
   if (delta_t == 0)
     noise = noiseData[node_id].lastNoiseVal;
   else {
-    noiseG = (char *)malloc(sizeof(char)*delta_t);
+    noiseG = (char *)malloc(sizeof(char) * delta_t);
     
     for(i=0; i< delta_t; i++) {
       noiseG[i] = sim_noise_gen(node_id);
@@ -432,4 +437,3 @@ void makeNoiseModel(uint16_t node_id)__attribute__ ((C, spontaneous)) {
   }
   noiseData[node_id].generated = 1;
 }
-

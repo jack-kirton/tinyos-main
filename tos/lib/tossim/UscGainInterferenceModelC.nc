@@ -117,7 +117,7 @@ implementation {
   command void Model.setClearValue(double value) {
     clearThreshold = value;
     dbg("Gain", "Setting clear threshold to %f\n", clearThreshold);
-	
+        
   }
   
   command bool Model.clearChannel() {
@@ -146,13 +146,13 @@ implementation {
     // to the received packet.
     while (list != NULL) {
       if (list->next == mine) {
-	predecessor = list;
+        predecessor = list;
       }
       if (list != mine) {
-	if ((list->power - sim_gain_sensitivity()) < mine->power) {
-	  dbg("Gain", "Lost packet from %i as I concurrently received a packet stronger than %lf\n", list->source, list->power);
-	  list->lost = 1;
-	}
+        if ((list->power - sim_gain_sensitivity()) < mine->power) {
+          dbg("Gain", "Lost packet from %i as I concurrently received a packet stronger than %lf\n", list->source, list->power);
+          list->lost = 1;
+        }
       }
       list = list->next;
     }
@@ -189,7 +189,7 @@ implementation {
       // If we scheduled an ack, receiving = 0 when it completes
       if (mine->ack && signal Model.shouldAck(mine->msg)) {
         dbg_clear("Gain", " scheduling ack.\n");
-	sim_gain_schedule_ack(mine->source, sim_time() + 1); 
+        sim_gain_schedule_ack(mine->source, sim_time() + 1); 
       }
       // We're searching for new packets again
       receiving = 0;
@@ -240,8 +240,8 @@ implementation {
     list = outstandingReceptionHead;
     while (list != NULL) {
       if ((list->power - sim_gain_sensitivity()) < power) {
-	dbg("Gain", "Lost packet from %i as I concurrently received a packet from %i stronger than %lf\n", list->source, source, list->power);
-	list->lost = 1;
+        dbg("Gain", "Lost packet from %i as I concurrently received a packet from %i stronger than %lf\n", list->source, source, list->power);
+        list->lost = 1;
       }
       list = list->next;
     }

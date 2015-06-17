@@ -93,8 +93,8 @@ Variable::~Variable() {
 
 /* This is the sdbm algorithm, taken from
    http://www.cs.yorku.ca/~oz/hash.html -pal */
-static unsigned int tossim_hash(void* key) {
-  char* str = (char*)key;
+static unsigned int tossim_hash(const void* key) {
+  const char* str = (const char*)key;
   unsigned int hashVal = 0;
   int c;
   
@@ -104,8 +104,8 @@ static unsigned int tossim_hash(void* key) {
   return hashVal;
 }
 
-static int tossim_hash_eq(void* key1, void* key2) {
-  return strcmp((char*)key1, (char*)key2) == 0;
+static int tossim_hash_eq(const void* key1, const void* key2) {
+  return strcmp((const char*)key1, (const char*)key2) == 0;
 }
 
 
@@ -246,8 +246,7 @@ Tossim::~Tossim() {
 void Tossim::init() {
   sim_init();
   free_motes();
-  motes = (Mote**)malloc(sizeof(Mote*) * (TOSSIM_MAX_NODES + 1));
-  memset(motes, 0, sizeof(Mote*) * (TOSSIM_MAX_NODES + 1));
+  motes = (Mote**)calloc(TOSSIM_MAX_NODES + 1, sizeof(Mote*));
 }
 
 long long int Tossim::time() {

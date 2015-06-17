@@ -68,8 +68,8 @@ sim_log_output_t outputs[SIM_LOG_OUTPUT_COUNT];
 struct hashtable* channelTable = NULL;
 
 
-static unsigned int sim_log_hash(void* key);
-static int sim_log_eq(void* key1, void* key2);
+static unsigned int sim_log_hash(const void* key);
+static int sim_log_eq(const void* key1, const void* key2);
 
 
 // First we count how many outputs there are,
@@ -86,8 +86,8 @@ static void fillInOutput(int id, char* name) {
   char* namePos = name;
   int count = 0;
   size_t nameLen = strlen(name);
-  char* newName = (char*)malloc(nameLen + 1);
-  memset(newName, 0, nameLen + 1);
+  char* newName = (char*)calloc(nameLen + 1, sizeof(char));
+
   // Count the outputs
   while (termination != NULL) {
     sim_log_channel_t* channel;
@@ -158,14 +158,14 @@ static void fillInOutput(int id, char* name) {
   free(newName);
 }
 
-void sim_log_init() {
+void sim_log_init(void) {
   int i;
 
   channelTable = create_hashtable(128, sim_log_hash, sim_log_eq);
   
   for (i = 0; i < SIM_LOG_OUTPUT_COUNT; i++) {
     outputs[i].num = 1;
-    outputs[i].files = (FILE**)malloc(sizeof(FILE*));
+    outputs[i].files = (FILE**)malloc(sizeof(FILE*) * 1);
     outputs[i].files[0] = fdopen(1, "w"); // STDOUT
   }
 }
@@ -183,24 +183,15 @@ void sim_log_add_channel(char* name, FILE* file) {
     channel->name = newName;
     channel->numOutputs = 0;
     channel->size = DEFAULT_CHANNEL_SIZE;
-    channel->outputs = (FILE**)malloc(sizeof(FILE*) * channel->size);
-    memset(channel->outputs, 0, sizeof(FILE*) * channel->size);
+    channel->outputs = (FILE**)calloc(channel->size, sizeof(FILE*));
     hashtable_insert(channelTable, newName, channel);
   }
 
   // If the channel output table is full, double the size of
   // channel->outputs.
   if (channel->numOutputs == channel->size) {
-    FILE** newOutputs;
-    int newSize = channel->size * 2;
-    
-    newOutputs = (FILE**)malloc(sizeof(FILE*) * newSize);
-    memcpy(newOutputs, channel->outputs, channel->size * sizeof(FILE**));
-
-    free(channel->outputs);
-
-    channel->outputs = newOutputs;
-    channel->size    = newSize;
+    channel->size *= 2;
+    channel->outputs = (FILE**)realloc(channel->outputs, sizeof(FILE*) * channel->size);
   }
 
   channel->outputs[channel->numOutputs] = file;
@@ -230,7 +221,7 @@ bool sim_log_remove_channel(char* output, FILE* file) {
   return TRUE;
 }
   
-void sim_log_commit_change() {
+void sim_log_commit_change(void) {
   int i;
   for (i = 0; i < SIM_LOG_OUTPUT_COUNT; i++) {
     if (outputs[i].files != NULL) {
@@ -302,8 +293,8 @@ void sim_log_error_clear(uint16_t id, char* string, const char* format, ...) {
 
 /* This is the sdbm algorithm, taken from
    http://www.cs.yorku.ca/~oz/hash.html -pal */
-static unsigned int sim_log_hash(void* key) {
-  char* str = (char*)key;
+static unsigned int sim_log_hash(const void* key) {
+  const char* str = (const char*)key;
   unsigned int hashVal = 0;
   int hashChar;
   
@@ -313,6 +304,6 @@ static unsigned int sim_log_hash(void* key) {
   return hashVal;
 }
 
-static int sim_log_eq(void* key1, void* key2) {
-  return strcmp((char*)key1, (char*)key2) == 0;
+static int sim_log_eq(const void* key1, const void* key2) {
+  return strcmp((const char*)key1, (const char*)key2) == 0;
 }

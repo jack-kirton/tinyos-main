@@ -116,12 +116,12 @@ implementation {
     hours = minutes / 60;
     seconds %= 60;
     minutes %= 60;
-	
+        
     ms_time += (hours*3600+minutes*60+seconds)*1000;
 
     return ms_time;
   }
-	
+        
   //Generate a CPM noise reading
   double noise_hash_generation()   {
     double CT = timeInMs(); 
@@ -159,7 +159,7 @@ implementation {
       prr_hat = 1.1;
     else if (prr_hat < 0)
       prr_hat = -0.1;
-	
+        
     return prr_hat;
   }
   
@@ -168,9 +168,9 @@ implementation {
     double coin = RandomUniform();
     if ( (prr >= 0) && (prr <= 1) ) {
       if (coin < prr)
-	prr = 1.0;
+        prr = 1.0;
       else
-	prr = 0.0;
+        prr = 0.0;
     }
     return (int)prr;
   }
@@ -182,14 +182,14 @@ implementation {
     // 3) The transmitter is on
     // 4) The packet passes the SNR/ARR curve
     if (requestAck && // This 
-	outgoing != NULL &&
-	sim_mote_is_on(sim_node())) {
+        outgoing != NULL &&
+        sim_mote_is_on(sim_node())) {
       receive_message_t* rcv = (receive_message_t*)evt->data;
       double power = rcv->reversePower;
       double noise = packetNoise(rcv);
       double snr = power - noise;
       if (shouldAckReceive(snr)) {
-	signal Model.acked(outgoing);
+        signal Model.acked(outgoing);
       }
     }
     free_receive_message((receive_message_t*)evt->data);
@@ -205,7 +205,6 @@ implementation {
   command void Model.setClearValue(double value) {
     clearThreshold = value;
     dbg("CpmModelC", "Setting clear threshold to %f\n", clearThreshold);
-	
   }
   
   command bool Model.clearChannel() {
@@ -241,7 +240,7 @@ implementation {
       prr_hat = 1.1;
     else if (prr_hat < 0)
       prr_hat = -0.1;
-	
+        
     return prr_hat;
   }
 
@@ -250,9 +249,9 @@ implementation {
     double coin = RandomUniform();
     if ( (prr >= 0) && (prr <= 1) ) {
       if (coin < prr)
-	prr = 1.0;
+        prr = 1.0;
       else
-	prr = 0.0;
+        prr = 0.0;
     }
     return prr;
   }
@@ -263,7 +262,7 @@ implementation {
     noise = pow(10.0, noise / 10.0);
     while (list != NULL) {
       if (list != msg) {
-	noise += pow(10.0, list->power / 10.0);
+        noise += pow(10.0, list->power / 10.0);
       }
       list = list->next;
     }
@@ -277,7 +276,7 @@ implementation {
     noise = pow(10.0, noise / 10.0);
     while (list != NULL) {
       if (list != msg) {
-	noise += pow(10.0, list->power / 10.0);
+        noise += pow(10.0, list->power / 10.0);
       }
       list = list->next;
     }
@@ -301,7 +300,7 @@ implementation {
     dbg("CpmModelC", "Handling reception event @ %s.\n", sim_time_string());
     while (list != NULL) {
       if (list->next == mine) {
-	predecessor = list;
+        predecessor = list;
       }
       list = list->next;
     }
@@ -337,27 +336,27 @@ implementation {
       // If we scheduled an ack, receiving = 0 when it completes
       if (mine->ack && signal Model.shouldAck(mine->msg)) {
         dbg_clear("CpmModelC", " scheduling ack.\n");
-	sim_gain_schedule_ack(mine->source, sim_time() + 1, mine);
+        sim_gain_schedule_ack(mine->source, sim_time() + 1, mine);
       }
       else { // Otherwise free the receive_message_t*
-	free_receive_message(mine);
+        free_receive_message(mine);
       }
       // We're searching for new packets again
       receiving = 0;
     } // If the packet was lost, then we're searching for new packets again
     else {
       if (RandomUniform() < 0.001) {
-	dbg("CpmModelC,SNRLoss", "Packet was technically lost, but TOSSIM introduces an ack false positive rate.\n");
-	if (mine->ack && signal Model.shouldAck(mine->msg)) {
-	  dbg_clear("CpmModelC", " scheduling ack.\n");
-	  sim_gain_schedule_ack(mine->source, sim_time() + 1, mine);
-	}
-	else { // Otherwise free the receive_message_t*
-	  free_receive_message(mine);
-	}
+        dbg("CpmModelC,SNRLoss", "Packet was technically lost, but TOSSIM introduces an ack false positive rate.\n");
+        if (mine->ack && signal Model.shouldAck(mine->msg)) {
+          dbg_clear("CpmModelC", " scheduling ack.\n");
+          sim_gain_schedule_ack(mine->source, sim_time() + 1, mine);
+        }
+        else { // Otherwise free the receive_message_t*
+          free_receive_message(mine);
+        }
       }
       else {
-	free_receive_message(mine);
+        free_receive_message(mine);
       }
       receiving = 0;
       dbg_clear("CpmModelC,SNRLoss", "  -packet was lost.\n");
@@ -412,8 +411,8 @@ implementation {
     list = outstandingReceptionHead;
     while (list != NULL) {
       if (!shouldReceive(list->power - rcv->power)) {
-	dbg("Gain,SNRLoss", "Going to lose packet from %i with signal %lf as am receiving a packet from %i with signal %lf\n", list->source, list->power, source, rcv->power);
-	list->lost = 1;
+        dbg("Gain,SNRLoss", "Going to lose packet from %i with signal %lf as am receiving a packet from %i with signal %lf\n", list->source, list->power, source, rcv->power);
+        list->lost = 1;
       }
       list = list->next;
     }

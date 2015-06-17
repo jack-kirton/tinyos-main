@@ -43,11 +43,11 @@
 
 static heap_t eventHeap;
 
-void sim_queue_init() __attribute__ ((C, spontaneous)) {
+void sim_queue_init(void) __attribute__ ((C, spontaneous)) {
   init_heap(&eventHeap);
 }
 
-void sim_queue_free() __attribute__ ((C, spontaneous)) {
+void sim_queue_free(void) __attribute__ ((C, spontaneous)) {
   free_heap(&eventHeap);
 }
 
@@ -56,16 +56,16 @@ void sim_queue_insert(sim_event_t* event) __attribute__ ((C, spontaneous)) {
   heap_insert(&eventHeap, event, event->time);
 }
 
-sim_event_t* sim_queue_pop() __attribute__ ((C, spontaneous)) {
+sim_event_t* sim_queue_pop(void) __attribute__ ((C, spontaneous)) {
   long long int key;
   return (sim_event_t*)heap_pop_min_data(&eventHeap, &key);
 }
 
-bool sim_queue_is_empty() __attribute__ ((C, spontaneous)) {
+bool sim_queue_is_empty(void) __attribute__ ((C, spontaneous)) {
   return heap_is_empty(&eventHeap);
 }
 
-long long int sim_queue_peek_time() __attribute__ ((C, spontaneous)) {
+long long int sim_queue_peek_time(void) __attribute__ ((C, spontaneous)) {
   if (heap_is_empty(&eventHeap)) {
     return -1;
   }
@@ -98,9 +98,8 @@ void sim_queue_cleanup_total(sim_event_t* event) __attribute__ ((C, spontaneous)
   free(event);
 }
 
-sim_event_t* sim_queue_allocate_event() {
-  sim_event_t* evt = (sim_event_t*)malloc(sizeof(sim_event_t));
-  memset(evt, 0, sizeof(sim_event_t));
+sim_event_t* sim_queue_allocate_event(void) {
+  sim_event_t* evt = (sim_event_t*)calloc(1, sizeof(sim_event_t));
   evt->mote = sim_node();
   return evt;
 }
