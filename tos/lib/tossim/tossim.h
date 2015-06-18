@@ -79,7 +79,6 @@ class Variable {
   char* data;
   size_t len;
   int isArray;
-  variable_string_t str;
 };
 
 class Mote {
