@@ -62,12 +62,12 @@ Variable::Variable(char* name_string, char* formatStr, int array, int which) {
   isArray = array;
   mote = which;
   
-  int sLen = strlen(name);
+  size_t sLen = strlen(name);
   realName = (char*)malloc(sLen + 1);
   memcpy(realName, name, sLen + 1);
   realName[sLen] = 0;
 
-  for (int i = 0; i < sLen; i++) {
+  for (size_t i = 0; i < sLen; i++) {
     if (realName[i] == '.') {
       realName[i] = '$';
     }
@@ -80,15 +80,15 @@ Variable::Variable(char* name_string, char* formatStr, int array, int which) {
     data[len] = 0;
   }
   else {
-    printf("Could not find variable %s\n", realName);
+    //fprintf(stderr, "Could not find variable %s\n", realName);
     data = NULL;
     ptr = NULL;
   }
-  printf("Allocated variable %s\n", realName);
+  //printf("Allocated variable %s\n", realName);
 }
 
 Variable::~Variable() {
-  printf("Freeing variable %s\n", realName);
+  //printf("Freeing variable %s\n", realName);
   free(data);
   free(realName);
 }
@@ -112,6 +112,7 @@ static int tossim_hash_eq(void* key1, void* key2) {
 
 
 variable_string_t Variable::getData() {
+  variable_string_t str;
   if (data != NULL && ptr != NULL) {
     str.ptr = data;
     str.type = format;
@@ -185,11 +186,11 @@ Variable* Mote::getVariable(char* name) {
     // in Tossim class or a more complex typemap.
     if (app != NULL) {
       for (int i = 0; i < app->numVariables; i++) {
-	if(strcmp(name, app->variableNames[i]) == 0) {
-	  typeStr = app->variableTypes[i];
-	  isArray = app->variableArray[i];
-	  break;
-	}
+        if (strcmp(name, app->variableNames[i]) == 0) {
+          typeStr = app->variableTypes[i];
+          isArray = app->variableArray[i];
+          break;
+        }
       }
     }
     //  printf("Getting variable %s of type %s %s\n", name, typeStr, isArray? "[]" : "");
@@ -250,16 +251,17 @@ Mote* Tossim::currentNode() {
 Mote* Tossim::getNode(unsigned long nodeID) {
   if (nodeID > TOSSIM_MAX_NODES) {
     nodeID = TOSSIM_MAX_NODES;
-    // log an error, asked for an invalid node
+    // TODO: log an error, asked for an invalid node
+    return NULL;
   }
   else {
     if (motes[nodeID] == NULL) {
       motes[nodeID] = new Mote(app);
       if (nodeID == TOSSIM_MAX_NODES) {
-	motes[nodeID]->setID(0xffff);
+        motes[nodeID]->setID(0xffff);
       }
       else {
-	motes[nodeID]->setID(nodeID);
+        motes[nodeID]->setID(nodeID);
       }
     }
     return motes[nodeID];
