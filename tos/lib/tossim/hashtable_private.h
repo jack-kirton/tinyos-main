@@ -9,23 +9,23 @@
 struct entry
 {
     void *k, *v;
-    unsigned int h;
     struct entry *next;
+    unsigned int h;
 };
 
 struct hashtable {
-    unsigned int tablelength;
     struct entry **table;
+    unsigned int tablelength;
     unsigned int entrycount;
     unsigned int loadlimit;
     unsigned int primeindex;
-    unsigned int (*hashfn) (void *k);
-    int (*eqfn) (void *k1, void *k2);
+    unsigned int (*hashfn)(const void *k);
+    int (*eqfn)(const void *k1, const void *k2);
 };
 
 /*****************************************************************************/
 unsigned int
-hash(struct hashtable *h, void *k);
+hash(const struct hashtable *h, const void *k);
 
 /*****************************************************************************/
 /* indexFor */

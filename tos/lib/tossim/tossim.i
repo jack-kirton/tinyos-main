@@ -315,7 +315,7 @@ PyObject* listFromArray(char* type, char* ptr, int len) {
   }
 }
 
-typedef struct var_string {
+typedef struct variable_string {
   char* type;
   char* ptr;
   int len;
@@ -381,9 +381,8 @@ class Tossim {
   void randomSeed(int seed);
 
   bool runNextEvent();
+
   MAC* mac();
   Radio* radio();
   Packet* newPacket();
 };
-
-

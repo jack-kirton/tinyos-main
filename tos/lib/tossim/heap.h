@@ -59,12 +59,14 @@
 #define HEAP_H_INCLUDED
 
 typedef struct heap {
-  int size;
   void* data;
+  int size;
   int private_size;
 } heap_t;
 
 void init_heap(heap_t* heap);
+void free_heap(heap_t* heap);
+
 int heap_size(heap_t* heap);
 int heap_is_empty(heap_t* heap);
 

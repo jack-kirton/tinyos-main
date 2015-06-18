@@ -77,8 +77,8 @@ typedef struct hashtable hashtable_t;
 
 struct hashtable *
 create_hashtable(unsigned int minsize,
-                 unsigned int (*hashfunction) (void*),
-                 int (*key_eq_fn) (void*,void*));
+                 unsigned int (*hashfunction)(const void*),
+                 int (*key_eq_fn)(const void*, const void*));
 
 /*****************************************************************************
  * hashtable_insert
@@ -165,7 +165,7 @@ hashtable_count(struct hashtable *h);
  */
 
 void
-hashtable_destroy(struct hashtable *h, int free_values);
+hashtable_destroy(struct hashtable *h, void (*free_value)(void*));
 
 #ifdef __cplusplus
 }

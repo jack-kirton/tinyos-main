@@ -29,8 +29,8 @@ const float max_load_factor = 0.65;
 /*****************************************************************************/
 struct hashtable *
 create_hashtable(unsigned int minsize,
-                 unsigned int (*hashf) (void*),
-                 int (*eqf) (void*,void*))
+                 unsigned int (*hashf)(const void*),
+                 int (*eqf)(const void*, const void*))
 {
     struct hashtable *h;
     unsigned int pindex, size = primes[0];
@@ -56,7 +56,7 @@ create_hashtable(unsigned int minsize,
 
 /*****************************************************************************/
 unsigned int
-hash(struct hashtable *h, void *k)
+hash(const struct hashtable *h, const void *k)
 {
     /* Aim to protect against poor hash functions by adding logic here
      * - logic taken from java 1.4 hashtable source */
@@ -151,8 +151,8 @@ int hashtable_insert(struct hashtable *h, void *k, void *v)
     e = (struct entry *)malloc(sizeof(struct entry));
     if (NULL == e) { --(h->entrycount); return 0; } /*oom*/
 
-    e->h = hash(h,k);
-    tindex = indexFor(h->tablelength,e->h);
+    e->h = hash(h, k);
+    tindex = indexFor(h->tablelength, e->h);
     e->k = k;
     e->v = v;
     e->next = h->table[tindex];
@@ -173,7 +173,7 @@ hashtable_search(struct hashtable *h, void *k)
     {
         /* Check hash value to short circuit heavier comparison */
       if ((hashvalue == e->h) && (h->eqfn(k, e->k))) {
-	return e->v;
+        return e->v;
       }
       e = e->next;
     }
@@ -217,29 +217,31 @@ hashtable_remove(struct hashtable *h, void *k)
 /*****************************************************************************/
 /* destroy */
 void
-hashtable_destroy(struct hashtable *h, int free_values)
+hashtable_destroy(struct hashtable *h, void (*free_value)(void*))
 {
     unsigned int i;
     struct entry *e, *f;
     struct entry **table = h->table;
-    if (free_values)
+
+    for (i = 0; i < h->tablelength; i++)
     {
-        for (i = 0; i < h->tablelength; i++)
+        e = table[i];
+        while (NULL != e)
         {
-            e = table[i];
-            while (NULL != e)
-            { f = e; e = e->next; freekey(f->k); free(f->v); free(f); }
+            f = e;
+            e = e->next;
+
+            freekey(f->k);
+
+            if (free_value != NULL)
+            {
+                free_value(f->v);
+            }
+
+            free(f);
         }
     }
-    else
-    {
-        for (i = 0; i < h->tablelength; i++)
-        {
-            e = table[i];
-            while (NULL != e)
-            { f = e; e = e->next; freekey(f->k); free(f); }
-        }
-    }
+
     free(h->table);
     free(h);
 }

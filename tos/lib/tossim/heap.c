@@ -81,6 +81,15 @@ void init_heap(heap_t* heap) {
   heap->data = malloc(sizeof(node_t) * heap->private_size);
 }
 
+void free_heap(heap_t* heap) {
+  if (heap != NULL && heap->data != NULL) {
+    free(heap->data);
+    heap->data = NULL;
+    heap->size = 0;
+    heap->private_size = 0;
+  }
+}
+
 int heap_size(heap_t* heap) {
   return heap->size;
 }

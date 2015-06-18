@@ -54,40 +54,40 @@ int csmaMinFreeSamples = SIM_CSMA_MIN_FREE_SAMPLES;
 int csmaRxTxDelay = SIM_CSMA_RXTX_DELAY;
 int csmaAckTime = SIM_CSMA_ACK_TIME;
 
-int sim_csma_init_high() __attribute__ ((C, spontaneous)) {
+int sim_csma_init_high(void) __attribute__ ((C, spontaneous)) {
   return csmaInitHigh;
 }
-int sim_csma_init_low() __attribute__ ((C, spontaneous)) {
+int sim_csma_init_low(void) __attribute__ ((C, spontaneous)) {
   return csmaInitLow;
 }
-int sim_csma_high() __attribute__ ((C, spontaneous)) {
+int sim_csma_high(void) __attribute__ ((C, spontaneous)) {
   return csmaHigh;
 }
-int sim_csma_low() __attribute__ ((C, spontaneous)) {
+int sim_csma_low(void) __attribute__ ((C, spontaneous)) {
   return csmaLow;
 }
-int sim_csma_symbols_per_sec() __attribute__ ((C, spontaneous)) {
+int sim_csma_symbols_per_sec(void) __attribute__ ((C, spontaneous)) {
   return csmaSymbolsPerSec;
 }
-int sim_csma_bits_per_symbol() __attribute__ ((C, spontaneous)) {
+int sim_csma_bits_per_symbol(void) __attribute__ ((C, spontaneous)) {
   return csmaBitsPerSymbol;
 }
-int sim_csma_preamble_length() __attribute__ ((C, spontaneous)) {
+int sim_csma_preamble_length(void) __attribute__ ((C, spontaneous)) {
   return csmaPreambleLength;
 }
-int sim_csma_exponent_base() __attribute__ ((C, spontaneous)) {
-  return csmaExponentBase;;
+int sim_csma_exponent_base(void) __attribute__ ((C, spontaneous)) {
+  return csmaExponentBase;
 }
-int sim_csma_max_iterations() __attribute__ ((C, spontaneous)) {
+int sim_csma_max_iterations(void) __attribute__ ((C, spontaneous)) {
   return csmaMaxIterations;
 }
-int sim_csma_min_free_samples() __attribute__ ((C, spontaneous)) {
+int sim_csma_min_free_samples(void) __attribute__ ((C, spontaneous)) {
   return csmaMinFreeSamples;
 }
-int sim_csma_rxtx_delay() __attribute__ ((C, spontaneous)) {
+int sim_csma_rxtx_delay(void) __attribute__ ((C, spontaneous)) {
   return csmaRxTxDelay;
 }
-int sim_csma_ack_time() __attribute__ ((C, spontaneous)) {
+int sim_csma_ack_time(void) __attribute__ ((C, spontaneous)) {
   return csmaAckTime;
 }
 

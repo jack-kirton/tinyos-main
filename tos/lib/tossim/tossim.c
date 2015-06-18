@@ -63,9 +63,7 @@ Variable::Variable(char* name_string, char* formatStr, int array, int which) {
   mote = which;
   
   size_t sLen = strlen(name);
-  realName = (char*)malloc(sLen + 1);
-  memcpy(realName, name, sLen + 1);
-  realName[sLen] = 0;
+  realName = strndup(name, sLen);
 
   for (size_t i = 0; i < sLen; i++) {
     if (realName[i] == '.') {
@@ -88,15 +86,15 @@ Variable::Variable(char* name_string, char* formatStr, int array, int which) {
 }
 
 Variable::~Variable() {
-  //printf("Freeing variable %s\n", realName);
+  //fprintf(stderr, "Freeing variable %s\n", realName);
   free(data);
   free(realName);
 }
 
 /* This is the sdbm algorithm, taken from
    http://www.cs.yorku.ca/~oz/hash.html -pal */
-static unsigned int tossim_hash(void* key) {
-  char* str = (char*)key;
+static unsigned int tossim_hash(const void* key) {
+  const char* str = (const char*)key;
   unsigned int hashVal = 0;
   int c;
   
@@ -106,8 +104,8 @@ static unsigned int tossim_hash(void* key) {
   return hashVal;
 }
 
-static int tossim_hash_eq(void* key1, void* key2) {
-  return strcmp((char*)key1, (char*)key2) == 0;
+static int tossim_hash_eq(const void* key1, const void* key2) {
+  return strcmp((const char*)key1, (const char*)key2) == 0;
 }
 
 
@@ -135,7 +133,15 @@ Mote::Mote(nesc_app_t* n) {
   varTable = create_hashtable(128, tossim_hash, tossim_hash_eq);
 }
 
-Mote::~Mote(){}
+static void delete_Variable(void* voidptr)
+{
+  Variable* var = static_cast<Variable*>(voidptr);
+  delete var;
+}
+
+Mote::~Mote(){
+  hashtable_destroy(varTable, &delete_Variable);
+}
 
 unsigned long Mote::id() {
   return nodeID;
@@ -195,8 +201,9 @@ Variable* Mote::getVariable(char* name) {
     }
     //  printf("Getting variable %s of type %s %s\n", name, typeStr, isArray? "[]" : "");
     var = new Variable(name, typeStr, isArray, nodeID);
-    hashtable_insert(varTable, name, var);
+    hashtable_insert(varTable, strdup(name), var);
   }
+
   return var;
 }
 
@@ -214,17 +221,33 @@ int Mote::generateNoise(int when) {
 
 Tossim::Tossim(nesc_app_t* n) {
   app = n;
+  motes = NULL;
   init();
 }
 
+void Tossim::free_motes()
+{
+  if (motes != NULL)
+  {
+    for (size_t i = 0; i != (TOSSIM_MAX_NODES + 1); ++i)
+    {
+      if (motes[i] != NULL)
+        delete motes[i];
+    }
+    free(motes);
+  }
+  motes = NULL;
+}
+
 Tossim::~Tossim() {
+  free_motes();
   sim_end();
 }
 
 void Tossim::init() {
   sim_init();
-  motes = (Mote**)malloc(sizeof(Mote*) * (TOSSIM_MAX_NODES + 1));
-  memset(motes, 0, sizeof(Mote*) * TOSSIM_MAX_NODES);
+  free_motes();
+  motes = (Mote**)calloc(TOSSIM_MAX_NODES + 1, sizeof(Mote*));
 }
 
 long long int Tossim::time() {

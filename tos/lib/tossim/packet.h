@@ -72,8 +72,8 @@ class Packet {
     void deliverNow(int node);
     
  private:
-    int allocated;
     sim_packet_t* msgPtr;
+    int allocated;
 };
 
 #endif

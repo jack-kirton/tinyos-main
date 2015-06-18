@@ -74,10 +74,10 @@ class Variable {
   char* name;
   char* realName;
   char* format;
-  int mote;
   void* ptr;
   char* data;
   size_t len;
+  int mote;
   int isArray;
 };
 
@@ -137,12 +137,13 @@ class Tossim {
   Radio* radio();
   Packet* newPacket();
 
+private:
+  void free_motes();
+
  private:
-  char timeBuf[256];
   nesc_app_t* app;
   Mote** motes;
+  char timeBuf[256];
 };
-
-
 
 #endif // TOSSIM_H_INCLUDED

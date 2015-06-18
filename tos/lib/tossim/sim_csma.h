@@ -96,18 +96,18 @@
 extern "C" {
 #endif
 
-  int sim_csma_init_high();
-  int sim_csma_init_low();
-  int sim_csma_high();
-  int sim_csma_low();
-  int sim_csma_symbols_per_sec();
-  int sim_csma_bits_per_symbol();
-  int sim_csma_preamble_length(); // in symbols
-  int sim_csma_exponent_base();
-  int sim_csma_max_iterations();
-  int sim_csma_min_free_samples();
-  int sim_csma_rxtx_delay();
-  int sim_csma_ack_time(); // in symbols
+  int sim_csma_init_high(void);
+  int sim_csma_init_low(void);
+  int sim_csma_high(void);
+  int sim_csma_low(void);
+  int sim_csma_symbols_per_sec(void);
+  int sim_csma_bits_per_symbol(void);
+  int sim_csma_preamble_length(void); // in symbols
+  int sim_csma_exponent_base(void);
+  int sim_csma_max_iterations(void);
+  int sim_csma_min_free_samples(void);
+  int sim_csma_rxtx_delay(void);
+  int sim_csma_ack_time(void); // in symbols
   
   void sim_csma_set_init_high(int val);
   void sim_csma_set_init_low(int val);

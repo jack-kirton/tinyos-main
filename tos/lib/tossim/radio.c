@@ -63,7 +63,6 @@ void Radio::setNoise(int node, double mean, double range) {
   sim_gain_set_noise_floor(node, mean, range);
 }
 
-
 void Radio::setSensitivity(double sensitivity) {
   sim_gain_set_sensitivity(sensitivity);
 }

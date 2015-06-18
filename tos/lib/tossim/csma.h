@@ -70,6 +70,6 @@ class Csma {
   void setMinFreeSamples(int val);
   void setRxtxDelay(int val);
   void setAckTime(int val); // in symbols int 
-}
+};
 
 #endif
