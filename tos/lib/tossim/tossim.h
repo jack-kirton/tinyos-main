@@ -66,12 +66,11 @@ typedef struct nesc_app {
 
 class Variable {
  public:
-  Variable(char* name, char* format, int array, int mote);
+  Variable(const char* name, char* format, int array, int mote);
   ~Variable();
   variable_string_t getData();
   
  private:
-  char* name;
   char* realName;
   char* format;
   void* ptr;
@@ -103,7 +102,7 @@ class Mote {
   void createNoiseModel();
   int generateNoise(int when);
   
-  Variable* getVariable(char* name);
+  Variable* getVariable(const char* name);
   
  private:
   unsigned long nodeID;

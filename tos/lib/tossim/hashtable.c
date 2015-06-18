@@ -162,7 +162,7 @@ int hashtable_insert(struct hashtable *h, void *k, void *v)
 
 /*****************************************************************************/
 void * /* returns value associated with key */
-hashtable_search(struct hashtable *h, void *k)
+hashtable_search(struct hashtable *h, const void *k)
 {
     struct entry *e;
     unsigned int hashvalue, tindex;
@@ -182,7 +182,7 @@ hashtable_search(struct hashtable *h, void *k)
 
 /*****************************************************************************/
 void * /* returns value associated with key */
-hashtable_remove(struct hashtable *h, void *k)
+hashtable_remove(struct hashtable *h, const void *k)
 {
     /* TODO: consider compacting the table when the load factor drops enough,
      *       or provide a 'compact' method. */

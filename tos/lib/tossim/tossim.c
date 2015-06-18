@@ -49,6 +49,8 @@
 #include <string.h>
 #include <hashtable.h>
 
+#include <algorithm>
+
 #include <mac.c>
 #include <radio.c>
 #include <packet.c>
@@ -56,8 +58,7 @@
 
 uint16_t TOS_NODE_ID = 1;
 
-Variable::Variable(char* name_string, char* formatStr, int array, int which) {
-  name = name_string;
+Variable::Variable(const char* name, char* formatStr, int array, int which) {
   format = formatStr;
   isArray = array;
   mote = which;
@@ -65,11 +66,7 @@ Variable::Variable(char* name_string, char* formatStr, int array, int which) {
   size_t sLen = strlen(name);
   realName = strndup(name, sLen);
 
-  for (size_t i = 0; i < sLen; i++) {
-    if (realName[i] == '.') {
-      realName[i] = '$';
-    }
-  }
+  std::replace(realName, realName + sLen, '.', '$');
 
   //  printf("Creating %s realName: %s format: %s %s\n", name, realName, formatStr, array? "[]":"");
 
@@ -180,7 +177,7 @@ void Mote::setID(unsigned long val) {
   nodeID = val;
 }
 
-Variable* Mote::getVariable(char* name) {
+Variable* Mote::getVariable(const char* name) {
   char* typeStr = (char*)"";
   int isArray;
   Variable* var;
