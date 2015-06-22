@@ -88,17 +88,17 @@ implementation {
       dbg("Binary", "Handling receive event for %i.\n", sim_node());
       loss *= 1000000.0;
       if (randVal < (int)loss) {
-	signal Model.receive(incoming);
+        signal Model.receive(incoming);
 
-	loss = sim_binary_loss(sim_node(), incomingSource);
-	randVal = sim_random() % 1000000;
-	loss *= 1000000.0;
-	if (randVal < (int)loss) {
-	  sim_schedule_ack(incomingSource, sim_time());
-	}
+        loss = sim_binary_loss(sim_node(), incomingSource);
+        randVal = sim_random() % 1000000;
+        loss *= 1000000.0;
+        if (randVal < (int)loss) {
+          sim_schedule_ack(incomingSource, sim_time());
+        }
       }
       else {
-	dbg("Binary", "Packet lost.\n");
+        dbg("Binary", "Packet lost.\n");
       }
     }
     else {
