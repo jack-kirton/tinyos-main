@@ -125,7 +125,7 @@ implementation
       m_head = m_next[m_head];
       if( m_head == NO_TASK )
       {
-	m_tail = NO_TASK;
+        m_tail = NO_TASK;
       }
       m_next[id] = NO_TASK;
       return id;
@@ -147,13 +147,13 @@ implementation
     {
       if( m_head == NO_TASK )
       {
-	m_head = id;
-	m_tail = id;
+        m_head = id;
+        m_tail = id;
       }
       else
       {
-	m_next[m_tail] = id;
-	m_tail = id;
+        m_next[m_tail] = id;
+        m_tail = id;
       }
       return TRUE;
     }
@@ -185,8 +185,8 @@ implementation
       nextTask = popTask();
       if( nextTask == NO_TASK )
       {
-	dbg("Scheduler", "Told to run next task, but no task to run.\n");
-	return FALSE;
+        dbg("Scheduler", "Told to run next task, but no task to run.\n");
+        return FALSE;
       }
     }
     dbg("Scheduler", "Running task %hhu.\n", nextTask);

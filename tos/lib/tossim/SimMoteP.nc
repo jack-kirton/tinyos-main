@@ -72,7 +72,7 @@ implementation {
   command void SimMote.turnOn() {
     if (!isOn) {
       if (bootEvent != NULL) {
-	bootEvent->cancelled = TRUE;
+        bootEvent->cancelled = TRUE;
       }
       __nesc_nido_initialise(sim_node());
       startTime = sim_time();
@@ -157,7 +157,7 @@ implementation {
   void sim_mote_boot_handle(sim_event_t* e) {
     char buf[128];
     sim_print_now(buf, 128);
-	   
+           
     bootEvent = (sim_event_t*)NULL;
     dbg("SimMoteP", "Turning on mote %i at time %s.\n", (int)sim_node(), buf);
     call SimMote.turnOn();
@@ -169,12 +169,12 @@ implementation {
 
     if (bootEvent != NULL)  {
       if (bootEvent->time == startTime) {
-	// In case we have a cancelled boot event.
-	bootEvent->cancelled = FALSE;
-	return;
+        // In case we have a cancelled boot event.
+        bootEvent->cancelled = FALSE;
+        return;
       }
       else {
-	bootEvent->cancelled = TRUE;
+        bootEvent->cancelled = TRUE;
       }
     }
     
