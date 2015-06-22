@@ -9,7 +9,9 @@
  * ----------------------------------------------------------------------------- */
 
 #define SWIGPYTHON
-#define SWIG_PYTHON_DIRECTOR_NO_VTABLE
+#define SWIG_PYTHON_NO_THREADS
+#define SWIG_PYTHON_NO_BUILD_NONE
+#define SWIGPYTHON_BUILTIN
 
 
 #ifdef __cplusplus
@@ -2942,6 +2944,517 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 }
 #endif
 
+#define SWIGPY_UNARYFUNC_CLOSURE(wrapper)	\
+SWIGINTERN PyObject *				\
+wrapper##_closure(PyObject *a) {		\
+  return wrapper(a, NULL);			\
+}
+
+#define SWIGPY_DESTRUCTOR_CLOSURE(wrapper)	\
+SWIGINTERN void					\
+wrapper##_closure(PyObject *a) {		\
+    SwigPyObject *sobj;				\
+    sobj = (SwigPyObject *)a;			\
+    if (sobj->own) {				\
+	PyObject *o = wrapper(a, NULL);		\
+	Py_XDECREF(o);				\
+    }						\
+    PyObject_Del(a);				\
+}
+
+#define SWIGPY_INQUIRY_CLOSURE(wrapper)				\
+SWIGINTERN int							\
+wrapper##_closure(PyObject *a) {				\
+    PyObject *pyresult;						\
+    int result;							\
+    pyresult = wrapper(a, NULL);				\
+    result = pyresult && PyObject_IsTrue(pyresult) ? 1 : 0;	\
+    Py_XDECREF(pyresult);					\
+    return result;						\
+}
+
+#define SWIGPY_BINARYFUNC_CLOSURE(wrapper)	\
+SWIGINTERN PyObject *				\
+wrapper##_closure(PyObject *a, PyObject *b) {	\
+    PyObject *tuple, *result;			\
+    tuple = PyTuple_New(1);			\
+    assert(tuple);				\
+    PyTuple_SET_ITEM(tuple, 0, b);		\
+    Py_XINCREF(b);				\
+    result = wrapper(a, tuple);			\
+    Py_DECREF(tuple);				\
+    return result;				\
+}
+
+typedef ternaryfunc ternarycallfunc;
+
+#define SWIGPY_TERNARYFUNC_CLOSURE(wrapper)			\
+SWIGINTERN PyObject *						\
+wrapper##_closure(PyObject *a, PyObject *b, PyObject *c) {	\
+    PyObject *tuple, *result;					\
+    tuple = PyTuple_New(2);					\
+    assert(tuple);						\
+    PyTuple_SET_ITEM(tuple, 0, b);				\
+    PyTuple_SET_ITEM(tuple, 1, c);				\
+    Py_XINCREF(b);						\
+    Py_XINCREF(c);						\
+    result = wrapper(a, tuple);					\
+    Py_DECREF(tuple);						\
+    return result;						\
+}
+
+#define SWIGPY_TERNARYCALLFUNC_CLOSURE(wrapper)			\
+SWIGINTERN PyObject *						\
+wrapper##_closure(PyObject *callable_object, PyObject *args, PyObject *) {	\
+    return wrapper(callable_object, args);			\
+}
+
+#define SWIGPY_LENFUNC_CLOSURE(wrapper)			\
+SWIGINTERN Py_ssize_t					\
+wrapper##_closure(PyObject *a) {			\
+    PyObject *resultobj;				\
+    Py_ssize_t result;					\
+    resultobj = wrapper(a, NULL);			\
+    result = PyNumber_AsSsize_t(resultobj, NULL);	\
+    Py_DECREF(resultobj);				\
+    return result;					\
+}
+
+#define SWIGPY_SSIZESSIZEARGFUNC_CLOSURE(wrapper)		\
+SWIGINTERN PyObject *						\
+wrapper##_closure(PyObject *a, Py_ssize_t b, Py_ssize_t c) {	\
+    PyObject *tuple, *result;					\
+    tuple = PyTuple_New(2);					\
+    assert(tuple);						\
+    PyTuple_SET_ITEM(tuple, 0, _PyLong_FromSsize_t(b));		\
+    PyTuple_SET_ITEM(tuple, 1, _PyLong_FromSsize_t(c));		\
+    result = wrapper(a, tuple);					\
+    Py_DECREF(tuple);						\
+    return result;						\
+}
+
+#define SWIGPY_SSIZESSIZEOBJARGPROC_CLOSURE(wrapper)			\
+SWIGINTERN int								\
+wrapper##_closure(PyObject *a, Py_ssize_t b, Py_ssize_t c, PyObject *d) { \
+    PyObject *tuple, *resultobj;					\
+    int result;								\
+    tuple = PyTuple_New(d ? 3 : 2);					\
+    assert(tuple);							\
+    PyTuple_SET_ITEM(tuple, 0, _PyLong_FromSsize_t(b));			\
+    PyTuple_SET_ITEM(tuple, 1, _PyLong_FromSsize_t(c));			\
+    if (d) {								\
+        PyTuple_SET_ITEM(tuple, 2, d);					\
+        Py_INCREF(d);							\
+    }									\
+    resultobj = wrapper(a, tuple);					\
+    result = resultobj ? 0 : -1;					\
+    Py_DECREF(tuple);							\
+    Py_XDECREF(resultobj);						\
+    return result;							\
+}
+
+#define SWIGPY_SSIZEARGFUNC_CLOSURE(wrapper)		\
+SWIGINTERN PyObject *					\
+wrapper##_closure(PyObject *a, Py_ssize_t b) {		\
+    PyObject *tuple, *result;				\
+    tuple = PyTuple_New(1);				\
+    assert(tuple);					\
+    PyTuple_SET_ITEM(tuple, 0, _PyLong_FromSsize_t(b));	\
+    result = wrapper(a, tuple);				\
+    Py_DECREF(tuple);					\
+    return result;					\
+}
+
+#define SWIGPY_FUNPACK_SSIZEARGFUNC_CLOSURE(wrapper)		\
+SWIGINTERN PyObject *					\
+wrapper##_closure(PyObject *a, Py_ssize_t b) {		\
+    PyObject *arg, *result;				\
+    arg = _PyLong_FromSsize_t(b);			\
+    result = wrapper(a, arg);				\
+    Py_DECREF(arg);					\
+    return result;					\
+}
+
+#define SWIGPY_SSIZEOBJARGPROC_CLOSURE(wrapper)			\
+SWIGINTERN int							\
+wrapper##_closure(PyObject *a, Py_ssize_t b, PyObject *c) {	\
+    PyObject *tuple, *resultobj;				\
+    int result;							\
+    tuple = PyTuple_New(2);					\
+    assert(tuple);						\
+    PyTuple_SET_ITEM(tuple, 0, _PyLong_FromSsize_t(b));		\
+    PyTuple_SET_ITEM(tuple, 1, c);				\
+    Py_XINCREF(c);						\
+    resultobj = wrapper(a, tuple);				\
+    result = resultobj ? 0 : -1;				\
+    Py_XDECREF(resultobj);					\
+    Py_DECREF(tuple);						\
+    return result;						\
+}
+
+#define SWIGPY_OBJOBJARGPROC_CLOSURE(wrapper)			\
+SWIGINTERN int							\
+wrapper##_closure(PyObject *a, PyObject *b, PyObject *c) {	\
+    PyObject *tuple, *resultobj;				\
+    int result;							\
+    tuple = PyTuple_New(c ? 2 : 1);				\
+    assert(tuple);						\
+    PyTuple_SET_ITEM(tuple, 0, b);				\
+    Py_XINCREF(b);						\
+    if (c) {							\
+        PyTuple_SET_ITEM(tuple, 1, c);				\
+        Py_XINCREF(c);						\
+    }								\
+    resultobj = wrapper(a, tuple);				\
+    result = resultobj ? 0 : -1;				\
+    Py_XDECREF(resultobj);					\
+    Py_DECREF(tuple);						\
+    return result;						\
+}
+
+#define SWIGPY_REPRFUNC_CLOSURE(wrapper)	\
+SWIGINTERN PyObject *				\
+wrapper##_closure(PyObject *a) {		\
+    return wrapper(a, NULL);			\
+}
+
+#define SWIGPY_HASHFUNC_CLOSURE(wrapper)	\
+SWIGINTERN long					\
+wrapper##_closure(PyObject *a) {		\
+    PyObject *pyresult;				\
+    long result;				\
+    pyresult = wrapper(a, NULL);		\
+    if (!pyresult || !PyLong_Check(pyresult))	\
+	return -1;				\
+    result = PyLong_AsLong(pyresult);		\
+    Py_DECREF(pyresult);			\
+    return result;				\
+}
+
+#define SWIGPY_ITERNEXT_CLOSURE(wrapper)	\
+SWIGINTERN PyObject *				\
+wrapper##_closure(PyObject *a) {		\
+    PyObject *result;				\
+    result = wrapper(a, NULL);			\
+    if (result && result == Py_None) {		\
+	Py_DECREF(result);			\
+	result = NULL;				\
+    }						\
+    return result;				\
+}
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+SWIGINTERN int
+SwigPyBuiltin_BadInit(PyObject *self, PyObject *SWIGUNUSEDPARM(args), PyObject *SWIGUNUSEDPARM(kwds)) {
+  PyErr_Format(PyExc_TypeError, "Cannot create new instances of type '%.300s'", self->ob_type->tp_name);
+  return -1;
+}
+
+SWIGINTERN void
+SwigPyBuiltin_BadDealloc(PyObject *pyobj) {
+  SwigPyObject *sobj;
+  sobj = (SwigPyObject *)pyobj;
+  if (sobj->own) {
+    PyErr_Format(PyExc_TypeError, "Swig detected a memory leak in type '%.300s': no callable destructor found.", pyobj->ob_type->tp_name);
+  }
+}
+
+typedef struct {
+  PyCFunction get;
+  PyCFunction set;
+} SwigPyGetSet;
+
+SWIGINTERN PyObject *
+SwigPyBuiltin_GetterClosure (PyObject *obj, void *closure) {
+  SwigPyGetSet *getset;
+  PyObject *tuple, *result;
+  if (!closure)
+    return SWIG_Py_Void();
+  getset = (SwigPyGetSet *)closure;
+  if (!getset->get)
+    return SWIG_Py_Void();
+  tuple = PyTuple_New(0);
+  assert(tuple);
+  result = (*getset->get)(obj, tuple);
+  Py_DECREF(tuple);
+  return result;
+}
+
+SWIGINTERN PyObject *
+SwigPyBuiltin_FunpackGetterClosure (PyObject *obj, void *closure) {
+  SwigPyGetSet *getset;
+  PyObject *result;
+  if (!closure)
+    return SWIG_Py_Void();
+  getset = (SwigPyGetSet *)closure;
+  if (!getset->get)
+    return SWIG_Py_Void();
+  result = (*getset->get)(obj, NULL);
+  return result;
+}
+
+SWIGINTERN int
+SwigPyBuiltin_SetterClosure (PyObject *obj, PyObject *val, void *closure) {
+  SwigPyGetSet *getset;
+  PyObject *tuple, *result;
+  if (!closure) {
+    PyErr_Format(PyExc_TypeError, "Missing getset closure");
+    return -1;
+  }
+  getset = (SwigPyGetSet *)closure;
+  if (!getset->set) {
+    PyErr_Format(PyExc_TypeError, "Illegal member variable assignment in type '%.300s'", obj->ob_type->tp_name);
+    return -1;
+  }
+  tuple = PyTuple_New(1);
+  assert(tuple);
+  PyTuple_SET_ITEM(tuple, 0, val);
+  Py_XINCREF(val);
+  result = (*getset->set)(obj, tuple);
+  Py_DECREF(tuple);
+  Py_XDECREF(result);
+  return result ? 0 : -1;
+}
+
+SWIGINTERN int
+SwigPyBuiltin_FunpackSetterClosure (PyObject *obj, PyObject *val, void *closure) {
+  SwigPyGetSet *getset;
+  PyObject *result;
+  if (!closure) {
+    PyErr_Format(PyExc_TypeError, "Missing getset closure");
+    return -1;
+  }
+  getset = (SwigPyGetSet *)closure;
+  if (!getset->set) {
+    PyErr_Format(PyExc_TypeError, "Illegal member variable assignment in type '%.300s'", obj->ob_type->tp_name);
+    return -1;
+  }
+  result = (*getset->set)(obj, val);
+  Py_XDECREF(result);
+  return result ? 0 : -1;
+}
+
+SWIGINTERN void
+SwigPyStaticVar_dealloc(PyDescrObject *descr) {
+  _PyObject_GC_UNTRACK(descr);
+  Py_XDECREF(PyDescr_TYPE(descr));
+  Py_XDECREF(PyDescr_NAME(descr));
+  PyObject_GC_Del(descr);
+}
+
+SWIGINTERN PyObject *
+SwigPyStaticVar_repr(PyGetSetDescrObject *descr) {
+#if PY_VERSION_HEX >= 0x03000000
+
+  return PyUnicode_FromFormat("<class attribute '%S' of type '%s'>", PyDescr_NAME(descr), PyDescr_TYPE(descr)->tp_name);
+#else
+  return PyString_FromFormat("<class attribute '%s' of type '%s'>", PyString_AsString(PyDescr_NAME(descr)), PyDescr_TYPE(descr)->tp_name);
+#endif
+}
+
+SWIGINTERN int
+SwigPyStaticVar_traverse(PyObject *self, visitproc visit, void *arg) {
+  PyDescrObject *descr;
+  descr = (PyDescrObject *)self;
+  Py_VISIT((PyObject*) PyDescr_TYPE(descr));
+  return 0;
+}
+
+SWIGINTERN PyObject *
+SwigPyStaticVar_get(PyGetSetDescrObject *descr, PyObject *obj, PyObject *SWIGUNUSEDPARM(type)) {
+  if (descr->d_getset->get != NULL)
+    return descr->d_getset->get(obj, descr->d_getset->closure);
+#if PY_VERSION_HEX >= 0x03000000
+  PyErr_Format(PyExc_AttributeError, "attribute '%.300S' of '%.100s' objects is not readable", PyDescr_NAME(descr), PyDescr_TYPE(descr)->tp_name);
+#else
+  PyErr_Format(PyExc_AttributeError, "attribute '%.300s' of '%.100s' objects is not readable", PyString_AsString(PyDescr_NAME(descr)), PyDescr_TYPE(descr)->tp_name);
+#endif
+  return NULL;
+}
+
+SWIGINTERN int
+SwigPyStaticVar_set(PyGetSetDescrObject *descr, PyObject *obj, PyObject *value) {
+  if (descr->d_getset->set != NULL)
+    return descr->d_getset->set(obj, value, descr->d_getset->closure);
+#if PY_VERSION_HEX >= 0x03000000
+  PyErr_Format(PyExc_AttributeError, "attribute '%.300S' of '%.100s' objects is not writable", PyDescr_NAME(descr), PyDescr_TYPE(descr)->tp_name);
+#else
+  PyErr_Format(PyExc_AttributeError, "attribute '%.300s' of '%.100s' objects is not writable", PyString_AsString(PyDescr_NAME(descr)), PyDescr_TYPE(descr)->tp_name);
+#endif
+  return -1;
+}
+
+SWIGINTERN int
+SwigPyObjectType_setattro(PyTypeObject *type, PyObject *name, PyObject *value) {
+  PyObject *attribute;
+  descrsetfunc local_set;
+  attribute = _PyType_Lookup(type, name);
+  if (attribute != NULL) {
+    /* Implement descriptor functionality, if any */
+    local_set = attribute->ob_type->tp_descr_set;
+    if (local_set != NULL)
+      return local_set(attribute, (PyObject *)type, value);
+#if PY_VERSION_HEX >= 0x03000000
+    PyErr_Format(PyExc_AttributeError, "cannot modify read-only attribute '%.50s.%.400S'", type->tp_name, name);
+#else 
+    PyErr_Format(PyExc_AttributeError, "cannot modify read-only attribute '%.50s.%.400s'", type->tp_name, PyString_AS_STRING(name));
+#endif
+  } else {
+#if PY_VERSION_HEX >= 0x03000000
+    PyErr_Format(PyExc_AttributeError, "type '%.50s' has no attribute '%.400S'", type->tp_name, name);
+#else
+    PyErr_Format(PyExc_AttributeError, "type '%.50s' has no attribute '%.400s'", type->tp_name, PyString_AS_STRING(name));
+#endif
+  }
+
+  return -1;
+}
+
+SWIGINTERN PyTypeObject*
+SwigPyStaticVar_Type(void) {
+  static PyTypeObject staticvar_type;
+  static int type_init = 0;
+  if (!type_init) {
+    const PyTypeObject tmp = {
+      /* PyObject header changed in Python 3 */
+#if PY_VERSION_HEX >= 0x03000000
+      PyVarObject_HEAD_INIT(&PyType_Type, 0)
+#else
+      PyObject_HEAD_INIT(&PyType_Type)
+      0,
+#endif
+      "swig_static_var_getset_descriptor",
+      sizeof(PyGetSetDescrObject),
+      0,
+      (destructor)SwigPyStaticVar_dealloc,      /* tp_dealloc */
+      0,                                        /* tp_print */
+      0,                                        /* tp_getattr */
+      0,                                        /* tp_setattr */
+      0,                                        /* tp_compare */
+      (reprfunc)SwigPyStaticVar_repr,           /* tp_repr */
+      0,                                        /* tp_as_number */
+      0,                                        /* tp_as_sequence */
+      0,                                        /* tp_as_mapping */
+      0,                                        /* tp_hash */
+      0,                                        /* tp_call */
+      0,                                        /* tp_str */
+      PyObject_GenericGetAttr,                  /* tp_getattro */
+      0,                                        /* tp_setattro */
+      0,                                        /* tp_as_buffer */
+      Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC|Py_TPFLAGS_HAVE_CLASS, /* tp_flags */
+      0,                                        /* tp_doc */
+      SwigPyStaticVar_traverse,                 /* tp_traverse */
+      0,                                        /* tp_clear */
+      0,                                        /* tp_richcompare */
+      0,                                        /* tp_weaklistoffset */
+      0,                                        /* tp_iter */
+      0,                                        /* tp_iternext */
+      0,                                        /* tp_methods */
+      0,                                        /* tp_members */
+      0,                                        /* tp_getset */
+      0,                                        /* tp_base */
+      0,                                        /* tp_dict */
+      (descrgetfunc)SwigPyStaticVar_get,        /* tp_descr_get */
+      (descrsetfunc)SwigPyStaticVar_set,        /* tp_descr_set */
+      0,                                        /* tp_dictoffset */
+      0,                                        /* tp_init */
+      0,                                        /* tp_alloc */
+      0,                                        /* tp_new */
+      0,                                        /* tp_free */
+      0,                                        /* tp_is_gc */
+      0,                                        /* tp_bases */
+      0,                                        /* tp_mro */
+      0,                                        /* tp_cache */
+      0,                                        /* tp_subclasses */
+      0,                                        /* tp_weaklist */
+#if PY_VERSION_HEX >= 0x02030000
+      0,                                        /* tp_del */
+#endif
+#if PY_VERSION_HEX >= 0x02060000
+      0,                                        /* tp_version */
+#endif
+#ifdef COUNT_ALLOCS
+      0,0,0,0                                   /* tp_alloc -> tp_next */
+#endif
+    };
+    staticvar_type = tmp;
+    type_init = 1;
+#if PY_VERSION_HEX < 0x02020000
+    staticvar_type.ob_type = &PyType_Type;
+#else
+    if (PyType_Ready(&staticvar_type) < 0)
+      return NULL;
+#endif
+  }
+  return &staticvar_type;
+}
+
+SWIGINTERN PyGetSetDescrObject *
+SwigPyStaticVar_new_getset(PyTypeObject *type, PyGetSetDef *getset) {
+
+  PyGetSetDescrObject *descr;
+  descr = (PyGetSetDescrObject *)PyType_GenericAlloc(SwigPyStaticVar_Type(), 0);
+  assert(descr);
+  Py_XINCREF(type);
+  PyDescr_TYPE(descr) = type;
+  PyDescr_NAME(descr) = PyString_InternFromString(getset->name);
+  descr->d_getset = getset;
+  if (PyDescr_NAME(descr) == NULL) {
+    Py_DECREF(descr);
+    descr = NULL;
+  }
+  return descr;
+}
+
+SWIGINTERN void
+SwigPyBuiltin_InitBases (PyTypeObject *type, PyTypeObject **bases) {
+  int base_count = 0;
+  PyTypeObject **b;
+  PyObject *tuple;
+  int i;
+
+  if (!bases[0]) {
+    bases[0] = SwigPyObject_type();
+    bases[1] = NULL;
+  }
+  type->tp_base = bases[0];
+  Py_INCREF((PyObject *)bases[0]);
+  for (b = bases; *b != NULL; ++b)
+    ++base_count;
+  tuple = PyTuple_New(base_count);
+  for (i = 0; i < base_count; ++i) {
+    PyTuple_SET_ITEM(tuple, i, (PyObject *)bases[i]);
+    Py_INCREF((PyObject *)bases[i]);
+  }
+  type->tp_bases = tuple;
+}
+
+SWIGINTERN PyObject *
+SwigPyBuiltin_ThisClosure (PyObject *self, void *SWIGUNUSEDPARM(closure)) {
+  PyObject *result;
+  result = (PyObject *)SWIG_Python_GetSwigThis(self);
+  Py_XINCREF(result);
+  return result;
+}
+
+SWIGINTERN void
+SwigPyBuiltin_SetMetaType (PyTypeObject *type, PyTypeObject *metatype)
+{
+#if PY_VERSION_HEX >= 0x03000000
+    type->ob_base.ob_base.ob_type = metatype;
+#else
+    type->ob_type = metatype;
+#endif
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+
 
 
 #define SWIG_exception_fail(code, msg) do { SWIG_Error(code, msg); SWIG_fail; } while(0) 
@@ -2957,15 +3470,16 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_Mote swig_types[2]
 #define SWIGTYPE_p_Packet swig_types[3]
 #define SWIGTYPE_p_Radio swig_types[4]
-#define SWIGTYPE_p_Tossim swig_types[5]
-#define SWIGTYPE_p_Variable swig_types[6]
-#define SWIGTYPE_p_char swig_types[7]
-#define SWIGTYPE_p_int swig_types[8]
-#define SWIGTYPE_p_nesc_app swig_types[9]
-#define SWIGTYPE_p_p_char swig_types[10]
-#define SWIGTYPE_p_variable_string swig_types[11]
-static swig_type_info *swig_types[13];
-static swig_module_info swig_module = {swig_types, 12, 0, 0, 0, 0};
+#define SWIGTYPE_p_SwigPyObject swig_types[5]
+#define SWIGTYPE_p_Tossim swig_types[6]
+#define SWIGTYPE_p_Variable swig_types[7]
+#define SWIGTYPE_p_char swig_types[8]
+#define SWIGTYPE_p_int swig_types[9]
+#define SWIGTYPE_p_nesc_app swig_types[10]
+#define SWIGTYPE_p_p_char swig_types[11]
+#define SWIGTYPE_p_variable_string swig_types[12]
+static swig_type_info *swig_types[14];
+static swig_module_info swig_module = {swig_types, 13, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -2976,6 +3490,19 @@ static swig_module_info swig_module = {swig_types, 12, 0, 0, 0, 0};
 #  error "This python version requires swig to be run with the '-classic' option"
 # endif
 #endif
+#if (PY_VERSION_HEX <= 0x02020000)
+# error "This python version requires swig to be run with the '-nomodern' option"
+#endif
+#if (PY_VERSION_HEX <= 0x02020000)
+# error "This python version requires swig to be run with the '-nomodernargs' option"
+#endif
+#ifndef METH_O
+# error "This python version requires swig to be run with the '-nofastunpack' option"
+#endif
+#ifdef SWIG_TypeQuery
+# undef SWIG_TypeQuery
+#endif
+#define SWIG_TypeQuery SWIG_Python_TypeQuery
 
 /*-----------------------------------------------
               @(target):= _TOSSIM.so
@@ -3648,28 +4175,28 @@ SWIG_AsVal_unsigned_SS_long (PyObject *obj, unsigned long *val)
 #ifdef __cplusplus
 extern "C" {
 #endif
-SWIGINTERN PyObject *_wrap_new_MAC(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN int _wrap_new_MAC(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)":new_MAC")) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args,"new_MAC",0,0,0)) SWIG_fail;
   result = (MAC *)new MAC();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MAC, SWIG_POINTER_NEW |  0 );
-  return resultobj;
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MAC, SWIG_BUILTIN_INIT |  0 );
+  return resultobj == Py_None ? -1 : 0;
 fail:
-  return NULL;
+  return -1;
 }
 
 
-SWIGINTERN PyObject *_wrap_delete_MAC(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_MAC(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_MAC",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"delete_MAC",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_MAC" "', argument " "1"" of type '" "MAC *""'"); 
   }
@@ -3682,16 +4209,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_initHigh(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_initHigh(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:MAC_initHigh",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"MAC_initHigh",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_initHigh" "', argument " "1"" of type '" "MAC *""'"); 
   }
@@ -3704,16 +4231,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_initLow(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_initLow(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:MAC_initLow",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"MAC_initLow",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_initLow" "', argument " "1"" of type '" "MAC *""'"); 
   }
@@ -3726,16 +4253,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_high(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_high(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:MAC_high",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"MAC_high",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_high" "', argument " "1"" of type '" "MAC *""'"); 
   }
@@ -3748,16 +4275,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_low(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_low(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:MAC_low",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"MAC_low",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_low" "', argument " "1"" of type '" "MAC *""'"); 
   }
@@ -3770,16 +4297,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_symbolsPerSec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_symbolsPerSec(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:MAC_symbolsPerSec",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"MAC_symbolsPerSec",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_symbolsPerSec" "', argument " "1"" of type '" "MAC *""'"); 
   }
@@ -3792,16 +4319,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_bitsPerSymbol(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_bitsPerSymbol(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:MAC_bitsPerSymbol",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"MAC_bitsPerSymbol",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_bitsPerSymbol" "', argument " "1"" of type '" "MAC *""'"); 
   }
@@ -3814,16 +4341,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_preambleLength(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_preambleLength(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:MAC_preambleLength",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"MAC_preambleLength",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_preambleLength" "', argument " "1"" of type '" "MAC *""'"); 
   }
@@ -3836,16 +4363,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_exponentBase(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_exponentBase(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:MAC_exponentBase",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"MAC_exponentBase",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_exponentBase" "', argument " "1"" of type '" "MAC *""'"); 
   }
@@ -3858,16 +4385,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_maxIterations(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_maxIterations(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:MAC_maxIterations",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"MAC_maxIterations",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_maxIterations" "', argument " "1"" of type '" "MAC *""'"); 
   }
@@ -3880,16 +4407,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_minFreeSamples(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_minFreeSamples(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:MAC_minFreeSamples",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"MAC_minFreeSamples",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_minFreeSamples" "', argument " "1"" of type '" "MAC *""'"); 
   }
@@ -3902,16 +4429,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_rxtxDelay(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_rxtxDelay(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:MAC_rxtxDelay",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"MAC_rxtxDelay",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_rxtxDelay" "', argument " "1"" of type '" "MAC *""'"); 
   }
@@ -3924,16 +4451,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_ackTime(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_ackTime(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:MAC_ackTime",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"MAC_ackTime",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_ackTime" "', argument " "1"" of type '" "MAC *""'"); 
   }
@@ -3946,7 +4473,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_setInitHigh(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_setInitHigh(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   int arg2 ;
@@ -3954,16 +4481,16 @@ SWIGINTERN PyObject *_wrap_MAC_setInitHigh(PyObject *SWIGUNUSEDPARM(self), PyObj
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:MAC_setInitHigh",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setInitHigh" "', argument " "1"" of type '" "MAC *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setInitHigh" "', argument " "2"" of type '" "int""'");
   } 
@@ -3976,7 +4503,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_setInitLow(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_setInitLow(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   int arg2 ;
@@ -3984,16 +4511,16 @@ SWIGINTERN PyObject *_wrap_MAC_setInitLow(PyObject *SWIGUNUSEDPARM(self), PyObje
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:MAC_setInitLow",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setInitLow" "', argument " "1"" of type '" "MAC *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setInitLow" "', argument " "2"" of type '" "int""'");
   } 
@@ -4006,7 +4533,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_setHigh(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_setHigh(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   int arg2 ;
@@ -4014,16 +4541,16 @@ SWIGINTERN PyObject *_wrap_MAC_setHigh(PyObject *SWIGUNUSEDPARM(self), PyObject 
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:MAC_setHigh",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setHigh" "', argument " "1"" of type '" "MAC *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setHigh" "', argument " "2"" of type '" "int""'");
   } 
@@ -4036,7 +4563,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_setLow(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_setLow(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   int arg2 ;
@@ -4044,16 +4571,16 @@ SWIGINTERN PyObject *_wrap_MAC_setLow(PyObject *SWIGUNUSEDPARM(self), PyObject *
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:MAC_setLow",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setLow" "', argument " "1"" of type '" "MAC *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setLow" "', argument " "2"" of type '" "int""'");
   } 
@@ -4066,7 +4593,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_setSymbolsPerSec(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_setSymbolsPerSec(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   int arg2 ;
@@ -4074,16 +4601,16 @@ SWIGINTERN PyObject *_wrap_MAC_setSymbolsPerSec(PyObject *SWIGUNUSEDPARM(self), 
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:MAC_setSymbolsPerSec",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setSymbolsPerSec" "', argument " "1"" of type '" "MAC *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setSymbolsPerSec" "', argument " "2"" of type '" "int""'");
   } 
@@ -4096,7 +4623,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_setBitsBerSymbol(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_setBitsBerSymbol(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   int arg2 ;
@@ -4104,16 +4631,16 @@ SWIGINTERN PyObject *_wrap_MAC_setBitsBerSymbol(PyObject *SWIGUNUSEDPARM(self), 
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:MAC_setBitsBerSymbol",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setBitsBerSymbol" "', argument " "1"" of type '" "MAC *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setBitsBerSymbol" "', argument " "2"" of type '" "int""'");
   } 
@@ -4126,7 +4653,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_setPreambleLength(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_setPreambleLength(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   int arg2 ;
@@ -4134,16 +4661,16 @@ SWIGINTERN PyObject *_wrap_MAC_setPreambleLength(PyObject *SWIGUNUSEDPARM(self),
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:MAC_setPreambleLength",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setPreambleLength" "', argument " "1"" of type '" "MAC *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setPreambleLength" "', argument " "2"" of type '" "int""'");
   } 
@@ -4156,7 +4683,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_setExponentBase(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_setExponentBase(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   int arg2 ;
@@ -4164,16 +4691,16 @@ SWIGINTERN PyObject *_wrap_MAC_setExponentBase(PyObject *SWIGUNUSEDPARM(self), P
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:MAC_setExponentBase",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setExponentBase" "', argument " "1"" of type '" "MAC *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setExponentBase" "', argument " "2"" of type '" "int""'");
   } 
@@ -4186,7 +4713,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_setMaxIterations(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_setMaxIterations(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   int arg2 ;
@@ -4194,16 +4721,16 @@ SWIGINTERN PyObject *_wrap_MAC_setMaxIterations(PyObject *SWIGUNUSEDPARM(self), 
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:MAC_setMaxIterations",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setMaxIterations" "', argument " "1"" of type '" "MAC *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setMaxIterations" "', argument " "2"" of type '" "int""'");
   } 
@@ -4216,7 +4743,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_setMinFreeSamples(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_setMinFreeSamples(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   int arg2 ;
@@ -4224,16 +4751,16 @@ SWIGINTERN PyObject *_wrap_MAC_setMinFreeSamples(PyObject *SWIGUNUSEDPARM(self),
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:MAC_setMinFreeSamples",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setMinFreeSamples" "', argument " "1"" of type '" "MAC *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setMinFreeSamples" "', argument " "2"" of type '" "int""'");
   } 
@@ -4246,7 +4773,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_setRxtxDelay(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_setRxtxDelay(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   int arg2 ;
@@ -4254,16 +4781,16 @@ SWIGINTERN PyObject *_wrap_MAC_setRxtxDelay(PyObject *SWIGUNUSEDPARM(self), PyOb
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:MAC_setRxtxDelay",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setRxtxDelay" "', argument " "1"" of type '" "MAC *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setRxtxDelay" "', argument " "2"" of type '" "int""'");
   } 
@@ -4276,7 +4803,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MAC_setAckTime(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_MAC_setAckTime(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   MAC *arg1 = (MAC *) 0 ;
   int arg2 ;
@@ -4284,16 +4811,16 @@ SWIGINTERN PyObject *_wrap_MAC_setAckTime(PyObject *SWIGUNUSEDPARM(self), PyObje
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:MAC_setAckTime",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setAckTime" "', argument " "1"" of type '" "MAC *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setAckTime" "', argument " "2"" of type '" "int""'");
   } 
@@ -4306,35 +4833,28 @@ fail:
 }
 
 
-SWIGINTERN PyObject *MAC_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_MAC, SWIG_NewClientData(obj));
-  return SWIG_Py_Void();
-}
-
-SWIGINTERN PyObject *_wrap_new_Radio(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN int _wrap_new_Radio(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Radio *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)":new_Radio")) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args,"new_Radio",0,0,0)) SWIG_fail;
   result = (Radio *)new Radio();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Radio, SWIG_POINTER_NEW |  0 );
-  return resultobj;
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Radio, SWIG_BUILTIN_INIT |  0 );
+  return resultobj == Py_None ? -1 : 0;
 fail:
-  return NULL;
+  return -1;
 }
 
 
-SWIGINTERN PyObject *_wrap_delete_Radio(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_Radio(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Radio *arg1 = (Radio *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_Radio",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Radio, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"delete_Radio",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Radio, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Radio" "', argument " "1"" of type '" "Radio *""'"); 
   }
@@ -4347,7 +4867,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Radio_add(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Radio_add(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Radio *arg1 = (Radio *) 0 ;
   int arg2 ;
@@ -4361,28 +4881,25 @@ SWIGINTERN PyObject *_wrap_Radio_add(PyObject *SWIGUNUSEDPARM(self), PyObject *a
   int ecode3 = 0 ;
   double val4 ;
   int ecode4 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
+  PyObject *swig_obj[4] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:Radio_add",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Radio_add",3,3,swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_add" "', argument " "1"" of type '" "Radio *""'"); 
   }
   arg1 = reinterpret_cast< Radio * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Radio_add" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  ecode3 = SWIG_AsVal_int(swig_obj[1], &val3);
   if (!SWIG_IsOK(ecode3)) {
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Radio_add" "', argument " "3"" of type '" "int""'");
   } 
   arg3 = static_cast< int >(val3);
-  ecode4 = SWIG_AsVal_double(obj3, &val4);
+  ecode4 = SWIG_AsVal_double(swig_obj[2], &val4);
   if (!SWIG_IsOK(ecode4)) {
     SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Radio_add" "', argument " "4"" of type '" "double""'");
   } 
@@ -4395,7 +4912,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Radio_gain(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Radio_gain(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Radio *arg1 = (Radio *) 0 ;
   int arg2 ;
@@ -4406,23 +4923,21 @@ SWIGINTERN PyObject *_wrap_Radio_gain(PyObject *SWIGUNUSEDPARM(self), PyObject *
   int ecode2 = 0 ;
   int val3 ;
   int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
+  PyObject *swig_obj[3] ;
   double result;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOO:Radio_gain",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Radio_gain",2,2,swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_gain" "', argument " "1"" of type '" "Radio *""'"); 
   }
   arg1 = reinterpret_cast< Radio * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Radio_gain" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  ecode3 = SWIG_AsVal_int(swig_obj[1], &val3);
   if (!SWIG_IsOK(ecode3)) {
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Radio_gain" "', argument " "3"" of type '" "int""'");
   } 
@@ -4435,7 +4950,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Radio_connected(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Radio_connected(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Radio *arg1 = (Radio *) 0 ;
   int arg2 ;
@@ -4446,23 +4961,21 @@ SWIGINTERN PyObject *_wrap_Radio_connected(PyObject *SWIGUNUSEDPARM(self), PyObj
   int ecode2 = 0 ;
   int val3 ;
   int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
+  PyObject *swig_obj[3] ;
   bool result;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOO:Radio_connected",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Radio_connected",2,2,swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_connected" "', argument " "1"" of type '" "Radio *""'"); 
   }
   arg1 = reinterpret_cast< Radio * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Radio_connected" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  ecode3 = SWIG_AsVal_int(swig_obj[1], &val3);
   if (!SWIG_IsOK(ecode3)) {
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Radio_connected" "', argument " "3"" of type '" "int""'");
   } 
@@ -4475,7 +4988,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Radio_remove(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Radio_remove(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Radio *arg1 = (Radio *) 0 ;
   int arg2 ;
@@ -4486,22 +4999,20 @@ SWIGINTERN PyObject *_wrap_Radio_remove(PyObject *SWIGUNUSEDPARM(self), PyObject
   int ecode2 = 0 ;
   int val3 ;
   int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
+  PyObject *swig_obj[3] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOO:Radio_remove",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Radio_remove",2,2,swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_remove" "', argument " "1"" of type '" "Radio *""'"); 
   }
   arg1 = reinterpret_cast< Radio * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Radio_remove" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  ecode3 = SWIG_AsVal_int(swig_obj[1], &val3);
   if (!SWIG_IsOK(ecode3)) {
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Radio_remove" "', argument " "3"" of type '" "int""'");
   } 
@@ -4514,7 +5025,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Radio_setNoise(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Radio_setNoise(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Radio *arg1 = (Radio *) 0 ;
   int arg2 ;
@@ -4528,28 +5039,25 @@ SWIGINTERN PyObject *_wrap_Radio_setNoise(PyObject *SWIGUNUSEDPARM(self), PyObje
   int ecode3 = 0 ;
   double val4 ;
   int ecode4 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
+  PyObject *swig_obj[4] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:Radio_setNoise",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Radio_setNoise",3,3,swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_setNoise" "', argument " "1"" of type '" "Radio *""'"); 
   }
   arg1 = reinterpret_cast< Radio * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Radio_setNoise" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  ecode3 = SWIG_AsVal_double(swig_obj[1], &val3);
   if (!SWIG_IsOK(ecode3)) {
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Radio_setNoise" "', argument " "3"" of type '" "double""'");
   } 
   arg3 = static_cast< double >(val3);
-  ecode4 = SWIG_AsVal_double(obj3, &val4);
+  ecode4 = SWIG_AsVal_double(swig_obj[2], &val4);
   if (!SWIG_IsOK(ecode4)) {
     SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Radio_setNoise" "', argument " "4"" of type '" "double""'");
   } 
@@ -4562,7 +5070,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Radio_setSensitivity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Radio_setSensitivity(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Radio *arg1 = (Radio *) 0 ;
   double arg2 ;
@@ -4570,16 +5078,16 @@ SWIGINTERN PyObject *_wrap_Radio_setSensitivity(PyObject *SWIGUNUSEDPARM(self), 
   int res1 = 0 ;
   double val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Radio_setSensitivity",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_setSensitivity" "', argument " "1"" of type '" "Radio *""'"); 
   }
   arg1 = reinterpret_cast< Radio * >(argp1);
-  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  ecode2 = SWIG_AsVal_double(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Radio_setSensitivity" "', argument " "2"" of type '" "double""'");
   } 
@@ -4592,35 +5100,28 @@ fail:
 }
 
 
-SWIGINTERN PyObject *Radio_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_Radio, SWIG_NewClientData(obj));
-  return SWIG_Py_Void();
-}
-
-SWIGINTERN PyObject *_wrap_new_Packet(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN int _wrap_new_Packet(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)":new_Packet")) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args,"new_Packet",0,0,0)) SWIG_fail;
   result = (Packet *)new Packet();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Packet, SWIG_POINTER_NEW |  0 );
-  return resultobj;
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Packet, SWIG_BUILTIN_INIT |  0 );
+  return resultobj == Py_None ? -1 : 0;
 fail:
-  return NULL;
+  return -1;
 }
 
 
-SWIGINTERN PyObject *_wrap_delete_Packet(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_Packet(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_Packet",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"delete_Packet",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Packet" "', argument " "1"" of type '" "Packet *""'"); 
   }
@@ -4633,7 +5134,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Packet_setSource(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Packet_setSource(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   int arg2 ;
@@ -4641,16 +5142,16 @@ SWIGINTERN PyObject *_wrap_Packet_setSource(PyObject *SWIGUNUSEDPARM(self), PyOb
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Packet_setSource",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setSource" "', argument " "1"" of type '" "Packet *""'"); 
   }
   arg1 = reinterpret_cast< Packet * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Packet_setSource" "', argument " "2"" of type '" "int""'");
   } 
@@ -4663,16 +5164,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Packet_source(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Packet_source(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Packet_source",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Packet_source",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_source" "', argument " "1"" of type '" "Packet *""'"); 
   }
@@ -4685,7 +5186,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Packet_setDestination(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Packet_setDestination(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   int arg2 ;
@@ -4693,16 +5194,16 @@ SWIGINTERN PyObject *_wrap_Packet_setDestination(PyObject *SWIGUNUSEDPARM(self),
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Packet_setDestination",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setDestination" "', argument " "1"" of type '" "Packet *""'"); 
   }
   arg1 = reinterpret_cast< Packet * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Packet_setDestination" "', argument " "2"" of type '" "int""'");
   } 
@@ -4715,16 +5216,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Packet_destination(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Packet_destination(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Packet_destination",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Packet_destination",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_destination" "', argument " "1"" of type '" "Packet *""'"); 
   }
@@ -4737,7 +5238,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Packet_setLength(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Packet_setLength(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   int arg2 ;
@@ -4745,16 +5246,16 @@ SWIGINTERN PyObject *_wrap_Packet_setLength(PyObject *SWIGUNUSEDPARM(self), PyOb
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Packet_setLength",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setLength" "', argument " "1"" of type '" "Packet *""'"); 
   }
   arg1 = reinterpret_cast< Packet * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Packet_setLength" "', argument " "2"" of type '" "int""'");
   } 
@@ -4767,16 +5268,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Packet_length(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Packet_length(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Packet_length",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Packet_length",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_length" "', argument " "1"" of type '" "Packet *""'"); 
   }
@@ -4789,7 +5290,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Packet_setType(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Packet_setType(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   int arg2 ;
@@ -4797,16 +5298,16 @@ SWIGINTERN PyObject *_wrap_Packet_setType(PyObject *SWIGUNUSEDPARM(self), PyObje
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Packet_setType",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setType" "', argument " "1"" of type '" "Packet *""'"); 
   }
   arg1 = reinterpret_cast< Packet * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Packet_setType" "', argument " "2"" of type '" "int""'");
   } 
@@ -4819,16 +5320,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Packet_type(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Packet_type(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Packet_type",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Packet_type",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_type" "', argument " "1"" of type '" "Packet *""'"); 
   }
@@ -4841,16 +5342,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Packet_data(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Packet_data(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   char *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Packet_data",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Packet_data",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_data" "', argument " "1"" of type '" "Packet *""'"); 
   }
@@ -4863,7 +5364,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Packet_setData(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Packet_setData(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   char *arg2 = (char *) 0 ;
@@ -4874,16 +5375,16 @@ SWIGINTERN PyObject *_wrap_Packet_setData(PyObject *SWIGUNUSEDPARM(self), PyObje
   char *buf2 = 0 ;
   size_t size2 = 0 ;
   int alloc2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Packet_setData",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setData" "', argument " "1"" of type '" "Packet *""'"); 
   }
   arg1 = reinterpret_cast< Packet * >(argp1);
-  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, &size2, &alloc2);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf2, &size2, &alloc2);
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Packet_setData" "', argument " "2"" of type '" "char *""'");
   }  
@@ -4899,16 +5400,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Packet_maxLength(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Packet_maxLength(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Packet_maxLength",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Packet_maxLength",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_maxLength" "', argument " "1"" of type '" "Packet *""'"); 
   }
@@ -4921,7 +5422,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Packet_setStrength(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Packet_setStrength(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   int arg2 ;
@@ -4929,16 +5430,16 @@ SWIGINTERN PyObject *_wrap_Packet_setStrength(PyObject *SWIGUNUSEDPARM(self), Py
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Packet_setStrength",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setStrength" "', argument " "1"" of type '" "Packet *""'"); 
   }
   arg1 = reinterpret_cast< Packet * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Packet_setStrength" "', argument " "2"" of type '" "int""'");
   } 
@@ -4951,7 +5452,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Packet_deliver(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Packet_deliver(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   int arg2 ;
@@ -4962,22 +5463,20 @@ SWIGINTERN PyObject *_wrap_Packet_deliver(PyObject *SWIGUNUSEDPARM(self), PyObje
   int ecode2 = 0 ;
   long long val3 ;
   int ecode3 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
+  PyObject *swig_obj[3] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOO:Packet_deliver",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Packet_deliver",2,2,swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_deliver" "', argument " "1"" of type '" "Packet *""'"); 
   }
   arg1 = reinterpret_cast< Packet * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Packet_deliver" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_long_SS_long(obj2, &val3);
+  ecode3 = SWIG_AsVal_long_SS_long(swig_obj[1], &val3);
   if (!SWIG_IsOK(ecode3)) {
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Packet_deliver" "', argument " "3"" of type '" "long long""'");
   } 
@@ -4990,7 +5489,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Packet_deliverNow(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Packet_deliverNow(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Packet *arg1 = (Packet *) 0 ;
   int arg2 ;
@@ -4998,16 +5497,16 @@ SWIGINTERN PyObject *_wrap_Packet_deliverNow(PyObject *SWIGUNUSEDPARM(self), PyO
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Packet_deliverNow",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_deliverNow" "', argument " "1"" of type '" "Packet *""'"); 
   }
   arg1 = reinterpret_cast< Packet * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Packet_deliverNow" "', argument " "2"" of type '" "int""'");
   } 
@@ -5020,14 +5519,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *Packet_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_Packet, SWIG_NewClientData(obj));
-  return SWIG_Py_Void();
-}
-
-SWIGINTERN PyObject *_wrap_variable_string_t_type_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_variable_string_t_type_set(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   variable_string *arg1 = (variable_string *) 0 ;
   char *arg2 = (char *) 0 ;
@@ -5036,16 +5528,16 @@ SWIGINTERN PyObject *_wrap_variable_string_t_type_set(PyObject *SWIGUNUSEDPARM(s
   int res2 ;
   char *buf2 = 0 ;
   int alloc2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:variable_string_t_type_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "variable_string_t_type_set" "', argument " "1"" of type '" "variable_string *""'"); 
   }
   arg1 = reinterpret_cast< variable_string * >(argp1);
-  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "variable_string_t_type_set" "', argument " "2"" of type '" "char *""'");
   }
@@ -5066,16 +5558,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_variable_string_t_type_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_variable_string_t_type_get(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   variable_string *arg1 = (variable_string *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   char *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:variable_string_t_type_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"variable_string_t_type_get",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "variable_string_t_type_get" "', argument " "1"" of type '" "variable_string *""'"); 
   }
@@ -5088,7 +5580,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_variable_string_t_ptr_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_variable_string_t_ptr_set(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   variable_string *arg1 = (variable_string *) 0 ;
   char *arg2 = (char *) 0 ;
@@ -5097,16 +5589,16 @@ SWIGINTERN PyObject *_wrap_variable_string_t_ptr_set(PyObject *SWIGUNUSEDPARM(se
   int res2 ;
   char *buf2 = 0 ;
   int alloc2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:variable_string_t_ptr_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "variable_string_t_ptr_set" "', argument " "1"" of type '" "variable_string *""'"); 
   }
   arg1 = reinterpret_cast< variable_string * >(argp1);
-  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "variable_string_t_ptr_set" "', argument " "2"" of type '" "char *""'");
   }
@@ -5127,16 +5619,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_variable_string_t_ptr_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_variable_string_t_ptr_get(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   variable_string *arg1 = (variable_string *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   char *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:variable_string_t_ptr_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"variable_string_t_ptr_get",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "variable_string_t_ptr_get" "', argument " "1"" of type '" "variable_string *""'"); 
   }
@@ -5149,7 +5641,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_variable_string_t_len_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_variable_string_t_len_set(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   variable_string *arg1 = (variable_string *) 0 ;
   int arg2 ;
@@ -5157,16 +5649,16 @@ SWIGINTERN PyObject *_wrap_variable_string_t_len_set(PyObject *SWIGUNUSEDPARM(se
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:variable_string_t_len_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "variable_string_t_len_set" "', argument " "1"" of type '" "variable_string *""'"); 
   }
   arg1 = reinterpret_cast< variable_string * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "variable_string_t_len_set" "', argument " "2"" of type '" "int""'");
   } 
@@ -5179,16 +5671,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_variable_string_t_len_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_variable_string_t_len_get(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   variable_string *arg1 = (variable_string *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:variable_string_t_len_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"variable_string_t_len_get",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "variable_string_t_len_get" "', argument " "1"" of type '" "variable_string *""'"); 
   }
@@ -5201,7 +5693,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_variable_string_t_isArray_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_variable_string_t_isArray_set(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   variable_string *arg1 = (variable_string *) 0 ;
   int arg2 ;
@@ -5209,16 +5701,16 @@ SWIGINTERN PyObject *_wrap_variable_string_t_isArray_set(PyObject *SWIGUNUSEDPAR
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:variable_string_t_isArray_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "variable_string_t_isArray_set" "', argument " "1"" of type '" "variable_string *""'"); 
   }
   arg1 = reinterpret_cast< variable_string * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "variable_string_t_isArray_set" "', argument " "2"" of type '" "int""'");
   } 
@@ -5231,16 +5723,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_variable_string_t_isArray_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_variable_string_t_isArray_get(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   variable_string *arg1 = (variable_string *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:variable_string_t_isArray_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"variable_string_t_isArray_get",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "variable_string_t_isArray_get" "', argument " "1"" of type '" "variable_string *""'"); 
   }
@@ -5253,28 +5745,28 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_variable_string_t(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN int _wrap_new_variable_string_t(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   variable_string *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)":new_variable_string_t")) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args,"new_variable_string_t",0,0,0)) SWIG_fail;
   result = (variable_string *)new variable_string();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_variable_string, SWIG_POINTER_NEW |  0 );
-  return resultobj;
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_variable_string, SWIG_BUILTIN_INIT |  0 );
+  return resultobj == Py_None ? -1 : 0;
 fail:
-  return NULL;
+  return -1;
 }
 
 
-SWIGINTERN PyObject *_wrap_delete_variable_string_t(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_variable_string_t(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   variable_string *arg1 = (variable_string *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_variable_string_t",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_variable_string, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"delete_variable_string_t",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_variable_string, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_variable_string_t" "', argument " "1"" of type '" "variable_string *""'"); 
   }
@@ -5287,14 +5779,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *variable_string_t_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_variable_string, SWIG_NewClientData(obj));
-  return SWIG_Py_Void();
-}
-
-SWIGINTERN PyObject *_wrap_nesc_app_t_numVariables_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_nesc_app_t_numVariables_set(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   nesc_app *arg1 = (nesc_app *) 0 ;
   int arg2 ;
@@ -5302,16 +5787,16 @@ SWIGINTERN PyObject *_wrap_nesc_app_t_numVariables_set(PyObject *SWIGUNUSEDPARM(
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:nesc_app_t_numVariables_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_numVariables_set" "', argument " "1"" of type '" "nesc_app *""'"); 
   }
   arg1 = reinterpret_cast< nesc_app * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "nesc_app_t_numVariables_set" "', argument " "2"" of type '" "int""'");
   } 
@@ -5324,16 +5809,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_numVariables_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_nesc_app_t_numVariables_get(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   nesc_app *arg1 = (nesc_app *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:nesc_app_t_numVariables_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"nesc_app_t_numVariables_get",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_numVariables_get" "', argument " "1"" of type '" "nesc_app *""'"); 
   }
@@ -5346,7 +5831,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_variableNames_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_nesc_app_t_variableNames_set(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   nesc_app *arg1 = (nesc_app *) 0 ;
   char **arg2 = (char **) 0 ;
@@ -5354,16 +5839,16 @@ SWIGINTERN PyObject *_wrap_nesc_app_t_variableNames_set(PyObject *SWIGUNUSEDPARM
   int res1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:nesc_app_t_variableNames_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_variableNames_set" "', argument " "1"" of type '" "nesc_app *""'"); 
   }
   arg1 = reinterpret_cast< nesc_app * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_p_char, 0 |  0 );
+  res2 = SWIG_ConvertPtr(swig_obj[0], &argp2,SWIGTYPE_p_p_char, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "nesc_app_t_variableNames_set" "', argument " "2"" of type '" "char **""'"); 
   }
@@ -5376,16 +5861,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_variableNames_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_nesc_app_t_variableNames_get(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   nesc_app *arg1 = (nesc_app *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   char **result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:nesc_app_t_variableNames_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"nesc_app_t_variableNames_get",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_variableNames_get" "', argument " "1"" of type '" "nesc_app *""'"); 
   }
@@ -5398,7 +5883,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_variableTypes_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_nesc_app_t_variableTypes_set(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   nesc_app *arg1 = (nesc_app *) 0 ;
   char **arg2 = (char **) 0 ;
@@ -5406,16 +5891,16 @@ SWIGINTERN PyObject *_wrap_nesc_app_t_variableTypes_set(PyObject *SWIGUNUSEDPARM
   int res1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:nesc_app_t_variableTypes_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_variableTypes_set" "', argument " "1"" of type '" "nesc_app *""'"); 
   }
   arg1 = reinterpret_cast< nesc_app * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_p_char, 0 |  0 );
+  res2 = SWIG_ConvertPtr(swig_obj[0], &argp2,SWIGTYPE_p_p_char, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "nesc_app_t_variableTypes_set" "', argument " "2"" of type '" "char **""'"); 
   }
@@ -5428,16 +5913,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_variableTypes_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_nesc_app_t_variableTypes_get(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   nesc_app *arg1 = (nesc_app *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   char **result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:nesc_app_t_variableTypes_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"nesc_app_t_variableTypes_get",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_variableTypes_get" "', argument " "1"" of type '" "nesc_app *""'"); 
   }
@@ -5450,7 +5935,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_variableArray_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_nesc_app_t_variableArray_set(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   nesc_app *arg1 = (nesc_app *) 0 ;
   int *arg2 = (int *) 0 ;
@@ -5458,16 +5943,16 @@ SWIGINTERN PyObject *_wrap_nesc_app_t_variableArray_set(PyObject *SWIGUNUSEDPARM
   int res1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:nesc_app_t_variableArray_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_variableArray_set" "', argument " "1"" of type '" "nesc_app *""'"); 
   }
   arg1 = reinterpret_cast< nesc_app * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_int, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(swig_obj[0], &argp2,SWIGTYPE_p_int, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "nesc_app_t_variableArray_set" "', argument " "2"" of type '" "int *""'"); 
   }
@@ -5480,16 +5965,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_variableArray_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_nesc_app_t_variableArray_get(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   nesc_app *arg1 = (nesc_app *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   int *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:nesc_app_t_variableArray_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"nesc_app_t_variableArray_get",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_variableArray_get" "', argument " "1"" of type '" "nesc_app *""'"); 
   }
@@ -5502,28 +5987,28 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_nesc_app_t(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN int _wrap_new_nesc_app_t(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   nesc_app *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)":new_nesc_app_t")) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args,"new_nesc_app_t",0,0,0)) SWIG_fail;
   result = (nesc_app *)new nesc_app();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_nesc_app, SWIG_POINTER_NEW |  0 );
-  return resultobj;
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_nesc_app, SWIG_BUILTIN_INIT |  0 );
+  return resultobj == Py_None ? -1 : 0;
 fail:
-  return NULL;
+  return -1;
 }
 
 
-SWIGINTERN PyObject *_wrap_delete_nesc_app_t(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_nesc_app_t(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   nesc_app *arg1 = (nesc_app *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_nesc_app_t",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nesc_app, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"delete_nesc_app_t",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_nesc_app_t" "', argument " "1"" of type '" "nesc_app *""'"); 
   }
@@ -5536,14 +6021,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *nesc_app_t_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_nesc_app, SWIG_NewClientData(obj));
-  return SWIG_Py_Void();
-}
-
-SWIGINTERN PyObject *_wrap_new_Variable(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN int _wrap_new_Variable(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   char *arg1 = (char *) 0 ;
   char *arg2 = (char *) 0 ;
@@ -5559,54 +6037,51 @@ SWIGINTERN PyObject *_wrap_new_Variable(PyObject *SWIGUNUSEDPARM(self), PyObject
   int ecode3 = 0 ;
   int val4 ;
   int ecode4 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
+  PyObject *swig_obj[4] ;
   Variable *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:new_Variable",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
-  res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
+  if (!SWIG_Python_UnpackTuple(args,"new_Variable",4,4,swig_obj)) SWIG_fail;
+  res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Variable" "', argument " "1"" of type '" "char *""'");
   }
   arg1 = reinterpret_cast< char * >(buf1);
-  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_Variable" "', argument " "2"" of type '" "char *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
-  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
   if (!SWIG_IsOK(ecode3)) {
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "new_Variable" "', argument " "3"" of type '" "int""'");
   } 
   arg3 = static_cast< int >(val3);
-  ecode4 = SWIG_AsVal_int(obj3, &val4);
+  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
   if (!SWIG_IsOK(ecode4)) {
     SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "new_Variable" "', argument " "4"" of type '" "int""'");
   } 
   arg4 = static_cast< int >(val4);
   result = (Variable *)new Variable(arg1,arg2,arg3,arg4);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Variable, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Variable, SWIG_BUILTIN_INIT |  0 );
   if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  return resultobj;
+  return resultobj == Py_None ? -1 : 0;
 fail:
   if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  return NULL;
+  return -1;
 }
 
 
-SWIGINTERN PyObject *_wrap_delete_Variable(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_Variable(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Variable *arg1 = (Variable *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_Variable",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Variable, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"delete_Variable",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Variable, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Variable" "', argument " "1"" of type '" "Variable *""'"); 
   }
@@ -5619,16 +6094,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Variable_getData(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Variable_getData(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Variable *arg1 = (Variable *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   variable_string_t result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Variable_getData",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Variable, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Variable_getData",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Variable, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Variable_getData" "', argument " "1"" of type '" "Variable *""'"); 
   }
@@ -5653,27 +6128,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *Variable_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_Variable, SWIG_NewClientData(obj));
-  return SWIG_Py_Void();
-}
-
-SWIGINTERN PyObject *_wrap_new_Mote(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN int _wrap_new_Mote(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   nesc_app_t *arg1 = (nesc_app_t *) 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   Mote *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:new_Mote",&obj0)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args,"new_Mote",1,1,swig_obj)) SWIG_fail;
   {
-    if (!PyList_Check(obj0)) {
+    if (!PyList_Check(swig_obj[0])) {
       PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
       return NULL;
     }
     else {
-      int size = PyList_Size(obj0);
+      int size = PyList_Size(swig_obj[0]);
       int i = 0;
       nesc_app_t* app;
       
@@ -5694,9 +6162,9 @@ SWIGINTERN PyObject *_wrap_new_Mote(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
       memset(app->variableArray, 0, sizeof(int) * app->numVariables);
       
       for (i = 0; i < app->numVariables; i++) {
-        PyObject* name = PyList_GetItem(obj0, 3 * i);
-        PyObject* array = PyList_GetItem(obj0, (3 * i) + 1);
-        PyObject* format = PyList_GetItem(obj0, (3 * i) + 2);
+        PyObject* name = PyList_GetItem(swig_obj[0], 3 * i);
+        PyObject* array = PyList_GetItem(swig_obj[0], (3 * i) + 1);
+        PyObject* format = PyList_GetItem(swig_obj[0], (3 * i) + 2);
         if (PyString_Check(name) && PyString_Check(format)) {
           app->variableNames[i] = PyString_AsString(name);
           app->variableTypes[i] = PyString_AsString(format);
@@ -5719,22 +6187,22 @@ SWIGINTERN PyObject *_wrap_new_Mote(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
     }
   }
   result = (Mote *)new Mote(arg1);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Mote, SWIG_POINTER_NEW |  0 );
-  return resultobj;
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Mote, SWIG_BUILTIN_INIT |  0 );
+  return resultobj == Py_None ? -1 : 0;
 fail:
-  return NULL;
+  return -1;
 }
 
 
-SWIGINTERN PyObject *_wrap_delete_Mote(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_Mote(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Mote *arg1 = (Mote *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_Mote",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mote, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"delete_Mote",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Mote" "', argument " "1"" of type '" "Mote *""'"); 
   }
@@ -5747,16 +6215,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Mote_id(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mote_id(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Mote *arg1 = (Mote *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   unsigned long result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Mote_id",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Mote_id",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_id" "', argument " "1"" of type '" "Mote *""'"); 
   }
@@ -5769,16 +6237,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Mote_euid(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mote_euid(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Mote *arg1 = (Mote *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   long long result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Mote_euid",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Mote_euid",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_euid" "', argument " "1"" of type '" "Mote *""'"); 
   }
@@ -5791,7 +6259,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Mote_setEuid(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mote_setEuid(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Mote *arg1 = (Mote *) 0 ;
   long long arg2 ;
@@ -5799,16 +6267,16 @@ SWIGINTERN PyObject *_wrap_Mote_setEuid(PyObject *SWIGUNUSEDPARM(self), PyObject
   int res1 = 0 ;
   long long val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Mote_setEuid",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_setEuid" "', argument " "1"" of type '" "Mote *""'"); 
   }
   arg1 = reinterpret_cast< Mote * >(argp1);
-  ecode2 = SWIG_AsVal_long_SS_long(obj1, &val2);
+  ecode2 = SWIG_AsVal_long_SS_long(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Mote_setEuid" "', argument " "2"" of type '" "long long""'");
   } 
@@ -5821,16 +6289,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Mote_bootTime(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mote_bootTime(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Mote *arg1 = (Mote *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   long long result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Mote_bootTime",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Mote_bootTime",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_bootTime" "', argument " "1"" of type '" "Mote *""'"); 
   }
@@ -5843,7 +6311,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Mote_bootAtTime(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mote_bootAtTime(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Mote *arg1 = (Mote *) 0 ;
   long long arg2 ;
@@ -5851,16 +6319,16 @@ SWIGINTERN PyObject *_wrap_Mote_bootAtTime(PyObject *SWIGUNUSEDPARM(self), PyObj
   int res1 = 0 ;
   long long val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Mote_bootAtTime",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_bootAtTime" "', argument " "1"" of type '" "Mote *""'"); 
   }
   arg1 = reinterpret_cast< Mote * >(argp1);
-  ecode2 = SWIG_AsVal_long_SS_long(obj1, &val2);
+  ecode2 = SWIG_AsVal_long_SS_long(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Mote_bootAtTime" "', argument " "2"" of type '" "long long""'");
   } 
@@ -5873,16 +6341,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Mote_isOn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mote_isOn(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Mote *arg1 = (Mote *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   bool result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Mote_isOn",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Mote_isOn",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_isOn" "', argument " "1"" of type '" "Mote *""'"); 
   }
@@ -5895,15 +6363,15 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Mote_turnOff(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mote_turnOff(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Mote *arg1 = (Mote *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Mote_turnOff",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Mote_turnOff",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_turnOff" "', argument " "1"" of type '" "Mote *""'"); 
   }
@@ -5916,15 +6384,15 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Mote_turnOn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mote_turnOn(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Mote *arg1 = (Mote *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Mote_turnOn",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Mote_turnOn",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_turnOn" "', argument " "1"" of type '" "Mote *""'"); 
   }
@@ -5937,7 +6405,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Mote_getVariable(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mote_getVariable(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Mote *arg1 = (Mote *) 0 ;
   char *arg2 = (char *) 0 ;
@@ -5946,17 +6414,17 @@ SWIGINTERN PyObject *_wrap_Mote_getVariable(PyObject *SWIGUNUSEDPARM(self), PyOb
   int res2 ;
   char *buf2 = 0 ;
   int alloc2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   Variable *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Mote_getVariable",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_getVariable" "', argument " "1"" of type '" "Mote *""'"); 
   }
   arg1 = reinterpret_cast< Mote * >(argp1);
-  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Mote_getVariable" "', argument " "2"" of type '" "char *""'");
   }
@@ -5971,7 +6439,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Mote_addNoiseTraceReading(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mote_addNoiseTraceReading(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Mote *arg1 = (Mote *) 0 ;
   int arg2 ;
@@ -5979,16 +6447,16 @@ SWIGINTERN PyObject *_wrap_Mote_addNoiseTraceReading(PyObject *SWIGUNUSEDPARM(se
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Mote_addNoiseTraceReading",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_addNoiseTraceReading" "', argument " "1"" of type '" "Mote *""'"); 
   }
   arg1 = reinterpret_cast< Mote * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Mote_addNoiseTraceReading" "', argument " "2"" of type '" "int""'");
   } 
@@ -6001,15 +6469,15 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Mote_createNoiseModel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mote_createNoiseModel(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Mote *arg1 = (Mote *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Mote_createNoiseModel",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Mote_createNoiseModel",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_createNoiseModel" "', argument " "1"" of type '" "Mote *""'"); 
   }
@@ -6022,7 +6490,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Mote_generateNoise(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Mote_generateNoise(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Mote *arg1 = (Mote *) 0 ;
   int arg2 ;
@@ -6030,17 +6498,17 @@ SWIGINTERN PyObject *_wrap_Mote_generateNoise(PyObject *SWIGUNUSEDPARM(self), Py
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   int result;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Mote_generateNoise",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_generateNoise" "', argument " "1"" of type '" "Mote *""'"); 
   }
   arg1 = reinterpret_cast< Mote * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Mote_generateNoise" "', argument " "2"" of type '" "int""'");
   } 
@@ -6053,27 +6521,20 @@ fail:
 }
 
 
-SWIGINTERN PyObject *Mote_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_Mote, SWIG_NewClientData(obj));
-  return SWIG_Py_Void();
-}
-
-SWIGINTERN PyObject *_wrap_new_Tossim(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   nesc_app_t *arg1 = (nesc_app_t *) 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   Tossim *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:new_Tossim",&obj0)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args,"new_Tossim",1,1,swig_obj)) SWIG_fail;
   {
-    if (!PyList_Check(obj0)) {
+    if (!PyList_Check(swig_obj[0])) {
       PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
       return NULL;
     }
     else {
-      int size = PyList_Size(obj0);
+      int size = PyList_Size(swig_obj[0]);
       int i = 0;
       nesc_app_t* app;
       
@@ -6094,9 +6555,9 @@ SWIGINTERN PyObject *_wrap_new_Tossim(PyObject *SWIGUNUSEDPARM(self), PyObject *
       memset(app->variableArray, 0, sizeof(int) * app->numVariables);
       
       for (i = 0; i < app->numVariables; i++) {
-        PyObject* name = PyList_GetItem(obj0, 3 * i);
-        PyObject* array = PyList_GetItem(obj0, (3 * i) + 1);
-        PyObject* format = PyList_GetItem(obj0, (3 * i) + 2);
+        PyObject* name = PyList_GetItem(swig_obj[0], 3 * i);
+        PyObject* array = PyList_GetItem(swig_obj[0], (3 * i) + 1);
+        PyObject* format = PyList_GetItem(swig_obj[0], (3 * i) + 2);
         if (PyString_Check(name) && PyString_Check(format)) {
           app->variableNames[i] = PyString_AsString(name);
           app->variableTypes[i] = PyString_AsString(format);
@@ -6119,22 +6580,22 @@ SWIGINTERN PyObject *_wrap_new_Tossim(PyObject *SWIGUNUSEDPARM(self), PyObject *
     }
   }
   result = (Tossim *)new Tossim(arg1);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Tossim, SWIG_POINTER_NEW |  0 );
-  return resultobj;
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Tossim, SWIG_BUILTIN_INIT |  0 );
+  return resultobj == Py_None ? -1 : 0;
 fail:
-  return NULL;
+  return -1;
 }
 
 
-SWIGINTERN PyObject *_wrap_delete_Tossim(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_Tossim(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_Tossim",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"delete_Tossim",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Tossim" "', argument " "1"" of type '" "Tossim *""'"); 
   }
@@ -6147,15 +6608,15 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_init(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_init(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Tossim_init",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Tossim_init",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_init" "', argument " "1"" of type '" "Tossim *""'"); 
   }
@@ -6168,16 +6629,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_time(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_time(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   long long result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Tossim_time",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Tossim_time",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_time" "', argument " "1"" of type '" "Tossim *""'"); 
   }
@@ -6190,16 +6651,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_ticksPerSecond(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_ticksPerSecond(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   long long result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Tossim_ticksPerSecond",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Tossim_ticksPerSecond",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_ticksPerSecond" "', argument " "1"" of type '" "Tossim *""'"); 
   }
@@ -6212,7 +6673,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_setTime(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_setTime(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   long long arg2 ;
@@ -6220,16 +6681,16 @@ SWIGINTERN PyObject *_wrap_Tossim_setTime(PyObject *SWIGUNUSEDPARM(self), PyObje
   int res1 = 0 ;
   long long val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Tossim_setTime",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_setTime" "', argument " "1"" of type '" "Tossim *""'"); 
   }
   arg1 = reinterpret_cast< Tossim * >(argp1);
-  ecode2 = SWIG_AsVal_long_SS_long(obj1, &val2);
+  ecode2 = SWIG_AsVal_long_SS_long(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tossim_setTime" "', argument " "2"" of type '" "long long""'");
   } 
@@ -6242,16 +6703,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_timeStr(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_timeStr(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   char *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Tossim_timeStr",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Tossim_timeStr",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_timeStr" "', argument " "1"" of type '" "Tossim *""'"); 
   }
@@ -6264,16 +6725,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_currentNode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_currentNode(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   Mote *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Tossim_currentNode",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Tossim_currentNode",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_currentNode" "', argument " "1"" of type '" "Tossim *""'"); 
   }
@@ -6286,7 +6747,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_getNode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_getNode(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   unsigned long arg2 ;
@@ -6294,17 +6755,17 @@ SWIGINTERN PyObject *_wrap_Tossim_getNode(PyObject *SWIGUNUSEDPARM(self), PyObje
   int res1 = 0 ;
   unsigned long val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   Mote *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Tossim_getNode",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_getNode" "', argument " "1"" of type '" "Tossim *""'"); 
   }
   arg1 = reinterpret_cast< Tossim * >(argp1);
-  ecode2 = SWIG_AsVal_unsigned_SS_long(obj1, &val2);
+  ecode2 = SWIG_AsVal_unsigned_SS_long(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tossim_getNode" "', argument " "2"" of type '" "unsigned long""'");
   } 
@@ -6317,7 +6778,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_setCurrentNode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_setCurrentNode(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   unsigned long arg2 ;
@@ -6325,16 +6786,16 @@ SWIGINTERN PyObject *_wrap_Tossim_setCurrentNode(PyObject *SWIGUNUSEDPARM(self),
   int res1 = 0 ;
   unsigned long val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Tossim_setCurrentNode",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_setCurrentNode" "', argument " "1"" of type '" "Tossim *""'"); 
   }
   arg1 = reinterpret_cast< Tossim * >(argp1);
-  ecode2 = SWIG_AsVal_unsigned_SS_long(obj1, &val2);
+  ecode2 = SWIG_AsVal_unsigned_SS_long(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tossim_setCurrentNode" "', argument " "2"" of type '" "unsigned long""'");
   } 
@@ -6347,7 +6808,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_addChannel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_addChannel(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   char *arg2 = (char *) 0 ;
@@ -6357,27 +6818,25 @@ SWIGINTERN PyObject *_wrap_Tossim_addChannel(PyObject *SWIGUNUSEDPARM(self), PyO
   int res2 ;
   char *buf2 = 0 ;
   int alloc2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
+  PyObject *swig_obj[3] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOO:Tossim_addChannel",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Tossim_addChannel",2,2,swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_addChannel" "', argument " "1"" of type '" "Tossim *""'"); 
   }
   arg1 = reinterpret_cast< Tossim * >(argp1);
-  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Tossim_addChannel" "', argument " "2"" of type '" "char *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
   {
-    if (!PyFile_Check(obj2)) {
+    if (!PyFile_Check(swig_obj[1])) {
       PyErr_SetString(PyExc_TypeError, "Requires a file as a parameter.");
       return NULL;
     }
-    arg3 = PyFile_AsFile(obj2);
+    arg3 = PyFile_AsFile(swig_obj[1]);
   }
   (arg1)->addChannel(arg2,arg3);
   resultobj = SWIG_Py_Void();
@@ -6389,7 +6848,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_removeChannel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_removeChannel(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   char *arg2 = (char *) 0 ;
@@ -6399,28 +6858,26 @@ SWIGINTERN PyObject *_wrap_Tossim_removeChannel(PyObject *SWIGUNUSEDPARM(self), 
   int res2 ;
   char *buf2 = 0 ;
   int alloc2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
+  PyObject *swig_obj[3] ;
   bool result;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOO:Tossim_removeChannel",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Tossim_removeChannel",2,2,swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_removeChannel" "', argument " "1"" of type '" "Tossim *""'"); 
   }
   arg1 = reinterpret_cast< Tossim * >(argp1);
-  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Tossim_removeChannel" "', argument " "2"" of type '" "char *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
   {
-    if (!PyFile_Check(obj2)) {
+    if (!PyFile_Check(swig_obj[1])) {
       PyErr_SetString(PyExc_TypeError, "Requires a file as a parameter.");
       return NULL;
     }
-    arg3 = PyFile_AsFile(obj2);
+    arg3 = PyFile_AsFile(swig_obj[1]);
   }
   result = (bool)(arg1)->removeChannel(arg2,arg3);
   resultobj = SWIG_From_bool(static_cast< bool >(result));
@@ -6432,7 +6889,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_randomSeed(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_randomSeed(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   int arg2 ;
@@ -6440,16 +6897,16 @@ SWIGINTERN PyObject *_wrap_Tossim_randomSeed(PyObject *SWIGUNUSEDPARM(self), PyO
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Tossim_randomSeed",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_randomSeed" "', argument " "1"" of type '" "Tossim *""'"); 
   }
   arg1 = reinterpret_cast< Tossim * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tossim_randomSeed" "', argument " "2"" of type '" "int""'");
   } 
@@ -6462,16 +6919,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_runNextEvent(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_runNextEvent(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   bool result;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Tossim_runNextEvent",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Tossim_runNextEvent",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_runNextEvent" "', argument " "1"" of type '" "Tossim *""'"); 
   }
@@ -6484,16 +6941,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_mac(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_mac(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   MAC *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Tossim_mac",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Tossim_mac",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_mac" "', argument " "1"" of type '" "Tossim *""'"); 
   }
@@ -6506,16 +6963,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_radio(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_radio(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   Radio *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Tossim_radio",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Tossim_radio",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_radio" "', argument " "1"" of type '" "Tossim *""'"); 
   }
@@ -6528,16 +6985,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Tossim_newPacket(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Tossim_newPacket(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject * obj0 = 0 ;
+  PyObject *swig_obj[1] ;
   Packet *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:Tossim_newPacket",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args,"Tossim_newPacket",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_newPacket" "', argument " "1"" of type '" "Tossim *""'"); 
   }
@@ -6550,145 +7007,1611 @@ fail:
 }
 
 
-SWIGINTERN PyObject *Tossim_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_Tossim, SWIG_NewClientData(obj));
-  return SWIG_Py_Void();
-}
-
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
-	 { (char *)"new_MAC", _wrap_new_MAC, METH_VARARGS, NULL},
-	 { (char *)"delete_MAC", _wrap_delete_MAC, METH_VARARGS, NULL},
-	 { (char *)"MAC_initHigh", _wrap_MAC_initHigh, METH_VARARGS, NULL},
-	 { (char *)"MAC_initLow", _wrap_MAC_initLow, METH_VARARGS, NULL},
-	 { (char *)"MAC_high", _wrap_MAC_high, METH_VARARGS, NULL},
-	 { (char *)"MAC_low", _wrap_MAC_low, METH_VARARGS, NULL},
-	 { (char *)"MAC_symbolsPerSec", _wrap_MAC_symbolsPerSec, METH_VARARGS, NULL},
-	 { (char *)"MAC_bitsPerSymbol", _wrap_MAC_bitsPerSymbol, METH_VARARGS, NULL},
-	 { (char *)"MAC_preambleLength", _wrap_MAC_preambleLength, METH_VARARGS, NULL},
-	 { (char *)"MAC_exponentBase", _wrap_MAC_exponentBase, METH_VARARGS, NULL},
-	 { (char *)"MAC_maxIterations", _wrap_MAC_maxIterations, METH_VARARGS, NULL},
-	 { (char *)"MAC_minFreeSamples", _wrap_MAC_minFreeSamples, METH_VARARGS, NULL},
-	 { (char *)"MAC_rxtxDelay", _wrap_MAC_rxtxDelay, METH_VARARGS, NULL},
-	 { (char *)"MAC_ackTime", _wrap_MAC_ackTime, METH_VARARGS, NULL},
-	 { (char *)"MAC_setInitHigh", _wrap_MAC_setInitHigh, METH_VARARGS, NULL},
-	 { (char *)"MAC_setInitLow", _wrap_MAC_setInitLow, METH_VARARGS, NULL},
-	 { (char *)"MAC_setHigh", _wrap_MAC_setHigh, METH_VARARGS, NULL},
-	 { (char *)"MAC_setLow", _wrap_MAC_setLow, METH_VARARGS, NULL},
-	 { (char *)"MAC_setSymbolsPerSec", _wrap_MAC_setSymbolsPerSec, METH_VARARGS, NULL},
-	 { (char *)"MAC_setBitsBerSymbol", _wrap_MAC_setBitsBerSymbol, METH_VARARGS, NULL},
-	 { (char *)"MAC_setPreambleLength", _wrap_MAC_setPreambleLength, METH_VARARGS, NULL},
-	 { (char *)"MAC_setExponentBase", _wrap_MAC_setExponentBase, METH_VARARGS, NULL},
-	 { (char *)"MAC_setMaxIterations", _wrap_MAC_setMaxIterations, METH_VARARGS, NULL},
-	 { (char *)"MAC_setMinFreeSamples", _wrap_MAC_setMinFreeSamples, METH_VARARGS, NULL},
-	 { (char *)"MAC_setRxtxDelay", _wrap_MAC_setRxtxDelay, METH_VARARGS, NULL},
-	 { (char *)"MAC_setAckTime", _wrap_MAC_setAckTime, METH_VARARGS, NULL},
-	 { (char *)"MAC_swigregister", MAC_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Radio", _wrap_new_Radio, METH_VARARGS, NULL},
-	 { (char *)"delete_Radio", _wrap_delete_Radio, METH_VARARGS, NULL},
-	 { (char *)"Radio_add", _wrap_Radio_add, METH_VARARGS, NULL},
-	 { (char *)"Radio_gain", _wrap_Radio_gain, METH_VARARGS, NULL},
-	 { (char *)"Radio_connected", _wrap_Radio_connected, METH_VARARGS, NULL},
-	 { (char *)"Radio_remove", _wrap_Radio_remove, METH_VARARGS, NULL},
-	 { (char *)"Radio_setNoise", _wrap_Radio_setNoise, METH_VARARGS, NULL},
-	 { (char *)"Radio_setSensitivity", _wrap_Radio_setSensitivity, METH_VARARGS, NULL},
-	 { (char *)"Radio_swigregister", Radio_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Packet", _wrap_new_Packet, METH_VARARGS, NULL},
-	 { (char *)"delete_Packet", _wrap_delete_Packet, METH_VARARGS, NULL},
-	 { (char *)"Packet_setSource", _wrap_Packet_setSource, METH_VARARGS, NULL},
-	 { (char *)"Packet_source", _wrap_Packet_source, METH_VARARGS, NULL},
-	 { (char *)"Packet_setDestination", _wrap_Packet_setDestination, METH_VARARGS, NULL},
-	 { (char *)"Packet_destination", _wrap_Packet_destination, METH_VARARGS, NULL},
-	 { (char *)"Packet_setLength", _wrap_Packet_setLength, METH_VARARGS, NULL},
-	 { (char *)"Packet_length", _wrap_Packet_length, METH_VARARGS, NULL},
-	 { (char *)"Packet_setType", _wrap_Packet_setType, METH_VARARGS, NULL},
-	 { (char *)"Packet_type", _wrap_Packet_type, METH_VARARGS, NULL},
-	 { (char *)"Packet_data", _wrap_Packet_data, METH_VARARGS, NULL},
-	 { (char *)"Packet_setData", _wrap_Packet_setData, METH_VARARGS, NULL},
-	 { (char *)"Packet_maxLength", _wrap_Packet_maxLength, METH_VARARGS, NULL},
-	 { (char *)"Packet_setStrength", _wrap_Packet_setStrength, METH_VARARGS, NULL},
-	 { (char *)"Packet_deliver", _wrap_Packet_deliver, METH_VARARGS, NULL},
-	 { (char *)"Packet_deliverNow", _wrap_Packet_deliverNow, METH_VARARGS, NULL},
-	 { (char *)"Packet_swigregister", Packet_swigregister, METH_VARARGS, NULL},
-	 { (char *)"variable_string_t_type_set", _wrap_variable_string_t_type_set, METH_VARARGS, NULL},
-	 { (char *)"variable_string_t_type_get", _wrap_variable_string_t_type_get, METH_VARARGS, NULL},
-	 { (char *)"variable_string_t_ptr_set", _wrap_variable_string_t_ptr_set, METH_VARARGS, NULL},
-	 { (char *)"variable_string_t_ptr_get", _wrap_variable_string_t_ptr_get, METH_VARARGS, NULL},
-	 { (char *)"variable_string_t_len_set", _wrap_variable_string_t_len_set, METH_VARARGS, NULL},
-	 { (char *)"variable_string_t_len_get", _wrap_variable_string_t_len_get, METH_VARARGS, NULL},
-	 { (char *)"variable_string_t_isArray_set", _wrap_variable_string_t_isArray_set, METH_VARARGS, NULL},
-	 { (char *)"variable_string_t_isArray_get", _wrap_variable_string_t_isArray_get, METH_VARARGS, NULL},
-	 { (char *)"new_variable_string_t", _wrap_new_variable_string_t, METH_VARARGS, NULL},
-	 { (char *)"delete_variable_string_t", _wrap_delete_variable_string_t, METH_VARARGS, NULL},
-	 { (char *)"variable_string_t_swigregister", variable_string_t_swigregister, METH_VARARGS, NULL},
-	 { (char *)"nesc_app_t_numVariables_set", _wrap_nesc_app_t_numVariables_set, METH_VARARGS, NULL},
-	 { (char *)"nesc_app_t_numVariables_get", _wrap_nesc_app_t_numVariables_get, METH_VARARGS, NULL},
-	 { (char *)"nesc_app_t_variableNames_set", _wrap_nesc_app_t_variableNames_set, METH_VARARGS, NULL},
-	 { (char *)"nesc_app_t_variableNames_get", _wrap_nesc_app_t_variableNames_get, METH_VARARGS, NULL},
-	 { (char *)"nesc_app_t_variableTypes_set", _wrap_nesc_app_t_variableTypes_set, METH_VARARGS, NULL},
-	 { (char *)"nesc_app_t_variableTypes_get", _wrap_nesc_app_t_variableTypes_get, METH_VARARGS, NULL},
-	 { (char *)"nesc_app_t_variableArray_set", _wrap_nesc_app_t_variableArray_set, METH_VARARGS, NULL},
-	 { (char *)"nesc_app_t_variableArray_get", _wrap_nesc_app_t_variableArray_get, METH_VARARGS, NULL},
-	 { (char *)"new_nesc_app_t", _wrap_new_nesc_app_t, METH_VARARGS, NULL},
-	 { (char *)"delete_nesc_app_t", _wrap_delete_nesc_app_t, METH_VARARGS, NULL},
-	 { (char *)"nesc_app_t_swigregister", nesc_app_t_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Variable", _wrap_new_Variable, METH_VARARGS, NULL},
-	 { (char *)"delete_Variable", _wrap_delete_Variable, METH_VARARGS, NULL},
-	 { (char *)"Variable_getData", _wrap_Variable_getData, METH_VARARGS, NULL},
-	 { (char *)"Variable_swigregister", Variable_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Mote", _wrap_new_Mote, METH_VARARGS, NULL},
-	 { (char *)"delete_Mote", _wrap_delete_Mote, METH_VARARGS, NULL},
-	 { (char *)"Mote_id", _wrap_Mote_id, METH_VARARGS, NULL},
-	 { (char *)"Mote_euid", _wrap_Mote_euid, METH_VARARGS, NULL},
-	 { (char *)"Mote_setEuid", _wrap_Mote_setEuid, METH_VARARGS, NULL},
-	 { (char *)"Mote_bootTime", _wrap_Mote_bootTime, METH_VARARGS, NULL},
-	 { (char *)"Mote_bootAtTime", _wrap_Mote_bootAtTime, METH_VARARGS, NULL},
-	 { (char *)"Mote_isOn", _wrap_Mote_isOn, METH_VARARGS, NULL},
-	 { (char *)"Mote_turnOff", _wrap_Mote_turnOff, METH_VARARGS, NULL},
-	 { (char *)"Mote_turnOn", _wrap_Mote_turnOn, METH_VARARGS, NULL},
-	 { (char *)"Mote_getVariable", _wrap_Mote_getVariable, METH_VARARGS, NULL},
-	 { (char *)"Mote_addNoiseTraceReading", _wrap_Mote_addNoiseTraceReading, METH_VARARGS, NULL},
-	 { (char *)"Mote_createNoiseModel", _wrap_Mote_createNoiseModel, METH_VARARGS, NULL},
-	 { (char *)"Mote_generateNoise", _wrap_Mote_generateNoise, METH_VARARGS, NULL},
-	 { (char *)"Mote_swigregister", Mote_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Tossim", _wrap_new_Tossim, METH_VARARGS, NULL},
-	 { (char *)"delete_Tossim", _wrap_delete_Tossim, METH_VARARGS, NULL},
-	 { (char *)"Tossim_init", _wrap_Tossim_init, METH_VARARGS, NULL},
-	 { (char *)"Tossim_time", _wrap_Tossim_time, METH_VARARGS, NULL},
-	 { (char *)"Tossim_ticksPerSecond", _wrap_Tossim_ticksPerSecond, METH_VARARGS, NULL},
-	 { (char *)"Tossim_setTime", _wrap_Tossim_setTime, METH_VARARGS, NULL},
-	 { (char *)"Tossim_timeStr", _wrap_Tossim_timeStr, METH_VARARGS, NULL},
-	 { (char *)"Tossim_currentNode", _wrap_Tossim_currentNode, METH_VARARGS, NULL},
-	 { (char *)"Tossim_getNode", _wrap_Tossim_getNode, METH_VARARGS, NULL},
-	 { (char *)"Tossim_setCurrentNode", _wrap_Tossim_setCurrentNode, METH_VARARGS, NULL},
-	 { (char *)"Tossim_addChannel", _wrap_Tossim_addChannel, METH_VARARGS, NULL},
-	 { (char *)"Tossim_removeChannel", _wrap_Tossim_removeChannel, METH_VARARGS, NULL},
-	 { (char *)"Tossim_randomSeed", _wrap_Tossim_randomSeed, METH_VARARGS, NULL},
-	 { (char *)"Tossim_runNextEvent", _wrap_Tossim_runNextEvent, METH_VARARGS, NULL},
-	 { (char *)"Tossim_mac", _wrap_Tossim_mac, METH_VARARGS, NULL},
-	 { (char *)"Tossim_radio", _wrap_Tossim_radio, METH_VARARGS, NULL},
-	 { (char *)"Tossim_newPacket", _wrap_Tossim_newPacket, METH_VARARGS, NULL},
-	 { (char *)"Tossim_swigregister", Tossim_swigregister, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
+
+SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_MAC)
+SWIGINTERN PyGetSetDef SwigPyBuiltin__MAC_getset[] = {
+    {NULL, NULL, NULL, NULL, NULL} /* Sentinel */
+};
+
+SWIGINTERN PyObject *
+SwigPyBuiltin__MAC_richcompare(PyObject *self, PyObject *other, int op) {
+  PyObject *result = NULL;
+  if (!result) {
+    if (SwigPyObject_Check(self) && SwigPyObject_Check(other)) {
+      result = SwigPyObject_richcompare((SwigPyObject *)self, (SwigPyObject *)other, op);
+    } else {
+      result = Py_NotImplemented;
+      Py_INCREF(result);
+    }
+  }
+  return result;
+}
+
+SWIGINTERN PyMethodDef SwigPyBuiltin__MAC_methods[] = {
+  { "initHigh", (PyCFunction) _wrap_MAC_initHigh, METH_NOARGS, (char*) "" },
+  { "initLow", (PyCFunction) _wrap_MAC_initLow, METH_NOARGS, (char*) "" },
+  { "high", (PyCFunction) _wrap_MAC_high, METH_NOARGS, (char*) "" },
+  { "low", (PyCFunction) _wrap_MAC_low, METH_NOARGS, (char*) "" },
+  { "symbolsPerSec", (PyCFunction) _wrap_MAC_symbolsPerSec, METH_NOARGS, (char*) "" },
+  { "bitsPerSymbol", (PyCFunction) _wrap_MAC_bitsPerSymbol, METH_NOARGS, (char*) "" },
+  { "preambleLength", (PyCFunction) _wrap_MAC_preambleLength, METH_NOARGS, (char*) "" },
+  { "exponentBase", (PyCFunction) _wrap_MAC_exponentBase, METH_NOARGS, (char*) "" },
+  { "maxIterations", (PyCFunction) _wrap_MAC_maxIterations, METH_NOARGS, (char*) "" },
+  { "minFreeSamples", (PyCFunction) _wrap_MAC_minFreeSamples, METH_NOARGS, (char*) "" },
+  { "rxtxDelay", (PyCFunction) _wrap_MAC_rxtxDelay, METH_NOARGS, (char*) "" },
+  { "ackTime", (PyCFunction) _wrap_MAC_ackTime, METH_NOARGS, (char*) "" },
+  { "setInitHigh", (PyCFunction) _wrap_MAC_setInitHigh, METH_O, (char*) "" },
+  { "setInitLow", (PyCFunction) _wrap_MAC_setInitLow, METH_O, (char*) "" },
+  { "setHigh", (PyCFunction) _wrap_MAC_setHigh, METH_O, (char*) "" },
+  { "setLow", (PyCFunction) _wrap_MAC_setLow, METH_O, (char*) "" },
+  { "setSymbolsPerSec", (PyCFunction) _wrap_MAC_setSymbolsPerSec, METH_O, (char*) "" },
+  { "setBitsBerSymbol", (PyCFunction) _wrap_MAC_setBitsBerSymbol, METH_O, (char*) "" },
+  { "setPreambleLength", (PyCFunction) _wrap_MAC_setPreambleLength, METH_O, (char*) "" },
+  { "setExponentBase", (PyCFunction) _wrap_MAC_setExponentBase, METH_O, (char*) "" },
+  { "setMaxIterations", (PyCFunction) _wrap_MAC_setMaxIterations, METH_O, (char*) "" },
+  { "setMinFreeSamples", (PyCFunction) _wrap_MAC_setMinFreeSamples, METH_O, (char*) "" },
+  { "setRxtxDelay", (PyCFunction) _wrap_MAC_setRxtxDelay, METH_O, (char*) "" },
+  { "setAckTime", (PyCFunction) _wrap_MAC_setAckTime, METH_O, (char*) "" },
+  { NULL, NULL, 0, NULL } /* Sentinel */
+};
+
+static PyHeapTypeObject SwigPyBuiltin__MAC_type = {
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
+    PyObject_HEAD_INIT(NULL)
+    0,                                        /* ob_size */
+#endif
+    "MAC",                                    /* tp_name */
+    sizeof(SwigPyObject),                     /* tp_basicsize */
+    0,                                        /* tp_itemsize */
+    (destructor) _wrap_delete_MAC_closure,    /* tp_dealloc */
+    (printfunc) 0,                            /* tp_print */
+    (getattrfunc) 0,                          /* tp_getattr */
+    (setattrfunc) 0,                          /* tp_setattr */
+#if PY_VERSION_HEX >= 0x03000000
+    0,                                        /* tp_compare */
+#else
+    (cmpfunc) 0,                              /* tp_compare */
+#endif
+    (reprfunc) 0,                             /* tp_repr */
+    &SwigPyBuiltin__MAC_type.as_number,      /* tp_as_number */
+    &SwigPyBuiltin__MAC_type.as_sequence,    /* tp_as_sequence */
+    &SwigPyBuiltin__MAC_type.as_mapping,     /* tp_as_mapping */
+    (hashfunc) 0,                             /* tp_hash */
+    (ternaryfunc) 0,                          /* tp_call */
+    (reprfunc) 0,                             /* tp_str */
+    (getattrofunc) 0,                         /* tp_getattro */
+    (setattrofunc) 0,                         /* tp_setattro */
+    &SwigPyBuiltin__MAC_type.as_buffer,      /* tp_as_buffer */
+#if PY_VERSION_HEX >= 0x03000000
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,   /* tp_flags */
+#else
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES, /* tp_flags */
+#endif
+    "::MAC",                                  /* tp_doc */
+    (traverseproc) 0,                         /* tp_traverse */
+    (inquiry) 0,                              /* tp_clear */
+    (richcmpfunc) SwigPyBuiltin__MAC_richcompare, /* feature:python:tp_richcompare */
+    0,                                        /* tp_weaklistoffset */
+    (getiterfunc) 0,                          /* tp_iter */
+    (iternextfunc) 0,                         /* tp_iternext */
+    SwigPyBuiltin__MAC_methods,               /* tp_methods */
+    0,                                        /* tp_members */
+    SwigPyBuiltin__MAC_getset,                /* tp_getset */
+    0,                                        /* tp_base */
+    0,                                        /* tp_dict */
+    (descrgetfunc) 0,                         /* tp_descr_get */
+    (descrsetfunc) 0,                         /* tp_descr_set */
+    (size_t)(((char*)&((SwigPyObject *) 64L)->dict) - (char*) 64L), /* tp_dictoffset */
+    (initproc) _wrap_new_MAC,                 /* tp_init */
+    (allocfunc) 0,                            /* tp_alloc */
+    (newfunc) 0,                              /* tp_new */
+    (freefunc) 0,                             /* tp_free */
+    (inquiry) 0,                              /* tp_is_gc */
+    (PyObject*) 0,                            /* tp_bases */
+    (PyObject*) 0,                            /* tp_mro */
+    (PyObject*) 0,                            /* tp_cache */
+    (PyObject*) 0,                            /* tp_subclasses */
+    (PyObject*) 0,                            /* tp_weaklist */
+    (destructor) 0,                           /* tp_del */
+#if PY_VERSION_HEX >= 0x02060000
+    (int) 0,                                  /* tp_version_tag */
+#endif
+  },
+  {
+    (binaryfunc) 0,                           /* nb_add */
+    (binaryfunc) 0,                           /* nb_subtract */
+    (binaryfunc) 0,                           /* nb_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_remainder */
+    (binaryfunc) 0,                           /* nb_divmod */
+    (ternaryfunc) 0,                          /* nb_power */
+    (unaryfunc) 0,                            /* nb_negative */
+    (unaryfunc) 0,                            /* nb_positive */
+    (unaryfunc) 0,                            /* nb_absolute */
+    (inquiry) 0,                              /* nb_nonzero */
+    (unaryfunc) 0,                            /* nb_invert */
+    (binaryfunc) 0,                           /* nb_lshift */
+    (binaryfunc) 0,                           /* nb_rshift */
+    (binaryfunc) 0,                           /* nb_and */
+    (binaryfunc) 0,                           /* nb_xor */
+    (binaryfunc) 0,                           /* nb_or */
+#if PY_VERSION_HEX < 0x03000000
+    (coercion) 0,                             /* nb_coerce */
+#endif
+    (unaryfunc) 0,                            /* nb_int */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* nb_reserved */
+#else
+    (unaryfunc) 0,                            /* nb_long */
+#endif
+    (unaryfunc) 0,                            /* nb_float */
+#if PY_VERSION_HEX < 0x03000000
+    (unaryfunc) 0,                            /* nb_oct */
+    (unaryfunc) 0,                            /* nb_hex */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_add */
+    (binaryfunc) 0,                           /* nb_inplace_subtract */
+    (binaryfunc) 0,                           /* nb_inplace_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_inplace_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_remainder */
+    (ternaryfunc) 0,                          /* nb_inplace_power */
+    (binaryfunc) 0,                           /* nb_inplace_lshift */
+    (binaryfunc) 0,                           /* nb_inplace_rshift */
+    (binaryfunc) 0,                           /* nb_inplace_and */
+    (binaryfunc) 0,                           /* nb_inplace_xor */
+    (binaryfunc) 0,                           /* nb_inplace_or */
+    (binaryfunc) 0,                           /* nb_floor_divide */
+    (binaryfunc) 0,                           /* nb_true_divide */
+    (binaryfunc) 0,                           /* nb_inplace_floor_divide */
+    (binaryfunc) 0,                           /* nb_inplace_true_divide */
+#if PY_VERSION_HEX >= 0x02050000
+    (unaryfunc) 0,                            /* nb_index */
+#endif
+  },
+  {
+    (lenfunc) 0,                              /* mp_length */
+    (binaryfunc) 0,                           /* mp_subscript */
+    (objobjargproc) 0,                        /* mp_ass_subscript */
+  },
+  {
+    (lenfunc) 0,                              /* sq_length */
+    (binaryfunc) 0,                           /* sq_concat */
+    (ssizeargfunc) 0,                         /* sq_repeat */
+    (ssizeargfunc) 0,                         /* sq_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_slice */
+#else
+    (ssizessizeargfunc) 0,                    /* sq_slice */
+#endif
+    (ssizeobjargproc) 0,                      /* sq_ass_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_ass_slice */
+#else
+    (ssizessizeobjargproc) 0,                 /* sq_ass_slice */
+#endif
+    (objobjproc) 0,                           /* sq_contains */
+    (binaryfunc) 0,                           /* sq_inplace_concat */
+    (ssizeargfunc) 0,                         /* sq_inplace_repeat */
+  },
+  {
+#if PY_VERSION_HEX < 0x03000000
+    (readbufferproc) 0,                       /* bf_getreadbuffer */
+    (writebufferproc) 0,                      /* bf_getwritebuffer */
+    (segcountproc) 0,                         /* bf_getsegcount */
+    (charbufferproc) 0,                       /* bf_getcharbuffer */
+#endif
+#if PY_VERSION_HEX >= 0x02060000
+    (getbufferproc) 0,                        /* bf_getbuffer */
+    (releasebufferproc) 0,                    /* bf_releasebuffer */
+#endif
+  },
+    (PyObject*) 0,                            /* ht_name */
+    (PyObject*) 0,                            /* ht_slots */
+};
+
+SWIGINTERN SwigPyClientData SwigPyBuiltin__MAC_clientdata = {0, 0, 0, 0, 0, 0, (PyTypeObject *)&SwigPyBuiltin__MAC_type};
+
+SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Radio)
+SWIGINTERN PyGetSetDef SwigPyBuiltin__Radio_getset[] = {
+    {NULL, NULL, NULL, NULL, NULL} /* Sentinel */
+};
+
+SWIGINTERN PyObject *
+SwigPyBuiltin__Radio_richcompare(PyObject *self, PyObject *other, int op) {
+  PyObject *result = NULL;
+  if (!result) {
+    if (SwigPyObject_Check(self) && SwigPyObject_Check(other)) {
+      result = SwigPyObject_richcompare((SwigPyObject *)self, (SwigPyObject *)other, op);
+    } else {
+      result = Py_NotImplemented;
+      Py_INCREF(result);
+    }
+  }
+  return result;
+}
+
+SWIGINTERN PyMethodDef SwigPyBuiltin__Radio_methods[] = {
+  { "add", (PyCFunction) _wrap_Radio_add, METH_VARARGS, (char*) "" },
+  { "gain", (PyCFunction) _wrap_Radio_gain, METH_VARARGS, (char*) "" },
+  { "connected", (PyCFunction) _wrap_Radio_connected, METH_VARARGS, (char*) "" },
+  { "remove", (PyCFunction) _wrap_Radio_remove, METH_VARARGS, (char*) "" },
+  { "setNoise", (PyCFunction) _wrap_Radio_setNoise, METH_VARARGS, (char*) "" },
+  { "setSensitivity", (PyCFunction) _wrap_Radio_setSensitivity, METH_O, (char*) "" },
+  { NULL, NULL, 0, NULL } /* Sentinel */
+};
+
+static PyHeapTypeObject SwigPyBuiltin__Radio_type = {
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
+    PyObject_HEAD_INIT(NULL)
+    0,                                        /* ob_size */
+#endif
+    "Radio",                                  /* tp_name */
+    sizeof(SwigPyObject),                     /* tp_basicsize */
+    0,                                        /* tp_itemsize */
+    (destructor) _wrap_delete_Radio_closure,  /* tp_dealloc */
+    (printfunc) 0,                            /* tp_print */
+    (getattrfunc) 0,                          /* tp_getattr */
+    (setattrfunc) 0,                          /* tp_setattr */
+#if PY_VERSION_HEX >= 0x03000000
+    0,                                        /* tp_compare */
+#else
+    (cmpfunc) 0,                              /* tp_compare */
+#endif
+    (reprfunc) 0,                             /* tp_repr */
+    &SwigPyBuiltin__Radio_type.as_number,      /* tp_as_number */
+    &SwigPyBuiltin__Radio_type.as_sequence,    /* tp_as_sequence */
+    &SwigPyBuiltin__Radio_type.as_mapping,     /* tp_as_mapping */
+    (hashfunc) 0,                             /* tp_hash */
+    (ternaryfunc) 0,                          /* tp_call */
+    (reprfunc) 0,                             /* tp_str */
+    (getattrofunc) 0,                         /* tp_getattro */
+    (setattrofunc) 0,                         /* tp_setattro */
+    &SwigPyBuiltin__Radio_type.as_buffer,      /* tp_as_buffer */
+#if PY_VERSION_HEX >= 0x03000000
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,   /* tp_flags */
+#else
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES, /* tp_flags */
+#endif
+    "::Radio",                                /* tp_doc */
+    (traverseproc) 0,                         /* tp_traverse */
+    (inquiry) 0,                              /* tp_clear */
+    (richcmpfunc) SwigPyBuiltin__Radio_richcompare, /* feature:python:tp_richcompare */
+    0,                                        /* tp_weaklistoffset */
+    (getiterfunc) 0,                          /* tp_iter */
+    (iternextfunc) 0,                         /* tp_iternext */
+    SwigPyBuiltin__Radio_methods,             /* tp_methods */
+    0,                                        /* tp_members */
+    SwigPyBuiltin__Radio_getset,              /* tp_getset */
+    0,                                        /* tp_base */
+    0,                                        /* tp_dict */
+    (descrgetfunc) 0,                         /* tp_descr_get */
+    (descrsetfunc) 0,                         /* tp_descr_set */
+    (size_t)(((char*)&((SwigPyObject *) 64L)->dict) - (char*) 64L), /* tp_dictoffset */
+    (initproc) _wrap_new_Radio,               /* tp_init */
+    (allocfunc) 0,                            /* tp_alloc */
+    (newfunc) 0,                              /* tp_new */
+    (freefunc) 0,                             /* tp_free */
+    (inquiry) 0,                              /* tp_is_gc */
+    (PyObject*) 0,                            /* tp_bases */
+    (PyObject*) 0,                            /* tp_mro */
+    (PyObject*) 0,                            /* tp_cache */
+    (PyObject*) 0,                            /* tp_subclasses */
+    (PyObject*) 0,                            /* tp_weaklist */
+    (destructor) 0,                           /* tp_del */
+#if PY_VERSION_HEX >= 0x02060000
+    (int) 0,                                  /* tp_version_tag */
+#endif
+  },
+  {
+    (binaryfunc) 0,                           /* nb_add */
+    (binaryfunc) 0,                           /* nb_subtract */
+    (binaryfunc) 0,                           /* nb_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_remainder */
+    (binaryfunc) 0,                           /* nb_divmod */
+    (ternaryfunc) 0,                          /* nb_power */
+    (unaryfunc) 0,                            /* nb_negative */
+    (unaryfunc) 0,                            /* nb_positive */
+    (unaryfunc) 0,                            /* nb_absolute */
+    (inquiry) 0,                              /* nb_nonzero */
+    (unaryfunc) 0,                            /* nb_invert */
+    (binaryfunc) 0,                           /* nb_lshift */
+    (binaryfunc) 0,                           /* nb_rshift */
+    (binaryfunc) 0,                           /* nb_and */
+    (binaryfunc) 0,                           /* nb_xor */
+    (binaryfunc) 0,                           /* nb_or */
+#if PY_VERSION_HEX < 0x03000000
+    (coercion) 0,                             /* nb_coerce */
+#endif
+    (unaryfunc) 0,                            /* nb_int */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* nb_reserved */
+#else
+    (unaryfunc) 0,                            /* nb_long */
+#endif
+    (unaryfunc) 0,                            /* nb_float */
+#if PY_VERSION_HEX < 0x03000000
+    (unaryfunc) 0,                            /* nb_oct */
+    (unaryfunc) 0,                            /* nb_hex */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_add */
+    (binaryfunc) 0,                           /* nb_inplace_subtract */
+    (binaryfunc) 0,                           /* nb_inplace_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_inplace_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_remainder */
+    (ternaryfunc) 0,                          /* nb_inplace_power */
+    (binaryfunc) 0,                           /* nb_inplace_lshift */
+    (binaryfunc) 0,                           /* nb_inplace_rshift */
+    (binaryfunc) 0,                           /* nb_inplace_and */
+    (binaryfunc) 0,                           /* nb_inplace_xor */
+    (binaryfunc) 0,                           /* nb_inplace_or */
+    (binaryfunc) 0,                           /* nb_floor_divide */
+    (binaryfunc) 0,                           /* nb_true_divide */
+    (binaryfunc) 0,                           /* nb_inplace_floor_divide */
+    (binaryfunc) 0,                           /* nb_inplace_true_divide */
+#if PY_VERSION_HEX >= 0x02050000
+    (unaryfunc) 0,                            /* nb_index */
+#endif
+  },
+  {
+    (lenfunc) 0,                              /* mp_length */
+    (binaryfunc) 0,                           /* mp_subscript */
+    (objobjargproc) 0,                        /* mp_ass_subscript */
+  },
+  {
+    (lenfunc) 0,                              /* sq_length */
+    (binaryfunc) 0,                           /* sq_concat */
+    (ssizeargfunc) 0,                         /* sq_repeat */
+    (ssizeargfunc) 0,                         /* sq_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_slice */
+#else
+    (ssizessizeargfunc) 0,                    /* sq_slice */
+#endif
+    (ssizeobjargproc) 0,                      /* sq_ass_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_ass_slice */
+#else
+    (ssizessizeobjargproc) 0,                 /* sq_ass_slice */
+#endif
+    (objobjproc) 0,                           /* sq_contains */
+    (binaryfunc) 0,                           /* sq_inplace_concat */
+    (ssizeargfunc) 0,                         /* sq_inplace_repeat */
+  },
+  {
+#if PY_VERSION_HEX < 0x03000000
+    (readbufferproc) 0,                       /* bf_getreadbuffer */
+    (writebufferproc) 0,                      /* bf_getwritebuffer */
+    (segcountproc) 0,                         /* bf_getsegcount */
+    (charbufferproc) 0,                       /* bf_getcharbuffer */
+#endif
+#if PY_VERSION_HEX >= 0x02060000
+    (getbufferproc) 0,                        /* bf_getbuffer */
+    (releasebufferproc) 0,                    /* bf_releasebuffer */
+#endif
+  },
+    (PyObject*) 0,                            /* ht_name */
+    (PyObject*) 0,                            /* ht_slots */
+};
+
+SWIGINTERN SwigPyClientData SwigPyBuiltin__Radio_clientdata = {0, 0, 0, 0, 0, 0, (PyTypeObject *)&SwigPyBuiltin__Radio_type};
+
+SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Packet)
+SWIGINTERN PyGetSetDef SwigPyBuiltin__Packet_getset[] = {
+    {NULL, NULL, NULL, NULL, NULL} /* Sentinel */
+};
+
+SWIGINTERN PyObject *
+SwigPyBuiltin__Packet_richcompare(PyObject *self, PyObject *other, int op) {
+  PyObject *result = NULL;
+  if (!result) {
+    if (SwigPyObject_Check(self) && SwigPyObject_Check(other)) {
+      result = SwigPyObject_richcompare((SwigPyObject *)self, (SwigPyObject *)other, op);
+    } else {
+      result = Py_NotImplemented;
+      Py_INCREF(result);
+    }
+  }
+  return result;
+}
+
+SWIGINTERN PyMethodDef SwigPyBuiltin__Packet_methods[] = {
+  { "setSource", (PyCFunction) _wrap_Packet_setSource, METH_O, (char*) "" },
+  { "source", (PyCFunction) _wrap_Packet_source, METH_NOARGS, (char*) "" },
+  { "setDestination", (PyCFunction) _wrap_Packet_setDestination, METH_O, (char*) "" },
+  { "destination", (PyCFunction) _wrap_Packet_destination, METH_NOARGS, (char*) "" },
+  { "setLength", (PyCFunction) _wrap_Packet_setLength, METH_O, (char*) "" },
+  { "length", (PyCFunction) _wrap_Packet_length, METH_NOARGS, (char*) "" },
+  { "setType", (PyCFunction) _wrap_Packet_setType, METH_O, (char*) "" },
+  { "type", (PyCFunction) _wrap_Packet_type, METH_NOARGS, (char*) "" },
+  { "data", (PyCFunction) _wrap_Packet_data, METH_NOARGS, (char*) "" },
+  { "setData", (PyCFunction) _wrap_Packet_setData, METH_O, (char*) "" },
+  { "maxLength", (PyCFunction) _wrap_Packet_maxLength, METH_NOARGS, (char*) "" },
+  { "setStrength", (PyCFunction) _wrap_Packet_setStrength, METH_O, (char*) "" },
+  { "deliver", (PyCFunction) _wrap_Packet_deliver, METH_VARARGS, (char*) "" },
+  { "deliverNow", (PyCFunction) _wrap_Packet_deliverNow, METH_O, (char*) "" },
+  { NULL, NULL, 0, NULL } /* Sentinel */
+};
+
+static PyHeapTypeObject SwigPyBuiltin__Packet_type = {
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
+    PyObject_HEAD_INIT(NULL)
+    0,                                        /* ob_size */
+#endif
+    "Packet",                                 /* tp_name */
+    sizeof(SwigPyObject),                     /* tp_basicsize */
+    0,                                        /* tp_itemsize */
+    (destructor) _wrap_delete_Packet_closure, /* tp_dealloc */
+    (printfunc) 0,                            /* tp_print */
+    (getattrfunc) 0,                          /* tp_getattr */
+    (setattrfunc) 0,                          /* tp_setattr */
+#if PY_VERSION_HEX >= 0x03000000
+    0,                                        /* tp_compare */
+#else
+    (cmpfunc) 0,                              /* tp_compare */
+#endif
+    (reprfunc) 0,                             /* tp_repr */
+    &SwigPyBuiltin__Packet_type.as_number,      /* tp_as_number */
+    &SwigPyBuiltin__Packet_type.as_sequence,    /* tp_as_sequence */
+    &SwigPyBuiltin__Packet_type.as_mapping,     /* tp_as_mapping */
+    (hashfunc) 0,                             /* tp_hash */
+    (ternaryfunc) 0,                          /* tp_call */
+    (reprfunc) 0,                             /* tp_str */
+    (getattrofunc) 0,                         /* tp_getattro */
+    (setattrofunc) 0,                         /* tp_setattro */
+    &SwigPyBuiltin__Packet_type.as_buffer,      /* tp_as_buffer */
+#if PY_VERSION_HEX >= 0x03000000
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,   /* tp_flags */
+#else
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES, /* tp_flags */
+#endif
+    "::Packet",                               /* tp_doc */
+    (traverseproc) 0,                         /* tp_traverse */
+    (inquiry) 0,                              /* tp_clear */
+    (richcmpfunc) SwigPyBuiltin__Packet_richcompare, /* feature:python:tp_richcompare */
+    0,                                        /* tp_weaklistoffset */
+    (getiterfunc) 0,                          /* tp_iter */
+    (iternextfunc) 0,                         /* tp_iternext */
+    SwigPyBuiltin__Packet_methods,            /* tp_methods */
+    0,                                        /* tp_members */
+    SwigPyBuiltin__Packet_getset,             /* tp_getset */
+    0,                                        /* tp_base */
+    0,                                        /* tp_dict */
+    (descrgetfunc) 0,                         /* tp_descr_get */
+    (descrsetfunc) 0,                         /* tp_descr_set */
+    (size_t)(((char*)&((SwigPyObject *) 64L)->dict) - (char*) 64L), /* tp_dictoffset */
+    (initproc) _wrap_new_Packet,              /* tp_init */
+    (allocfunc) 0,                            /* tp_alloc */
+    (newfunc) 0,                              /* tp_new */
+    (freefunc) 0,                             /* tp_free */
+    (inquiry) 0,                              /* tp_is_gc */
+    (PyObject*) 0,                            /* tp_bases */
+    (PyObject*) 0,                            /* tp_mro */
+    (PyObject*) 0,                            /* tp_cache */
+    (PyObject*) 0,                            /* tp_subclasses */
+    (PyObject*) 0,                            /* tp_weaklist */
+    (destructor) 0,                           /* tp_del */
+#if PY_VERSION_HEX >= 0x02060000
+    (int) 0,                                  /* tp_version_tag */
+#endif
+  },
+  {
+    (binaryfunc) 0,                           /* nb_add */
+    (binaryfunc) 0,                           /* nb_subtract */
+    (binaryfunc) 0,                           /* nb_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_remainder */
+    (binaryfunc) 0,                           /* nb_divmod */
+    (ternaryfunc) 0,                          /* nb_power */
+    (unaryfunc) 0,                            /* nb_negative */
+    (unaryfunc) 0,                            /* nb_positive */
+    (unaryfunc) 0,                            /* nb_absolute */
+    (inquiry) 0,                              /* nb_nonzero */
+    (unaryfunc) 0,                            /* nb_invert */
+    (binaryfunc) 0,                           /* nb_lshift */
+    (binaryfunc) 0,                           /* nb_rshift */
+    (binaryfunc) 0,                           /* nb_and */
+    (binaryfunc) 0,                           /* nb_xor */
+    (binaryfunc) 0,                           /* nb_or */
+#if PY_VERSION_HEX < 0x03000000
+    (coercion) 0,                             /* nb_coerce */
+#endif
+    (unaryfunc) 0,                            /* nb_int */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* nb_reserved */
+#else
+    (unaryfunc) 0,                            /* nb_long */
+#endif
+    (unaryfunc) 0,                            /* nb_float */
+#if PY_VERSION_HEX < 0x03000000
+    (unaryfunc) 0,                            /* nb_oct */
+    (unaryfunc) 0,                            /* nb_hex */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_add */
+    (binaryfunc) 0,                           /* nb_inplace_subtract */
+    (binaryfunc) 0,                           /* nb_inplace_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_inplace_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_remainder */
+    (ternaryfunc) 0,                          /* nb_inplace_power */
+    (binaryfunc) 0,                           /* nb_inplace_lshift */
+    (binaryfunc) 0,                           /* nb_inplace_rshift */
+    (binaryfunc) 0,                           /* nb_inplace_and */
+    (binaryfunc) 0,                           /* nb_inplace_xor */
+    (binaryfunc) 0,                           /* nb_inplace_or */
+    (binaryfunc) 0,                           /* nb_floor_divide */
+    (binaryfunc) 0,                           /* nb_true_divide */
+    (binaryfunc) 0,                           /* nb_inplace_floor_divide */
+    (binaryfunc) 0,                           /* nb_inplace_true_divide */
+#if PY_VERSION_HEX >= 0x02050000
+    (unaryfunc) 0,                            /* nb_index */
+#endif
+  },
+  {
+    (lenfunc) 0,                              /* mp_length */
+    (binaryfunc) 0,                           /* mp_subscript */
+    (objobjargproc) 0,                        /* mp_ass_subscript */
+  },
+  {
+    (lenfunc) 0,                              /* sq_length */
+    (binaryfunc) 0,                           /* sq_concat */
+    (ssizeargfunc) 0,                         /* sq_repeat */
+    (ssizeargfunc) 0,                         /* sq_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_slice */
+#else
+    (ssizessizeargfunc) 0,                    /* sq_slice */
+#endif
+    (ssizeobjargproc) 0,                      /* sq_ass_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_ass_slice */
+#else
+    (ssizessizeobjargproc) 0,                 /* sq_ass_slice */
+#endif
+    (objobjproc) 0,                           /* sq_contains */
+    (binaryfunc) 0,                           /* sq_inplace_concat */
+    (ssizeargfunc) 0,                         /* sq_inplace_repeat */
+  },
+  {
+#if PY_VERSION_HEX < 0x03000000
+    (readbufferproc) 0,                       /* bf_getreadbuffer */
+    (writebufferproc) 0,                      /* bf_getwritebuffer */
+    (segcountproc) 0,                         /* bf_getsegcount */
+    (charbufferproc) 0,                       /* bf_getcharbuffer */
+#endif
+#if PY_VERSION_HEX >= 0x02060000
+    (getbufferproc) 0,                        /* bf_getbuffer */
+    (releasebufferproc) 0,                    /* bf_releasebuffer */
+#endif
+  },
+    (PyObject*) 0,                            /* ht_name */
+    (PyObject*) 0,                            /* ht_slots */
+};
+
+SWIGINTERN SwigPyClientData SwigPyBuiltin__Packet_clientdata = {0, 0, 0, 0, 0, 0, (PyTypeObject *)&SwigPyBuiltin__Packet_type};
+
+SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_variable_string_t)
+static SwigPyGetSet variable_string_t_isArray_getset = { _wrap_variable_string_t_isArray_get, _wrap_variable_string_t_isArray_set };
+static SwigPyGetSet variable_string_t_len_getset = { _wrap_variable_string_t_len_get, _wrap_variable_string_t_len_set };
+static SwigPyGetSet variable_string_t_type_getset = { _wrap_variable_string_t_type_get, _wrap_variable_string_t_type_set };
+static SwigPyGetSet variable_string_t_ptr_getset = { _wrap_variable_string_t_ptr_get, _wrap_variable_string_t_ptr_set };
+SWIGINTERN PyGetSetDef SwigPyBuiltin__variable_string_getset[] = {
+    { (char*) "isArray", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"variable_string.isArray", (void*) &variable_string_t_isArray_getset }
+,
+    { (char*) "len", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"variable_string.len", (void*) &variable_string_t_len_getset }
+,
+    { (char*) "type", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"variable_string.type", (void*) &variable_string_t_type_getset }
+,
+    { (char*) "ptr", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"variable_string.ptr", (void*) &variable_string_t_ptr_getset }
+,
+    {NULL, NULL, NULL, NULL, NULL} /* Sentinel */
+};
+
+SWIGINTERN PyObject *
+SwigPyBuiltin__variable_string_richcompare(PyObject *self, PyObject *other, int op) {
+  PyObject *result = NULL;
+  if (!result) {
+    if (SwigPyObject_Check(self) && SwigPyObject_Check(other)) {
+      result = SwigPyObject_richcompare((SwigPyObject *)self, (SwigPyObject *)other, op);
+    } else {
+      result = Py_NotImplemented;
+      Py_INCREF(result);
+    }
+  }
+  return result;
+}
+
+SWIGINTERN PyMethodDef SwigPyBuiltin__variable_string_methods[] = {
+  { NULL, NULL, 0, NULL } /* Sentinel */
+};
+
+static PyHeapTypeObject SwigPyBuiltin__variable_string_type = {
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
+    PyObject_HEAD_INIT(NULL)
+    0,                                        /* ob_size */
+#endif
+    "variable_string_t",                      /* tp_name */
+    sizeof(SwigPyObject),                     /* tp_basicsize */
+    0,                                        /* tp_itemsize */
+    (destructor) _wrap_delete_variable_string_t_closure, /* tp_dealloc */
+    (printfunc) 0,                            /* tp_print */
+    (getattrfunc) 0,                          /* tp_getattr */
+    (setattrfunc) 0,                          /* tp_setattr */
+#if PY_VERSION_HEX >= 0x03000000
+    0,                                        /* tp_compare */
+#else
+    (cmpfunc) 0,                              /* tp_compare */
+#endif
+    (reprfunc) 0,                             /* tp_repr */
+    &SwigPyBuiltin__variable_string_type.as_number,      /* tp_as_number */
+    &SwigPyBuiltin__variable_string_type.as_sequence,    /* tp_as_sequence */
+    &SwigPyBuiltin__variable_string_type.as_mapping,     /* tp_as_mapping */
+    (hashfunc) 0,                             /* tp_hash */
+    (ternaryfunc) 0,                          /* tp_call */
+    (reprfunc) 0,                             /* tp_str */
+    (getattrofunc) 0,                         /* tp_getattro */
+    (setattrofunc) 0,                         /* tp_setattro */
+    &SwigPyBuiltin__variable_string_type.as_buffer,      /* tp_as_buffer */
+#if PY_VERSION_HEX >= 0x03000000
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,   /* tp_flags */
+#else
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES, /* tp_flags */
+#endif
+    "::variable_string",                      /* tp_doc */
+    (traverseproc) 0,                         /* tp_traverse */
+    (inquiry) 0,                              /* tp_clear */
+    (richcmpfunc) SwigPyBuiltin__variable_string_richcompare, /* feature:python:tp_richcompare */
+    0,                                        /* tp_weaklistoffset */
+    (getiterfunc) 0,                          /* tp_iter */
+    (iternextfunc) 0,                         /* tp_iternext */
+    SwigPyBuiltin__variable_string_methods,   /* tp_methods */
+    0,                                        /* tp_members */
+    SwigPyBuiltin__variable_string_getset,    /* tp_getset */
+    0,                                        /* tp_base */
+    0,                                        /* tp_dict */
+    (descrgetfunc) 0,                         /* tp_descr_get */
+    (descrsetfunc) 0,                         /* tp_descr_set */
+    (size_t)(((char*)&((SwigPyObject *) 64L)->dict) - (char*) 64L), /* tp_dictoffset */
+    (initproc) _wrap_new_variable_string_t,   /* tp_init */
+    (allocfunc) 0,                            /* tp_alloc */
+    (newfunc) 0,                              /* tp_new */
+    (freefunc) 0,                             /* tp_free */
+    (inquiry) 0,                              /* tp_is_gc */
+    (PyObject*) 0,                            /* tp_bases */
+    (PyObject*) 0,                            /* tp_mro */
+    (PyObject*) 0,                            /* tp_cache */
+    (PyObject*) 0,                            /* tp_subclasses */
+    (PyObject*) 0,                            /* tp_weaklist */
+    (destructor) 0,                           /* tp_del */
+#if PY_VERSION_HEX >= 0x02060000
+    (int) 0,                                  /* tp_version_tag */
+#endif
+  },
+  {
+    (binaryfunc) 0,                           /* nb_add */
+    (binaryfunc) 0,                           /* nb_subtract */
+    (binaryfunc) 0,                           /* nb_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_remainder */
+    (binaryfunc) 0,                           /* nb_divmod */
+    (ternaryfunc) 0,                          /* nb_power */
+    (unaryfunc) 0,                            /* nb_negative */
+    (unaryfunc) 0,                            /* nb_positive */
+    (unaryfunc) 0,                            /* nb_absolute */
+    (inquiry) 0,                              /* nb_nonzero */
+    (unaryfunc) 0,                            /* nb_invert */
+    (binaryfunc) 0,                           /* nb_lshift */
+    (binaryfunc) 0,                           /* nb_rshift */
+    (binaryfunc) 0,                           /* nb_and */
+    (binaryfunc) 0,                           /* nb_xor */
+    (binaryfunc) 0,                           /* nb_or */
+#if PY_VERSION_HEX < 0x03000000
+    (coercion) 0,                             /* nb_coerce */
+#endif
+    (unaryfunc) 0,                            /* nb_int */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* nb_reserved */
+#else
+    (unaryfunc) 0,                            /* nb_long */
+#endif
+    (unaryfunc) 0,                            /* nb_float */
+#if PY_VERSION_HEX < 0x03000000
+    (unaryfunc) 0,                            /* nb_oct */
+    (unaryfunc) 0,                            /* nb_hex */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_add */
+    (binaryfunc) 0,                           /* nb_inplace_subtract */
+    (binaryfunc) 0,                           /* nb_inplace_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_inplace_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_remainder */
+    (ternaryfunc) 0,                          /* nb_inplace_power */
+    (binaryfunc) 0,                           /* nb_inplace_lshift */
+    (binaryfunc) 0,                           /* nb_inplace_rshift */
+    (binaryfunc) 0,                           /* nb_inplace_and */
+    (binaryfunc) 0,                           /* nb_inplace_xor */
+    (binaryfunc) 0,                           /* nb_inplace_or */
+    (binaryfunc) 0,                           /* nb_floor_divide */
+    (binaryfunc) 0,                           /* nb_true_divide */
+    (binaryfunc) 0,                           /* nb_inplace_floor_divide */
+    (binaryfunc) 0,                           /* nb_inplace_true_divide */
+#if PY_VERSION_HEX >= 0x02050000
+    (unaryfunc) 0,                            /* nb_index */
+#endif
+  },
+  {
+    (lenfunc) 0,                              /* mp_length */
+    (binaryfunc) 0,                           /* mp_subscript */
+    (objobjargproc) 0,                        /* mp_ass_subscript */
+  },
+  {
+    (lenfunc) 0,                              /* sq_length */
+    (binaryfunc) 0,                           /* sq_concat */
+    (ssizeargfunc) 0,                         /* sq_repeat */
+    (ssizeargfunc) 0,                         /* sq_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_slice */
+#else
+    (ssizessizeargfunc) 0,                    /* sq_slice */
+#endif
+    (ssizeobjargproc) 0,                      /* sq_ass_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_ass_slice */
+#else
+    (ssizessizeobjargproc) 0,                 /* sq_ass_slice */
+#endif
+    (objobjproc) 0,                           /* sq_contains */
+    (binaryfunc) 0,                           /* sq_inplace_concat */
+    (ssizeargfunc) 0,                         /* sq_inplace_repeat */
+  },
+  {
+#if PY_VERSION_HEX < 0x03000000
+    (readbufferproc) 0,                       /* bf_getreadbuffer */
+    (writebufferproc) 0,                      /* bf_getwritebuffer */
+    (segcountproc) 0,                         /* bf_getsegcount */
+    (charbufferproc) 0,                       /* bf_getcharbuffer */
+#endif
+#if PY_VERSION_HEX >= 0x02060000
+    (getbufferproc) 0,                        /* bf_getbuffer */
+    (releasebufferproc) 0,                    /* bf_releasebuffer */
+#endif
+  },
+    (PyObject*) 0,                            /* ht_name */
+    (PyObject*) 0,                            /* ht_slots */
+};
+
+SWIGINTERN SwigPyClientData SwigPyBuiltin__variable_string_clientdata = {0, 0, 0, 0, 0, 0, (PyTypeObject *)&SwigPyBuiltin__variable_string_type};
+
+SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_nesc_app_t)
+static SwigPyGetSet nesc_app_t_variableTypes_getset = { _wrap_nesc_app_t_variableTypes_get, _wrap_nesc_app_t_variableTypes_set };
+static SwigPyGetSet nesc_app_t_numVariables_getset = { _wrap_nesc_app_t_numVariables_get, _wrap_nesc_app_t_numVariables_set };
+static SwigPyGetSet nesc_app_t_variableNames_getset = { _wrap_nesc_app_t_variableNames_get, _wrap_nesc_app_t_variableNames_set };
+static SwigPyGetSet nesc_app_t_variableArray_getset = { _wrap_nesc_app_t_variableArray_get, _wrap_nesc_app_t_variableArray_set };
+SWIGINTERN PyGetSetDef SwigPyBuiltin__nesc_app_getset[] = {
+    { (char*) "variableTypes", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"nesc_app.variableTypes", (void*) &nesc_app_t_variableTypes_getset }
+,
+    { (char*) "numVariables", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"nesc_app.numVariables", (void*) &nesc_app_t_numVariables_getset }
+,
+    { (char*) "variableNames", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"nesc_app.variableNames", (void*) &nesc_app_t_variableNames_getset }
+,
+    { (char*) "variableArray", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"nesc_app.variableArray", (void*) &nesc_app_t_variableArray_getset }
+,
+    {NULL, NULL, NULL, NULL, NULL} /* Sentinel */
+};
+
+SWIGINTERN PyObject *
+SwigPyBuiltin__nesc_app_richcompare(PyObject *self, PyObject *other, int op) {
+  PyObject *result = NULL;
+  if (!result) {
+    if (SwigPyObject_Check(self) && SwigPyObject_Check(other)) {
+      result = SwigPyObject_richcompare((SwigPyObject *)self, (SwigPyObject *)other, op);
+    } else {
+      result = Py_NotImplemented;
+      Py_INCREF(result);
+    }
+  }
+  return result;
+}
+
+SWIGINTERN PyMethodDef SwigPyBuiltin__nesc_app_methods[] = {
+  { NULL, NULL, 0, NULL } /* Sentinel */
+};
+
+static PyHeapTypeObject SwigPyBuiltin__nesc_app_type = {
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
+    PyObject_HEAD_INIT(NULL)
+    0,                                        /* ob_size */
+#endif
+    "nesc_app_t",                             /* tp_name */
+    sizeof(SwigPyObject),                     /* tp_basicsize */
+    0,                                        /* tp_itemsize */
+    (destructor) _wrap_delete_nesc_app_t_closure, /* tp_dealloc */
+    (printfunc) 0,                            /* tp_print */
+    (getattrfunc) 0,                          /* tp_getattr */
+    (setattrfunc) 0,                          /* tp_setattr */
+#if PY_VERSION_HEX >= 0x03000000
+    0,                                        /* tp_compare */
+#else
+    (cmpfunc) 0,                              /* tp_compare */
+#endif
+    (reprfunc) 0,                             /* tp_repr */
+    &SwigPyBuiltin__nesc_app_type.as_number,      /* tp_as_number */
+    &SwigPyBuiltin__nesc_app_type.as_sequence,    /* tp_as_sequence */
+    &SwigPyBuiltin__nesc_app_type.as_mapping,     /* tp_as_mapping */
+    (hashfunc) 0,                             /* tp_hash */
+    (ternaryfunc) 0,                          /* tp_call */
+    (reprfunc) 0,                             /* tp_str */
+    (getattrofunc) 0,                         /* tp_getattro */
+    (setattrofunc) 0,                         /* tp_setattro */
+    &SwigPyBuiltin__nesc_app_type.as_buffer,      /* tp_as_buffer */
+#if PY_VERSION_HEX >= 0x03000000
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,   /* tp_flags */
+#else
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES, /* tp_flags */
+#endif
+    "::nesc_app",                             /* tp_doc */
+    (traverseproc) 0,                         /* tp_traverse */
+    (inquiry) 0,                              /* tp_clear */
+    (richcmpfunc) SwigPyBuiltin__nesc_app_richcompare, /* feature:python:tp_richcompare */
+    0,                                        /* tp_weaklistoffset */
+    (getiterfunc) 0,                          /* tp_iter */
+    (iternextfunc) 0,                         /* tp_iternext */
+    SwigPyBuiltin__nesc_app_methods,          /* tp_methods */
+    0,                                        /* tp_members */
+    SwigPyBuiltin__nesc_app_getset,           /* tp_getset */
+    0,                                        /* tp_base */
+    0,                                        /* tp_dict */
+    (descrgetfunc) 0,                         /* tp_descr_get */
+    (descrsetfunc) 0,                         /* tp_descr_set */
+    (size_t)(((char*)&((SwigPyObject *) 64L)->dict) - (char*) 64L), /* tp_dictoffset */
+    (initproc) _wrap_new_nesc_app_t,          /* tp_init */
+    (allocfunc) 0,                            /* tp_alloc */
+    (newfunc) 0,                              /* tp_new */
+    (freefunc) 0,                             /* tp_free */
+    (inquiry) 0,                              /* tp_is_gc */
+    (PyObject*) 0,                            /* tp_bases */
+    (PyObject*) 0,                            /* tp_mro */
+    (PyObject*) 0,                            /* tp_cache */
+    (PyObject*) 0,                            /* tp_subclasses */
+    (PyObject*) 0,                            /* tp_weaklist */
+    (destructor) 0,                           /* tp_del */
+#if PY_VERSION_HEX >= 0x02060000
+    (int) 0,                                  /* tp_version_tag */
+#endif
+  },
+  {
+    (binaryfunc) 0,                           /* nb_add */
+    (binaryfunc) 0,                           /* nb_subtract */
+    (binaryfunc) 0,                           /* nb_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_remainder */
+    (binaryfunc) 0,                           /* nb_divmod */
+    (ternaryfunc) 0,                          /* nb_power */
+    (unaryfunc) 0,                            /* nb_negative */
+    (unaryfunc) 0,                            /* nb_positive */
+    (unaryfunc) 0,                            /* nb_absolute */
+    (inquiry) 0,                              /* nb_nonzero */
+    (unaryfunc) 0,                            /* nb_invert */
+    (binaryfunc) 0,                           /* nb_lshift */
+    (binaryfunc) 0,                           /* nb_rshift */
+    (binaryfunc) 0,                           /* nb_and */
+    (binaryfunc) 0,                           /* nb_xor */
+    (binaryfunc) 0,                           /* nb_or */
+#if PY_VERSION_HEX < 0x03000000
+    (coercion) 0,                             /* nb_coerce */
+#endif
+    (unaryfunc) 0,                            /* nb_int */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* nb_reserved */
+#else
+    (unaryfunc) 0,                            /* nb_long */
+#endif
+    (unaryfunc) 0,                            /* nb_float */
+#if PY_VERSION_HEX < 0x03000000
+    (unaryfunc) 0,                            /* nb_oct */
+    (unaryfunc) 0,                            /* nb_hex */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_add */
+    (binaryfunc) 0,                           /* nb_inplace_subtract */
+    (binaryfunc) 0,                           /* nb_inplace_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_inplace_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_remainder */
+    (ternaryfunc) 0,                          /* nb_inplace_power */
+    (binaryfunc) 0,                           /* nb_inplace_lshift */
+    (binaryfunc) 0,                           /* nb_inplace_rshift */
+    (binaryfunc) 0,                           /* nb_inplace_and */
+    (binaryfunc) 0,                           /* nb_inplace_xor */
+    (binaryfunc) 0,                           /* nb_inplace_or */
+    (binaryfunc) 0,                           /* nb_floor_divide */
+    (binaryfunc) 0,                           /* nb_true_divide */
+    (binaryfunc) 0,                           /* nb_inplace_floor_divide */
+    (binaryfunc) 0,                           /* nb_inplace_true_divide */
+#if PY_VERSION_HEX >= 0x02050000
+    (unaryfunc) 0,                            /* nb_index */
+#endif
+  },
+  {
+    (lenfunc) 0,                              /* mp_length */
+    (binaryfunc) 0,                           /* mp_subscript */
+    (objobjargproc) 0,                        /* mp_ass_subscript */
+  },
+  {
+    (lenfunc) 0,                              /* sq_length */
+    (binaryfunc) 0,                           /* sq_concat */
+    (ssizeargfunc) 0,                         /* sq_repeat */
+    (ssizeargfunc) 0,                         /* sq_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_slice */
+#else
+    (ssizessizeargfunc) 0,                    /* sq_slice */
+#endif
+    (ssizeobjargproc) 0,                      /* sq_ass_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_ass_slice */
+#else
+    (ssizessizeobjargproc) 0,                 /* sq_ass_slice */
+#endif
+    (objobjproc) 0,                           /* sq_contains */
+    (binaryfunc) 0,                           /* sq_inplace_concat */
+    (ssizeargfunc) 0,                         /* sq_inplace_repeat */
+  },
+  {
+#if PY_VERSION_HEX < 0x03000000
+    (readbufferproc) 0,                       /* bf_getreadbuffer */
+    (writebufferproc) 0,                      /* bf_getwritebuffer */
+    (segcountproc) 0,                         /* bf_getsegcount */
+    (charbufferproc) 0,                       /* bf_getcharbuffer */
+#endif
+#if PY_VERSION_HEX >= 0x02060000
+    (getbufferproc) 0,                        /* bf_getbuffer */
+    (releasebufferproc) 0,                    /* bf_releasebuffer */
+#endif
+  },
+    (PyObject*) 0,                            /* ht_name */
+    (PyObject*) 0,                            /* ht_slots */
+};
+
+SWIGINTERN SwigPyClientData SwigPyBuiltin__nesc_app_clientdata = {0, 0, 0, 0, 0, 0, (PyTypeObject *)&SwigPyBuiltin__nesc_app_type};
+
+SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Variable)
+SWIGINTERN PyGetSetDef SwigPyBuiltin__Variable_getset[] = {
+    {NULL, NULL, NULL, NULL, NULL} /* Sentinel */
+};
+
+SWIGINTERN PyObject *
+SwigPyBuiltin__Variable_richcompare(PyObject *self, PyObject *other, int op) {
+  PyObject *result = NULL;
+  if (!result) {
+    if (SwigPyObject_Check(self) && SwigPyObject_Check(other)) {
+      result = SwigPyObject_richcompare((SwigPyObject *)self, (SwigPyObject *)other, op);
+    } else {
+      result = Py_NotImplemented;
+      Py_INCREF(result);
+    }
+  }
+  return result;
+}
+
+SWIGINTERN PyMethodDef SwigPyBuiltin__Variable_methods[] = {
+  { "getData", (PyCFunction) _wrap_Variable_getData, METH_NOARGS, (char*) "" },
+  { NULL, NULL, 0, NULL } /* Sentinel */
+};
+
+static PyHeapTypeObject SwigPyBuiltin__Variable_type = {
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
+    PyObject_HEAD_INIT(NULL)
+    0,                                        /* ob_size */
+#endif
+    "Variable",                               /* tp_name */
+    sizeof(SwigPyObject),                     /* tp_basicsize */
+    0,                                        /* tp_itemsize */
+    (destructor) _wrap_delete_Variable_closure, /* tp_dealloc */
+    (printfunc) 0,                            /* tp_print */
+    (getattrfunc) 0,                          /* tp_getattr */
+    (setattrfunc) 0,                          /* tp_setattr */
+#if PY_VERSION_HEX >= 0x03000000
+    0,                                        /* tp_compare */
+#else
+    (cmpfunc) 0,                              /* tp_compare */
+#endif
+    (reprfunc) 0,                             /* tp_repr */
+    &SwigPyBuiltin__Variable_type.as_number,      /* tp_as_number */
+    &SwigPyBuiltin__Variable_type.as_sequence,    /* tp_as_sequence */
+    &SwigPyBuiltin__Variable_type.as_mapping,     /* tp_as_mapping */
+    (hashfunc) 0,                             /* tp_hash */
+    (ternaryfunc) 0,                          /* tp_call */
+    (reprfunc) 0,                             /* tp_str */
+    (getattrofunc) 0,                         /* tp_getattro */
+    (setattrofunc) 0,                         /* tp_setattro */
+    &SwigPyBuiltin__Variable_type.as_buffer,      /* tp_as_buffer */
+#if PY_VERSION_HEX >= 0x03000000
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,   /* tp_flags */
+#else
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES, /* tp_flags */
+#endif
+    "::Variable",                             /* tp_doc */
+    (traverseproc) 0,                         /* tp_traverse */
+    (inquiry) 0,                              /* tp_clear */
+    (richcmpfunc) SwigPyBuiltin__Variable_richcompare, /* feature:python:tp_richcompare */
+    0,                                        /* tp_weaklistoffset */
+    (getiterfunc) 0,                          /* tp_iter */
+    (iternextfunc) 0,                         /* tp_iternext */
+    SwigPyBuiltin__Variable_methods,          /* tp_methods */
+    0,                                        /* tp_members */
+    SwigPyBuiltin__Variable_getset,           /* tp_getset */
+    0,                                        /* tp_base */
+    0,                                        /* tp_dict */
+    (descrgetfunc) 0,                         /* tp_descr_get */
+    (descrsetfunc) 0,                         /* tp_descr_set */
+    (size_t)(((char*)&((SwigPyObject *) 64L)->dict) - (char*) 64L), /* tp_dictoffset */
+    (initproc) _wrap_new_Variable,            /* tp_init */
+    (allocfunc) 0,                            /* tp_alloc */
+    (newfunc) 0,                              /* tp_new */
+    (freefunc) 0,                             /* tp_free */
+    (inquiry) 0,                              /* tp_is_gc */
+    (PyObject*) 0,                            /* tp_bases */
+    (PyObject*) 0,                            /* tp_mro */
+    (PyObject*) 0,                            /* tp_cache */
+    (PyObject*) 0,                            /* tp_subclasses */
+    (PyObject*) 0,                            /* tp_weaklist */
+    (destructor) 0,                           /* tp_del */
+#if PY_VERSION_HEX >= 0x02060000
+    (int) 0,                                  /* tp_version_tag */
+#endif
+  },
+  {
+    (binaryfunc) 0,                           /* nb_add */
+    (binaryfunc) 0,                           /* nb_subtract */
+    (binaryfunc) 0,                           /* nb_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_remainder */
+    (binaryfunc) 0,                           /* nb_divmod */
+    (ternaryfunc) 0,                          /* nb_power */
+    (unaryfunc) 0,                            /* nb_negative */
+    (unaryfunc) 0,                            /* nb_positive */
+    (unaryfunc) 0,                            /* nb_absolute */
+    (inquiry) 0,                              /* nb_nonzero */
+    (unaryfunc) 0,                            /* nb_invert */
+    (binaryfunc) 0,                           /* nb_lshift */
+    (binaryfunc) 0,                           /* nb_rshift */
+    (binaryfunc) 0,                           /* nb_and */
+    (binaryfunc) 0,                           /* nb_xor */
+    (binaryfunc) 0,                           /* nb_or */
+#if PY_VERSION_HEX < 0x03000000
+    (coercion) 0,                             /* nb_coerce */
+#endif
+    (unaryfunc) 0,                            /* nb_int */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* nb_reserved */
+#else
+    (unaryfunc) 0,                            /* nb_long */
+#endif
+    (unaryfunc) 0,                            /* nb_float */
+#if PY_VERSION_HEX < 0x03000000
+    (unaryfunc) 0,                            /* nb_oct */
+    (unaryfunc) 0,                            /* nb_hex */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_add */
+    (binaryfunc) 0,                           /* nb_inplace_subtract */
+    (binaryfunc) 0,                           /* nb_inplace_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_inplace_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_remainder */
+    (ternaryfunc) 0,                          /* nb_inplace_power */
+    (binaryfunc) 0,                           /* nb_inplace_lshift */
+    (binaryfunc) 0,                           /* nb_inplace_rshift */
+    (binaryfunc) 0,                           /* nb_inplace_and */
+    (binaryfunc) 0,                           /* nb_inplace_xor */
+    (binaryfunc) 0,                           /* nb_inplace_or */
+    (binaryfunc) 0,                           /* nb_floor_divide */
+    (binaryfunc) 0,                           /* nb_true_divide */
+    (binaryfunc) 0,                           /* nb_inplace_floor_divide */
+    (binaryfunc) 0,                           /* nb_inplace_true_divide */
+#if PY_VERSION_HEX >= 0x02050000
+    (unaryfunc) 0,                            /* nb_index */
+#endif
+  },
+  {
+    (lenfunc) 0,                              /* mp_length */
+    (binaryfunc) 0,                           /* mp_subscript */
+    (objobjargproc) 0,                        /* mp_ass_subscript */
+  },
+  {
+    (lenfunc) 0,                              /* sq_length */
+    (binaryfunc) 0,                           /* sq_concat */
+    (ssizeargfunc) 0,                         /* sq_repeat */
+    (ssizeargfunc) 0,                         /* sq_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_slice */
+#else
+    (ssizessizeargfunc) 0,                    /* sq_slice */
+#endif
+    (ssizeobjargproc) 0,                      /* sq_ass_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_ass_slice */
+#else
+    (ssizessizeobjargproc) 0,                 /* sq_ass_slice */
+#endif
+    (objobjproc) 0,                           /* sq_contains */
+    (binaryfunc) 0,                           /* sq_inplace_concat */
+    (ssizeargfunc) 0,                         /* sq_inplace_repeat */
+  },
+  {
+#if PY_VERSION_HEX < 0x03000000
+    (readbufferproc) 0,                       /* bf_getreadbuffer */
+    (writebufferproc) 0,                      /* bf_getwritebuffer */
+    (segcountproc) 0,                         /* bf_getsegcount */
+    (charbufferproc) 0,                       /* bf_getcharbuffer */
+#endif
+#if PY_VERSION_HEX >= 0x02060000
+    (getbufferproc) 0,                        /* bf_getbuffer */
+    (releasebufferproc) 0,                    /* bf_releasebuffer */
+#endif
+  },
+    (PyObject*) 0,                            /* ht_name */
+    (PyObject*) 0,                            /* ht_slots */
+};
+
+SWIGINTERN SwigPyClientData SwigPyBuiltin__Variable_clientdata = {0, 0, 0, 0, 0, 0, (PyTypeObject *)&SwigPyBuiltin__Variable_type};
+
+SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Mote)
+SWIGINTERN PyGetSetDef SwigPyBuiltin__Mote_getset[] = {
+    {NULL, NULL, NULL, NULL, NULL} /* Sentinel */
+};
+
+SWIGINTERN PyObject *
+SwigPyBuiltin__Mote_richcompare(PyObject *self, PyObject *other, int op) {
+  PyObject *result = NULL;
+  if (!result) {
+    if (SwigPyObject_Check(self) && SwigPyObject_Check(other)) {
+      result = SwigPyObject_richcompare((SwigPyObject *)self, (SwigPyObject *)other, op);
+    } else {
+      result = Py_NotImplemented;
+      Py_INCREF(result);
+    }
+  }
+  return result;
+}
+
+SWIGINTERN PyMethodDef SwigPyBuiltin__Mote_methods[] = {
+  { "id", (PyCFunction) _wrap_Mote_id, METH_NOARGS, (char*) "" },
+  { "euid", (PyCFunction) _wrap_Mote_euid, METH_NOARGS, (char*) "" },
+  { "setEuid", (PyCFunction) _wrap_Mote_setEuid, METH_O, (char*) "" },
+  { "bootTime", (PyCFunction) _wrap_Mote_bootTime, METH_NOARGS, (char*) "" },
+  { "bootAtTime", (PyCFunction) _wrap_Mote_bootAtTime, METH_O, (char*) "" },
+  { "isOn", (PyCFunction) _wrap_Mote_isOn, METH_NOARGS, (char*) "" },
+  { "turnOff", (PyCFunction) _wrap_Mote_turnOff, METH_NOARGS, (char*) "" },
+  { "turnOn", (PyCFunction) _wrap_Mote_turnOn, METH_NOARGS, (char*) "" },
+  { "getVariable", (PyCFunction) _wrap_Mote_getVariable, METH_O, (char*) "" },
+  { "addNoiseTraceReading", (PyCFunction) _wrap_Mote_addNoiseTraceReading, METH_O, (char*) "" },
+  { "createNoiseModel", (PyCFunction) _wrap_Mote_createNoiseModel, METH_NOARGS, (char*) "" },
+  { "generateNoise", (PyCFunction) _wrap_Mote_generateNoise, METH_O, (char*) "" },
+  { NULL, NULL, 0, NULL } /* Sentinel */
+};
+
+static PyHeapTypeObject SwigPyBuiltin__Mote_type = {
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
+    PyObject_HEAD_INIT(NULL)
+    0,                                        /* ob_size */
+#endif
+    "Mote",                                   /* tp_name */
+    sizeof(SwigPyObject),                     /* tp_basicsize */
+    0,                                        /* tp_itemsize */
+    (destructor) _wrap_delete_Mote_closure,   /* tp_dealloc */
+    (printfunc) 0,                            /* tp_print */
+    (getattrfunc) 0,                          /* tp_getattr */
+    (setattrfunc) 0,                          /* tp_setattr */
+#if PY_VERSION_HEX >= 0x03000000
+    0,                                        /* tp_compare */
+#else
+    (cmpfunc) 0,                              /* tp_compare */
+#endif
+    (reprfunc) 0,                             /* tp_repr */
+    &SwigPyBuiltin__Mote_type.as_number,      /* tp_as_number */
+    &SwigPyBuiltin__Mote_type.as_sequence,    /* tp_as_sequence */
+    &SwigPyBuiltin__Mote_type.as_mapping,     /* tp_as_mapping */
+    (hashfunc) 0,                             /* tp_hash */
+    (ternaryfunc) 0,                          /* tp_call */
+    (reprfunc) 0,                             /* tp_str */
+    (getattrofunc) 0,                         /* tp_getattro */
+    (setattrofunc) 0,                         /* tp_setattro */
+    &SwigPyBuiltin__Mote_type.as_buffer,      /* tp_as_buffer */
+#if PY_VERSION_HEX >= 0x03000000
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,   /* tp_flags */
+#else
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES, /* tp_flags */
+#endif
+    "::Mote",                                 /* tp_doc */
+    (traverseproc) 0,                         /* tp_traverse */
+    (inquiry) 0,                              /* tp_clear */
+    (richcmpfunc) SwigPyBuiltin__Mote_richcompare, /* feature:python:tp_richcompare */
+    0,                                        /* tp_weaklistoffset */
+    (getiterfunc) 0,                          /* tp_iter */
+    (iternextfunc) 0,                         /* tp_iternext */
+    SwigPyBuiltin__Mote_methods,              /* tp_methods */
+    0,                                        /* tp_members */
+    SwigPyBuiltin__Mote_getset,               /* tp_getset */
+    0,                                        /* tp_base */
+    0,                                        /* tp_dict */
+    (descrgetfunc) 0,                         /* tp_descr_get */
+    (descrsetfunc) 0,                         /* tp_descr_set */
+    (size_t)(((char*)&((SwigPyObject *) 64L)->dict) - (char*) 64L), /* tp_dictoffset */
+    (initproc) _wrap_new_Mote,                /* tp_init */
+    (allocfunc) 0,                            /* tp_alloc */
+    (newfunc) 0,                              /* tp_new */
+    (freefunc) 0,                             /* tp_free */
+    (inquiry) 0,                              /* tp_is_gc */
+    (PyObject*) 0,                            /* tp_bases */
+    (PyObject*) 0,                            /* tp_mro */
+    (PyObject*) 0,                            /* tp_cache */
+    (PyObject*) 0,                            /* tp_subclasses */
+    (PyObject*) 0,                            /* tp_weaklist */
+    (destructor) 0,                           /* tp_del */
+#if PY_VERSION_HEX >= 0x02060000
+    (int) 0,                                  /* tp_version_tag */
+#endif
+  },
+  {
+    (binaryfunc) 0,                           /* nb_add */
+    (binaryfunc) 0,                           /* nb_subtract */
+    (binaryfunc) 0,                           /* nb_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_remainder */
+    (binaryfunc) 0,                           /* nb_divmod */
+    (ternaryfunc) 0,                          /* nb_power */
+    (unaryfunc) 0,                            /* nb_negative */
+    (unaryfunc) 0,                            /* nb_positive */
+    (unaryfunc) 0,                            /* nb_absolute */
+    (inquiry) 0,                              /* nb_nonzero */
+    (unaryfunc) 0,                            /* nb_invert */
+    (binaryfunc) 0,                           /* nb_lshift */
+    (binaryfunc) 0,                           /* nb_rshift */
+    (binaryfunc) 0,                           /* nb_and */
+    (binaryfunc) 0,                           /* nb_xor */
+    (binaryfunc) 0,                           /* nb_or */
+#if PY_VERSION_HEX < 0x03000000
+    (coercion) 0,                             /* nb_coerce */
+#endif
+    (unaryfunc) 0,                            /* nb_int */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* nb_reserved */
+#else
+    (unaryfunc) 0,                            /* nb_long */
+#endif
+    (unaryfunc) 0,                            /* nb_float */
+#if PY_VERSION_HEX < 0x03000000
+    (unaryfunc) 0,                            /* nb_oct */
+    (unaryfunc) 0,                            /* nb_hex */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_add */
+    (binaryfunc) 0,                           /* nb_inplace_subtract */
+    (binaryfunc) 0,                           /* nb_inplace_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_inplace_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_remainder */
+    (ternaryfunc) 0,                          /* nb_inplace_power */
+    (binaryfunc) 0,                           /* nb_inplace_lshift */
+    (binaryfunc) 0,                           /* nb_inplace_rshift */
+    (binaryfunc) 0,                           /* nb_inplace_and */
+    (binaryfunc) 0,                           /* nb_inplace_xor */
+    (binaryfunc) 0,                           /* nb_inplace_or */
+    (binaryfunc) 0,                           /* nb_floor_divide */
+    (binaryfunc) 0,                           /* nb_true_divide */
+    (binaryfunc) 0,                           /* nb_inplace_floor_divide */
+    (binaryfunc) 0,                           /* nb_inplace_true_divide */
+#if PY_VERSION_HEX >= 0x02050000
+    (unaryfunc) 0,                            /* nb_index */
+#endif
+  },
+  {
+    (lenfunc) 0,                              /* mp_length */
+    (binaryfunc) 0,                           /* mp_subscript */
+    (objobjargproc) 0,                        /* mp_ass_subscript */
+  },
+  {
+    (lenfunc) 0,                              /* sq_length */
+    (binaryfunc) 0,                           /* sq_concat */
+    (ssizeargfunc) 0,                         /* sq_repeat */
+    (ssizeargfunc) 0,                         /* sq_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_slice */
+#else
+    (ssizessizeargfunc) 0,                    /* sq_slice */
+#endif
+    (ssizeobjargproc) 0,                      /* sq_ass_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_ass_slice */
+#else
+    (ssizessizeobjargproc) 0,                 /* sq_ass_slice */
+#endif
+    (objobjproc) 0,                           /* sq_contains */
+    (binaryfunc) 0,                           /* sq_inplace_concat */
+    (ssizeargfunc) 0,                         /* sq_inplace_repeat */
+  },
+  {
+#if PY_VERSION_HEX < 0x03000000
+    (readbufferproc) 0,                       /* bf_getreadbuffer */
+    (writebufferproc) 0,                      /* bf_getwritebuffer */
+    (segcountproc) 0,                         /* bf_getsegcount */
+    (charbufferproc) 0,                       /* bf_getcharbuffer */
+#endif
+#if PY_VERSION_HEX >= 0x02060000
+    (getbufferproc) 0,                        /* bf_getbuffer */
+    (releasebufferproc) 0,                    /* bf_releasebuffer */
+#endif
+  },
+    (PyObject*) 0,                            /* ht_name */
+    (PyObject*) 0,                            /* ht_slots */
+};
+
+SWIGINTERN SwigPyClientData SwigPyBuiltin__Mote_clientdata = {0, 0, 0, 0, 0, 0, (PyTypeObject *)&SwigPyBuiltin__Mote_type};
+
+SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Tossim)
+SWIGINTERN PyGetSetDef SwigPyBuiltin__Tossim_getset[] = {
+    {NULL, NULL, NULL, NULL, NULL} /* Sentinel */
+};
+
+SWIGINTERN PyObject *
+SwigPyBuiltin__Tossim_richcompare(PyObject *self, PyObject *other, int op) {
+  PyObject *result = NULL;
+  if (!result) {
+    if (SwigPyObject_Check(self) && SwigPyObject_Check(other)) {
+      result = SwigPyObject_richcompare((SwigPyObject *)self, (SwigPyObject *)other, op);
+    } else {
+      result = Py_NotImplemented;
+      Py_INCREF(result);
+    }
+  }
+  return result;
+}
+
+SWIGINTERN PyMethodDef SwigPyBuiltin__Tossim_methods[] = {
+  { "init", (PyCFunction) _wrap_Tossim_init, METH_NOARGS, (char*) "" },
+  { "time", (PyCFunction) _wrap_Tossim_time, METH_NOARGS, (char*) "" },
+  { "ticksPerSecond", (PyCFunction) _wrap_Tossim_ticksPerSecond, METH_NOARGS, (char*) "" },
+  { "setTime", (PyCFunction) _wrap_Tossim_setTime, METH_O, (char*) "" },
+  { "timeStr", (PyCFunction) _wrap_Tossim_timeStr, METH_NOARGS, (char*) "" },
+  { "currentNode", (PyCFunction) _wrap_Tossim_currentNode, METH_NOARGS, (char*) "" },
+  { "getNode", (PyCFunction) _wrap_Tossim_getNode, METH_O, (char*) "" },
+  { "setCurrentNode", (PyCFunction) _wrap_Tossim_setCurrentNode, METH_O, (char*) "" },
+  { "addChannel", (PyCFunction) _wrap_Tossim_addChannel, METH_VARARGS, (char*) "" },
+  { "removeChannel", (PyCFunction) _wrap_Tossim_removeChannel, METH_VARARGS, (char*) "" },
+  { "randomSeed", (PyCFunction) _wrap_Tossim_randomSeed, METH_O, (char*) "" },
+  { "runNextEvent", (PyCFunction) _wrap_Tossim_runNextEvent, METH_NOARGS, (char*) "" },
+  { "mac", (PyCFunction) _wrap_Tossim_mac, METH_NOARGS, (char*) "" },
+  { "radio", (PyCFunction) _wrap_Tossim_radio, METH_NOARGS, (char*) "" },
+  { "newPacket", (PyCFunction) _wrap_Tossim_newPacket, METH_NOARGS, (char*) "" },
+  { NULL, NULL, 0, NULL } /* Sentinel */
+};
+
+static PyHeapTypeObject SwigPyBuiltin__Tossim_type = {
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
+    PyObject_HEAD_INIT(NULL)
+    0,                                        /* ob_size */
+#endif
+    "Tossim",                                 /* tp_name */
+    sizeof(SwigPyObject),                     /* tp_basicsize */
+    0,                                        /* tp_itemsize */
+    (destructor) _wrap_delete_Tossim_closure, /* tp_dealloc */
+    (printfunc) 0,                            /* tp_print */
+    (getattrfunc) 0,                          /* tp_getattr */
+    (setattrfunc) 0,                          /* tp_setattr */
+#if PY_VERSION_HEX >= 0x03000000
+    0,                                        /* tp_compare */
+#else
+    (cmpfunc) 0,                              /* tp_compare */
+#endif
+    (reprfunc) 0,                             /* tp_repr */
+    &SwigPyBuiltin__Tossim_type.as_number,      /* tp_as_number */
+    &SwigPyBuiltin__Tossim_type.as_sequence,    /* tp_as_sequence */
+    &SwigPyBuiltin__Tossim_type.as_mapping,     /* tp_as_mapping */
+    (hashfunc) 0,                             /* tp_hash */
+    (ternaryfunc) 0,                          /* tp_call */
+    (reprfunc) 0,                             /* tp_str */
+    (getattrofunc) 0,                         /* tp_getattro */
+    (setattrofunc) 0,                         /* tp_setattro */
+    &SwigPyBuiltin__Tossim_type.as_buffer,      /* tp_as_buffer */
+#if PY_VERSION_HEX >= 0x03000000
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,   /* tp_flags */
+#else
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES, /* tp_flags */
+#endif
+    "::Tossim",                               /* tp_doc */
+    (traverseproc) 0,                         /* tp_traverse */
+    (inquiry) 0,                              /* tp_clear */
+    (richcmpfunc) SwigPyBuiltin__Tossim_richcompare, /* feature:python:tp_richcompare */
+    0,                                        /* tp_weaklistoffset */
+    (getiterfunc) 0,                          /* tp_iter */
+    (iternextfunc) 0,                         /* tp_iternext */
+    SwigPyBuiltin__Tossim_methods,            /* tp_methods */
+    0,                                        /* tp_members */
+    SwigPyBuiltin__Tossim_getset,             /* tp_getset */
+    0,                                        /* tp_base */
+    0,                                        /* tp_dict */
+    (descrgetfunc) 0,                         /* tp_descr_get */
+    (descrsetfunc) 0,                         /* tp_descr_set */
+    (size_t)(((char*)&((SwigPyObject *) 64L)->dict) - (char*) 64L), /* tp_dictoffset */
+    (initproc) _wrap_new_Tossim,              /* tp_init */
+    (allocfunc) 0,                            /* tp_alloc */
+    (newfunc) 0,                              /* tp_new */
+    (freefunc) 0,                             /* tp_free */
+    (inquiry) 0,                              /* tp_is_gc */
+    (PyObject*) 0,                            /* tp_bases */
+    (PyObject*) 0,                            /* tp_mro */
+    (PyObject*) 0,                            /* tp_cache */
+    (PyObject*) 0,                            /* tp_subclasses */
+    (PyObject*) 0,                            /* tp_weaklist */
+    (destructor) 0,                           /* tp_del */
+#if PY_VERSION_HEX >= 0x02060000
+    (int) 0,                                  /* tp_version_tag */
+#endif
+  },
+  {
+    (binaryfunc) 0,                           /* nb_add */
+    (binaryfunc) 0,                           /* nb_subtract */
+    (binaryfunc) 0,                           /* nb_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_remainder */
+    (binaryfunc) 0,                           /* nb_divmod */
+    (ternaryfunc) 0,                          /* nb_power */
+    (unaryfunc) 0,                            /* nb_negative */
+    (unaryfunc) 0,                            /* nb_positive */
+    (unaryfunc) 0,                            /* nb_absolute */
+    (inquiry) 0,                              /* nb_nonzero */
+    (unaryfunc) 0,                            /* nb_invert */
+    (binaryfunc) 0,                           /* nb_lshift */
+    (binaryfunc) 0,                           /* nb_rshift */
+    (binaryfunc) 0,                           /* nb_and */
+    (binaryfunc) 0,                           /* nb_xor */
+    (binaryfunc) 0,                           /* nb_or */
+#if PY_VERSION_HEX < 0x03000000
+    (coercion) 0,                             /* nb_coerce */
+#endif
+    (unaryfunc) 0,                            /* nb_int */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* nb_reserved */
+#else
+    (unaryfunc) 0,                            /* nb_long */
+#endif
+    (unaryfunc) 0,                            /* nb_float */
+#if PY_VERSION_HEX < 0x03000000
+    (unaryfunc) 0,                            /* nb_oct */
+    (unaryfunc) 0,                            /* nb_hex */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_add */
+    (binaryfunc) 0,                           /* nb_inplace_subtract */
+    (binaryfunc) 0,                           /* nb_inplace_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_inplace_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_remainder */
+    (ternaryfunc) 0,                          /* nb_inplace_power */
+    (binaryfunc) 0,                           /* nb_inplace_lshift */
+    (binaryfunc) 0,                           /* nb_inplace_rshift */
+    (binaryfunc) 0,                           /* nb_inplace_and */
+    (binaryfunc) 0,                           /* nb_inplace_xor */
+    (binaryfunc) 0,                           /* nb_inplace_or */
+    (binaryfunc) 0,                           /* nb_floor_divide */
+    (binaryfunc) 0,                           /* nb_true_divide */
+    (binaryfunc) 0,                           /* nb_inplace_floor_divide */
+    (binaryfunc) 0,                           /* nb_inplace_true_divide */
+#if PY_VERSION_HEX >= 0x02050000
+    (unaryfunc) 0,                            /* nb_index */
+#endif
+  },
+  {
+    (lenfunc) 0,                              /* mp_length */
+    (binaryfunc) 0,                           /* mp_subscript */
+    (objobjargproc) 0,                        /* mp_ass_subscript */
+  },
+  {
+    (lenfunc) 0,                              /* sq_length */
+    (binaryfunc) 0,                           /* sq_concat */
+    (ssizeargfunc) 0,                         /* sq_repeat */
+    (ssizeargfunc) 0,                         /* sq_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_slice */
+#else
+    (ssizessizeargfunc) 0,                    /* sq_slice */
+#endif
+    (ssizeobjargproc) 0,                      /* sq_ass_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void*) 0,                                /* was_sq_ass_slice */
+#else
+    (ssizessizeobjargproc) 0,                 /* sq_ass_slice */
+#endif
+    (objobjproc) 0,                           /* sq_contains */
+    (binaryfunc) 0,                           /* sq_inplace_concat */
+    (ssizeargfunc) 0,                         /* sq_inplace_repeat */
+  },
+  {
+#if PY_VERSION_HEX < 0x03000000
+    (readbufferproc) 0,                       /* bf_getreadbuffer */
+    (writebufferproc) 0,                      /* bf_getwritebuffer */
+    (segcountproc) 0,                         /* bf_getsegcount */
+    (charbufferproc) 0,                       /* bf_getcharbuffer */
+#endif
+#if PY_VERSION_HEX >= 0x02060000
+    (getbufferproc) 0,                        /* bf_getbuffer */
+    (releasebufferproc) 0,                    /* bf_releasebuffer */
+#endif
+  },
+    (PyObject*) 0,                            /* ht_name */
+    (PyObject*) 0,                            /* ht_slots */
+};
+
+SWIGINTERN SwigPyClientData SwigPyBuiltin__Tossim_clientdata = {0, 0, 0, 0, 0, 0, (PyTypeObject *)&SwigPyBuiltin__Tossim_type};
 
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
 static swig_type_info _swigt__p_FILE = {"_p_FILE", "FILE *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_MAC = {"_p_MAC", "MAC *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_Mote = {"_p_Mote", "Mote *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_Packet = {"_p_Packet", "Packet *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_Radio = {"_p_Radio", "Radio *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_Tossim = {"_p_Tossim", "Tossim *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_Variable = {"_p_Variable", "Variable *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_MAC = {"_p_MAC", "MAC *", 0, 0, (void*)&SwigPyBuiltin__MAC_clientdata, 0};
+static swig_type_info _swigt__p_Mote = {"_p_Mote", "Mote *", 0, 0, (void*)&SwigPyBuiltin__Mote_clientdata, 0};
+static swig_type_info _swigt__p_Packet = {"_p_Packet", "Packet *", 0, 0, (void*)&SwigPyBuiltin__Packet_clientdata, 0};
+static swig_type_info _swigt__p_Radio = {"_p_Radio", "Radio *", 0, 0, (void*)&SwigPyBuiltin__Radio_clientdata, 0};
+static swig_type_info _swigt__p_SwigPyObject = {"_p_SwigPyObject", "SwigPyObject *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Tossim = {"_p_Tossim", "Tossim *", 0, 0, (void*)&SwigPyBuiltin__Tossim_clientdata, 0};
+static swig_type_info _swigt__p_Variable = {"_p_Variable", "Variable *", 0, 0, (void*)&SwigPyBuiltin__Variable_clientdata, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_int = {"_p_int", "int *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_nesc_app = {"_p_nesc_app", "nesc_app *|nesc_app_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_nesc_app = {"_p_nesc_app", "nesc_app *|nesc_app_t *", 0, 0, (void*)&SwigPyBuiltin__nesc_app_clientdata, 0};
 static swig_type_info _swigt__p_p_char = {"_p_p_char", "char **", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_variable_string = {"_p_variable_string", "variable_string *|variable_string_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_variable_string = {"_p_variable_string", "variable_string *|variable_string_t *", 0, 0, (void*)&SwigPyBuiltin__variable_string_clientdata, 0};
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_FILE,
@@ -6696,6 +8619,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_Mote,
   &_swigt__p_Packet,
   &_swigt__p_Radio,
+  &_swigt__p_SwigPyObject,
   &_swigt__p_Tossim,
   &_swigt__p_Variable,
   &_swigt__p_char,
@@ -6710,6 +8634,7 @@ static swig_cast_info _swigc__p_MAC[] = {  {&_swigt__p_MAC, 0, 0, 0},{0, 0, 0, 0
 static swig_cast_info _swigc__p_Mote[] = {  {&_swigt__p_Mote, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Packet[] = {  {&_swigt__p_Packet, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Radio[] = {  {&_swigt__p_Radio, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_SwigPyObject[] = {  {&_swigt__p_SwigPyObject, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Tossim[] = {  {&_swigt__p_Tossim, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Variable[] = {  {&_swigt__p_Variable, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
@@ -6724,6 +8649,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_Mote,
   _swigc__p_Packet,
   _swigc__p_Radio,
+  _swigc__p_SwigPyObject,
   _swigc__p_Tossim,
   _swigc__p_Variable,
   _swigc__p_char,
@@ -6742,6 +8668,8 @@ static swig_const_info swig_const_table[] = {
 #ifdef __cplusplus
 }
 #endif
+static PyTypeObject *builtin_bases[2];
+
 /* -----------------------------------------------------------------------------
  * Type initialization:
  * This problem is tough by the requirement that no dynamic 
@@ -7416,6 +9344,190 @@ SWIG_init(void) {
   
   SWIG_InstallConstants(d,swig_const_table);
   
+  
+  /* type '::MAC' */
+  builtin_pytype = (PyTypeObject *)&SwigPyBuiltin__MAC_type;
+  builtin_pytype->tp_dict = d = PyDict_New();
+  SwigPyBuiltin_SetMetaType(builtin_pytype, metatype);
+  builtin_pytype->tp_new = PyType_GenericNew;
+  builtin_base_count = 0;
+  builtin_bases[builtin_base_count] = NULL;
+  SwigPyBuiltin_InitBases(builtin_pytype, builtin_bases);
+  PyDict_SetItemString(d, "this", this_descr);
+  PyDict_SetItemString(d, "thisown", thisown_descr);
+  if (PyType_Ready(builtin_pytype) < 0) {
+    PyErr_SetString(PyExc_TypeError, "Could not create type 'MAC'.");
+#if PY_VERSION_HEX >= 0x03000000
+    return NULL;
+#else
+    return;
+#endif
+  }
+  Py_INCREF(builtin_pytype);
+  PyModule_AddObject(m, "MAC", (PyObject*) builtin_pytype);
+  SwigPyBuiltin_AddPublicSymbol(public_interface, "MAC");
+  d = md;
+  
+  /* type '::Radio' */
+  builtin_pytype = (PyTypeObject *)&SwigPyBuiltin__Radio_type;
+  builtin_pytype->tp_dict = d = PyDict_New();
+  SwigPyBuiltin_SetMetaType(builtin_pytype, metatype);
+  builtin_pytype->tp_new = PyType_GenericNew;
+  builtin_base_count = 0;
+  builtin_bases[builtin_base_count] = NULL;
+  SwigPyBuiltin_InitBases(builtin_pytype, builtin_bases);
+  PyDict_SetItemString(d, "this", this_descr);
+  PyDict_SetItemString(d, "thisown", thisown_descr);
+  if (PyType_Ready(builtin_pytype) < 0) {
+    PyErr_SetString(PyExc_TypeError, "Could not create type 'Radio'.");
+#if PY_VERSION_HEX >= 0x03000000
+    return NULL;
+#else
+    return;
+#endif
+  }
+  Py_INCREF(builtin_pytype);
+  PyModule_AddObject(m, "Radio", (PyObject*) builtin_pytype);
+  SwigPyBuiltin_AddPublicSymbol(public_interface, "Radio");
+  d = md;
+  
+  /* type '::Packet' */
+  builtin_pytype = (PyTypeObject *)&SwigPyBuiltin__Packet_type;
+  builtin_pytype->tp_dict = d = PyDict_New();
+  SwigPyBuiltin_SetMetaType(builtin_pytype, metatype);
+  builtin_pytype->tp_new = PyType_GenericNew;
+  builtin_base_count = 0;
+  builtin_bases[builtin_base_count] = NULL;
+  SwigPyBuiltin_InitBases(builtin_pytype, builtin_bases);
+  PyDict_SetItemString(d, "this", this_descr);
+  PyDict_SetItemString(d, "thisown", thisown_descr);
+  if (PyType_Ready(builtin_pytype) < 0) {
+    PyErr_SetString(PyExc_TypeError, "Could not create type 'Packet'.");
+#if PY_VERSION_HEX >= 0x03000000
+    return NULL;
+#else
+    return;
+#endif
+  }
+  Py_INCREF(builtin_pytype);
+  PyModule_AddObject(m, "Packet", (PyObject*) builtin_pytype);
+  SwigPyBuiltin_AddPublicSymbol(public_interface, "Packet");
+  d = md;
+  
+  /* type '::variable_string' */
+  builtin_pytype = (PyTypeObject *)&SwigPyBuiltin__variable_string_type;
+  builtin_pytype->tp_dict = d = PyDict_New();
+  SwigPyBuiltin_SetMetaType(builtin_pytype, metatype);
+  builtin_pytype->tp_new = PyType_GenericNew;
+  builtin_base_count = 0;
+  builtin_bases[builtin_base_count] = NULL;
+  SwigPyBuiltin_InitBases(builtin_pytype, builtin_bases);
+  PyDict_SetItemString(d, "this", this_descr);
+  PyDict_SetItemString(d, "thisown", thisown_descr);
+  if (PyType_Ready(builtin_pytype) < 0) {
+    PyErr_SetString(PyExc_TypeError, "Could not create type 'variable_string_t'.");
+#if PY_VERSION_HEX >= 0x03000000
+    return NULL;
+#else
+    return;
+#endif
+  }
+  Py_INCREF(builtin_pytype);
+  PyModule_AddObject(m, "variable_string_t", (PyObject*) builtin_pytype);
+  SwigPyBuiltin_AddPublicSymbol(public_interface, "variable_string_t");
+  d = md;
+  
+  /* type '::nesc_app' */
+  builtin_pytype = (PyTypeObject *)&SwigPyBuiltin__nesc_app_type;
+  builtin_pytype->tp_dict = d = PyDict_New();
+  SwigPyBuiltin_SetMetaType(builtin_pytype, metatype);
+  builtin_pytype->tp_new = PyType_GenericNew;
+  builtin_base_count = 0;
+  builtin_bases[builtin_base_count] = NULL;
+  SwigPyBuiltin_InitBases(builtin_pytype, builtin_bases);
+  PyDict_SetItemString(d, "this", this_descr);
+  PyDict_SetItemString(d, "thisown", thisown_descr);
+  if (PyType_Ready(builtin_pytype) < 0) {
+    PyErr_SetString(PyExc_TypeError, "Could not create type 'nesc_app_t'.");
+#if PY_VERSION_HEX >= 0x03000000
+    return NULL;
+#else
+    return;
+#endif
+  }
+  Py_INCREF(builtin_pytype);
+  PyModule_AddObject(m, "nesc_app_t", (PyObject*) builtin_pytype);
+  SwigPyBuiltin_AddPublicSymbol(public_interface, "nesc_app_t");
+  d = md;
+  
+  /* type '::Variable' */
+  builtin_pytype = (PyTypeObject *)&SwigPyBuiltin__Variable_type;
+  builtin_pytype->tp_dict = d = PyDict_New();
+  SwigPyBuiltin_SetMetaType(builtin_pytype, metatype);
+  builtin_pytype->tp_new = PyType_GenericNew;
+  builtin_base_count = 0;
+  builtin_bases[builtin_base_count] = NULL;
+  SwigPyBuiltin_InitBases(builtin_pytype, builtin_bases);
+  PyDict_SetItemString(d, "this", this_descr);
+  PyDict_SetItemString(d, "thisown", thisown_descr);
+  if (PyType_Ready(builtin_pytype) < 0) {
+    PyErr_SetString(PyExc_TypeError, "Could not create type 'Variable'.");
+#if PY_VERSION_HEX >= 0x03000000
+    return NULL;
+#else
+    return;
+#endif
+  }
+  Py_INCREF(builtin_pytype);
+  PyModule_AddObject(m, "Variable", (PyObject*) builtin_pytype);
+  SwigPyBuiltin_AddPublicSymbol(public_interface, "Variable");
+  d = md;
+  
+  /* type '::Mote' */
+  builtin_pytype = (PyTypeObject *)&SwigPyBuiltin__Mote_type;
+  builtin_pytype->tp_dict = d = PyDict_New();
+  SwigPyBuiltin_SetMetaType(builtin_pytype, metatype);
+  builtin_pytype->tp_new = PyType_GenericNew;
+  builtin_base_count = 0;
+  builtin_bases[builtin_base_count] = NULL;
+  SwigPyBuiltin_InitBases(builtin_pytype, builtin_bases);
+  PyDict_SetItemString(d, "this", this_descr);
+  PyDict_SetItemString(d, "thisown", thisown_descr);
+  if (PyType_Ready(builtin_pytype) < 0) {
+    PyErr_SetString(PyExc_TypeError, "Could not create type 'Mote'.");
+#if PY_VERSION_HEX >= 0x03000000
+    return NULL;
+#else
+    return;
+#endif
+  }
+  Py_INCREF(builtin_pytype);
+  PyModule_AddObject(m, "Mote", (PyObject*) builtin_pytype);
+  SwigPyBuiltin_AddPublicSymbol(public_interface, "Mote");
+  d = md;
+  
+  /* type '::Tossim' */
+  builtin_pytype = (PyTypeObject *)&SwigPyBuiltin__Tossim_type;
+  builtin_pytype->tp_dict = d = PyDict_New();
+  SwigPyBuiltin_SetMetaType(builtin_pytype, metatype);
+  builtin_pytype->tp_new = PyType_GenericNew;
+  builtin_base_count = 0;
+  builtin_bases[builtin_base_count] = NULL;
+  SwigPyBuiltin_InitBases(builtin_pytype, builtin_bases);
+  PyDict_SetItemString(d, "this", this_descr);
+  PyDict_SetItemString(d, "thisown", thisown_descr);
+  if (PyType_Ready(builtin_pytype) < 0) {
+    PyErr_SetString(PyExc_TypeError, "Could not create type 'Tossim'.");
+#if PY_VERSION_HEX >= 0x03000000
+    return NULL;
+#else
+    return;
+#endif
+  }
+  Py_INCREF(builtin_pytype);
+  PyModule_AddObject(m, "Tossim", (PyObject*) builtin_pytype);
+  SwigPyBuiltin_AddPublicSymbol(public_interface, "Tossim");
+  d = md;
 #if PY_VERSION_HEX >= 0x03000000
   return m;
 #else

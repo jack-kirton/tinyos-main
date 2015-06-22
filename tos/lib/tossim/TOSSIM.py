@@ -28,6 +28,7 @@ if version_info >= (2,6,0):
 else:
     import _TOSSIM
 del version_info
+from _TOSSIM import *
 try:
     _swig_property = property
 except NameError:
@@ -67,222 +68,23 @@ except AttributeError:
     _newclass = 0
 
 
-class MAC(_object):
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, MAC, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, MAC, name)
-    __repr__ = _swig_repr
-    def __init__(self): 
-        this = _TOSSIM.new_MAC()
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _TOSSIM.delete_MAC
-    __del__ = lambda self : None;
-    def initHigh(self): return _TOSSIM.MAC_initHigh(self)
-    def initLow(self): return _TOSSIM.MAC_initLow(self)
-    def high(self): return _TOSSIM.MAC_high(self)
-    def low(self): return _TOSSIM.MAC_low(self)
-    def symbolsPerSec(self): return _TOSSIM.MAC_symbolsPerSec(self)
-    def bitsPerSymbol(self): return _TOSSIM.MAC_bitsPerSymbol(self)
-    def preambleLength(self): return _TOSSIM.MAC_preambleLength(self)
-    def exponentBase(self): return _TOSSIM.MAC_exponentBase(self)
-    def maxIterations(self): return _TOSSIM.MAC_maxIterations(self)
-    def minFreeSamples(self): return _TOSSIM.MAC_minFreeSamples(self)
-    def rxtxDelay(self): return _TOSSIM.MAC_rxtxDelay(self)
-    def ackTime(self): return _TOSSIM.MAC_ackTime(self)
-    def setInitHigh(self, *args): return _TOSSIM.MAC_setInitHigh(self, *args)
-    def setInitLow(self, *args): return _TOSSIM.MAC_setInitLow(self, *args)
-    def setHigh(self, *args): return _TOSSIM.MAC_setHigh(self, *args)
-    def setLow(self, *args): return _TOSSIM.MAC_setLow(self, *args)
-    def setSymbolsPerSec(self, *args): return _TOSSIM.MAC_setSymbolsPerSec(self, *args)
-    def setBitsBerSymbol(self, *args): return _TOSSIM.MAC_setBitsBerSymbol(self, *args)
-    def setPreambleLength(self, *args): return _TOSSIM.MAC_setPreambleLength(self, *args)
-    def setExponentBase(self, *args): return _TOSSIM.MAC_setExponentBase(self, *args)
-    def setMaxIterations(self, *args): return _TOSSIM.MAC_setMaxIterations(self, *args)
-    def setMinFreeSamples(self, *args): return _TOSSIM.MAC_setMinFreeSamples(self, *args)
-    def setRxtxDelay(self, *args): return _TOSSIM.MAC_setRxtxDelay(self, *args)
-    def setAckTime(self, *args): return _TOSSIM.MAC_setAckTime(self, *args)
-MAC_swigregister = _TOSSIM.MAC_swigregister
-MAC_swigregister(MAC)
+def _swig_setattr_nondynamic_method(set):
+    def set_attr(self,name,value):
+        if (name == "thisown"): return self.this.own(value)
+        if hasattr(self,name) or (name == "this"):
+            set(self,name,value)
+        else:
+            raise AttributeError("You cannot add attributes to %s" % self)
+    return set_attr
 
-class Radio(_object):
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, Radio, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, Radio, name)
-    __repr__ = _swig_repr
-    def __init__(self): 
-        this = _TOSSIM.new_Radio()
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _TOSSIM.delete_Radio
-    __del__ = lambda self : None;
-    def add(self, *args): return _TOSSIM.Radio_add(self, *args)
-    def gain(self, *args): return _TOSSIM.Radio_gain(self, *args)
-    def connected(self, *args): return _TOSSIM.Radio_connected(self, *args)
-    def remove(self, *args): return _TOSSIM.Radio_remove(self, *args)
-    def setNoise(self, *args): return _TOSSIM.Radio_setNoise(self, *args)
-    def setSensitivity(self, *args): return _TOSSIM.Radio_setSensitivity(self, *args)
-Radio_swigregister = _TOSSIM.Radio_swigregister
-Radio_swigregister(Radio)
 
-class Packet(_object):
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, Packet, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, Packet, name)
-    __repr__ = _swig_repr
-    def __init__(self): 
-        this = _TOSSIM.new_Packet()
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _TOSSIM.delete_Packet
-    __del__ = lambda self : None;
-    def setSource(self, *args): return _TOSSIM.Packet_setSource(self, *args)
-    def source(self): return _TOSSIM.Packet_source(self)
-    def setDestination(self, *args): return _TOSSIM.Packet_setDestination(self, *args)
-    def destination(self): return _TOSSIM.Packet_destination(self)
-    def setLength(self, *args): return _TOSSIM.Packet_setLength(self, *args)
-    def length(self): return _TOSSIM.Packet_length(self)
-    def setType(self, *args): return _TOSSIM.Packet_setType(self, *args)
-    def type(self): return _TOSSIM.Packet_type(self)
-    def data(self): return _TOSSIM.Packet_data(self)
-    def setData(self, *args): return _TOSSIM.Packet_setData(self, *args)
-    def maxLength(self): return _TOSSIM.Packet_maxLength(self)
-    def setStrength(self, *args): return _TOSSIM.Packet_setStrength(self, *args)
-    def deliver(self, *args): return _TOSSIM.Packet_deliver(self, *args)
-    def deliverNow(self, *args): return _TOSSIM.Packet_deliverNow(self, *args)
-Packet_swigregister = _TOSSIM.Packet_swigregister
-Packet_swigregister(Packet)
 
-class variable_string_t(_object):
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, variable_string_t, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, variable_string_t, name)
-    __repr__ = _swig_repr
-    __swig_setmethods__["type"] = _TOSSIM.variable_string_t_type_set
-    __swig_getmethods__["type"] = _TOSSIM.variable_string_t_type_get
-    if _newclass:type = _swig_property(_TOSSIM.variable_string_t_type_get, _TOSSIM.variable_string_t_type_set)
-    __swig_setmethods__["ptr"] = _TOSSIM.variable_string_t_ptr_set
-    __swig_getmethods__["ptr"] = _TOSSIM.variable_string_t_ptr_get
-    if _newclass:ptr = _swig_property(_TOSSIM.variable_string_t_ptr_get, _TOSSIM.variable_string_t_ptr_set)
-    __swig_setmethods__["len"] = _TOSSIM.variable_string_t_len_set
-    __swig_getmethods__["len"] = _TOSSIM.variable_string_t_len_get
-    if _newclass:len = _swig_property(_TOSSIM.variable_string_t_len_get, _TOSSIM.variable_string_t_len_set)
-    __swig_setmethods__["isArray"] = _TOSSIM.variable_string_t_isArray_set
-    __swig_getmethods__["isArray"] = _TOSSIM.variable_string_t_isArray_get
-    if _newclass:isArray = _swig_property(_TOSSIM.variable_string_t_isArray_get, _TOSSIM.variable_string_t_isArray_set)
-    def __init__(self): 
-        this = _TOSSIM.new_variable_string_t()
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _TOSSIM.delete_variable_string_t
-    __del__ = lambda self : None;
-variable_string_t_swigregister = _TOSSIM.variable_string_t_swigregister
-variable_string_t_swigregister(variable_string_t)
 
-class nesc_app_t(_object):
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, nesc_app_t, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, nesc_app_t, name)
-    __repr__ = _swig_repr
-    __swig_setmethods__["numVariables"] = _TOSSIM.nesc_app_t_numVariables_set
-    __swig_getmethods__["numVariables"] = _TOSSIM.nesc_app_t_numVariables_get
-    if _newclass:numVariables = _swig_property(_TOSSIM.nesc_app_t_numVariables_get, _TOSSIM.nesc_app_t_numVariables_set)
-    __swig_setmethods__["variableNames"] = _TOSSIM.nesc_app_t_variableNames_set
-    __swig_getmethods__["variableNames"] = _TOSSIM.nesc_app_t_variableNames_get
-    if _newclass:variableNames = _swig_property(_TOSSIM.nesc_app_t_variableNames_get, _TOSSIM.nesc_app_t_variableNames_set)
-    __swig_setmethods__["variableTypes"] = _TOSSIM.nesc_app_t_variableTypes_set
-    __swig_getmethods__["variableTypes"] = _TOSSIM.nesc_app_t_variableTypes_get
-    if _newclass:variableTypes = _swig_property(_TOSSIM.nesc_app_t_variableTypes_get, _TOSSIM.nesc_app_t_variableTypes_set)
-    __swig_setmethods__["variableArray"] = _TOSSIM.nesc_app_t_variableArray_set
-    __swig_getmethods__["variableArray"] = _TOSSIM.nesc_app_t_variableArray_get
-    if _newclass:variableArray = _swig_property(_TOSSIM.nesc_app_t_variableArray_get, _TOSSIM.nesc_app_t_variableArray_set)
-    def __init__(self): 
-        this = _TOSSIM.new_nesc_app_t()
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _TOSSIM.delete_nesc_app_t
-    __del__ = lambda self : None;
-nesc_app_t_swigregister = _TOSSIM.nesc_app_t_swigregister
-nesc_app_t_swigregister(nesc_app_t)
 
-class Variable(_object):
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, Variable, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, Variable, name)
-    __repr__ = _swig_repr
-    def __init__(self, *args): 
-        this = _TOSSIM.new_Variable(*args)
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _TOSSIM.delete_Variable
-    __del__ = lambda self : None;
-    def getData(self): return _TOSSIM.Variable_getData(self)
-Variable_swigregister = _TOSSIM.Variable_swigregister
-Variable_swigregister(Variable)
 
-class Mote(_object):
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, Mote, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, Mote, name)
-    __repr__ = _swig_repr
-    def __init__(self, *args): 
-        this = _TOSSIM.new_Mote(*args)
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _TOSSIM.delete_Mote
-    __del__ = lambda self : None;
-    def id(self): return _TOSSIM.Mote_id(self)
-    def euid(self): return _TOSSIM.Mote_euid(self)
-    def setEuid(self, *args): return _TOSSIM.Mote_setEuid(self, *args)
-    def bootTime(self): return _TOSSIM.Mote_bootTime(self)
-    def bootAtTime(self, *args): return _TOSSIM.Mote_bootAtTime(self, *args)
-    def isOn(self): return _TOSSIM.Mote_isOn(self)
-    def turnOff(self): return _TOSSIM.Mote_turnOff(self)
-    def turnOn(self): return _TOSSIM.Mote_turnOn(self)
-    def getVariable(self, *args): return _TOSSIM.Mote_getVariable(self, *args)
-    def addNoiseTraceReading(self, *args): return _TOSSIM.Mote_addNoiseTraceReading(self, *args)
-    def createNoiseModel(self): return _TOSSIM.Mote_createNoiseModel(self)
-    def generateNoise(self, *args): return _TOSSIM.Mote_generateNoise(self, *args)
-Mote_swigregister = _TOSSIM.Mote_swigregister
-Mote_swigregister(Mote)
 
-class Tossim(_object):
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, Tossim, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, Tossim, name)
-    __repr__ = _swig_repr
-    def __init__(self, *args): 
-        this = _TOSSIM.new_Tossim(*args)
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _TOSSIM.delete_Tossim
-    __del__ = lambda self : None;
-    def init(self): return _TOSSIM.Tossim_init(self)
-    def time(self): return _TOSSIM.Tossim_time(self)
-    def ticksPerSecond(self): return _TOSSIM.Tossim_ticksPerSecond(self)
-    def setTime(self, *args): return _TOSSIM.Tossim_setTime(self, *args)
-    def timeStr(self): return _TOSSIM.Tossim_timeStr(self)
-    def currentNode(self): return _TOSSIM.Tossim_currentNode(self)
-    def getNode(self, *args): return _TOSSIM.Tossim_getNode(self, *args)
-    def setCurrentNode(self, *args): return _TOSSIM.Tossim_setCurrentNode(self, *args)
-    def addChannel(self, *args): return _TOSSIM.Tossim_addChannel(self, *args)
-    def removeChannel(self, *args): return _TOSSIM.Tossim_removeChannel(self, *args)
-    def randomSeed(self, *args): return _TOSSIM.Tossim_randomSeed(self, *args)
-    def runNextEvent(self): return _TOSSIM.Tossim_runNextEvent(self)
-    def mac(self): return _TOSSIM.Tossim_mac(self)
-    def radio(self): return _TOSSIM.Tossim_radio(self)
-    def newPacket(self): return _TOSSIM.Tossim_newPacket(self)
-Tossim_swigregister = _TOSSIM.Tossim_swigregister
-Tossim_swigregister(Tossim)
 
-# This file is compatible with both classic and new-style classes.
+
+
 
 
