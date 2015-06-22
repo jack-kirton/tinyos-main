@@ -167,12 +167,12 @@ hashtable_search(struct hashtable *h, const void *k)
     struct entry *e;
     unsigned int hashvalue, tindex;
     hashvalue = hash(h,k);
-    tindex = indexFor(h->tablelength,hashvalue);
+    tindex = indexFor(h->tablelength, hashvalue);
     e = h->table[tindex];
     while (NULL != e)
     {
         /* Check hash value to short circuit heavier comparison */
-      if ((hashvalue == e->h) && (h->eqfn(k, e->k))) {
+      if (hashvalue == e->h && h->eqfn(k, e->k)) {
         return e->v;
       }
       e = e->next;
@@ -193,13 +193,13 @@ hashtable_remove(struct hashtable *h, const void *k)
     unsigned int hashvalue, tindex;
 
     hashvalue = hash(h,k);
-    tindex = indexFor(h->tablelength,hash(h,k));
+    tindex = indexFor(h->tablelength, hash(h,k));
     pE = &(h->table[tindex]);
     e = *pE;
     while (NULL != e)
     {
         /* Check hash value to short circuit heavier comparison */
-        if ((hashvalue == e->h) && (h->eqfn(k, e->k)))
+        if (hashvalue == e->h && h->eqfn(k, e->k))
         {
             *pE = e->next;
             h->entrycount--;
