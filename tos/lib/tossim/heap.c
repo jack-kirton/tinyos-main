@@ -64,11 +64,9 @@ typedef struct node {
   long long int key;
 } node_t;
 
-void down_heap(heap_t* heap, int findex);
-void up_heap(heap_t* heap, int findex);
-void swap(node_t* first, node_t* second);
-node_t* prev(node_t* node);
-node_t* next(node_t* next);
+static void down_heap(heap_t* heap, int findex);
+static void up_heap(heap_t* heap, int findex);
+static void swap(node_t* __restrict first, node_t* __restrict second);
 
 void init_node(node_t* node) {
   node->data = NULL;
@@ -137,17 +135,10 @@ void* heap_pop_min_data(heap_t* heap, long long int* key) {
 }
 
 void expand_heap(heap_t* heap) {
-  int new_size = (heap->private_size * 2) + 1;
-  void* new_data = malloc(sizeof(node_t) * new_size);
+  heap->private_size = (heap->private_size * 2) + 1;
+  heap->data = realloc(heap->data, sizeof(node_t) * heap->private_size);
 
   //dbg(DBG_SIM, "Resized heap from %i to %i.\n", heap->private_size, new_size);
-  
-  memcpy(new_data, heap->data, (sizeof(node_t) * heap->private_size));
-  free(heap->data);
-
-  heap->data = new_data;
-  heap->private_size = new_size;
-  
 }
 
 void heap_insert(heap_t* heap, void* data, long long int key) {
@@ -164,7 +155,7 @@ void heap_insert(heap_t* heap, void* data, long long int key) {
   heap->size++;
 }
 
-void swap(node_t* first, node_t* second) {
+static void swap(node_t* __restrict first, node_t* __restrict second) {
   long long int key;
   void* data;
 
@@ -177,8 +168,8 @@ void swap(node_t* first, node_t* second) {
   second->data = data;
 }
 
-void down_heap(heap_t* heap, int findex) {
-  int right_index =  ((findex + 1) * 2);
+static void down_heap(heap_t* heap, int findex) {
+  int right_index = (findex + 1) * 2;
   int left_index = (findex * 2) + 1;
 
   if (right_index < heap->size) { // Two children
@@ -203,7 +194,7 @@ void down_heap(heap_t* heap, int findex) {
   }
 }
 
-void up_heap(heap_t* heap, int findex) {
+static void up_heap(heap_t* heap, int findex) {
   int parent_index;
   if (findex == 0) {
     return;
