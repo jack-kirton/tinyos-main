@@ -91,12 +91,12 @@ int Packet::type() {
 }
 
 char* Packet::data() {
-  char* val =  (char*)sim_packet_data(msgPtr);
+  char* val = (char*)sim_packet_data(msgPtr);
   return val;
 }
 
 void Packet::setData(char* packet_data, int len) {
-  len = (len > maxLength())? maxLength():len;
+  len = std::min(maxLength(), len);
   memcpy(sim_packet_data(msgPtr), packet_data, len);
   setLength(len);
 }
