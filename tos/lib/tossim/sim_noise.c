@@ -156,9 +156,12 @@ void sim_noise_add(uint16_t node_id, char noise)__attribute__ ((C, spontaneous))
 
     noise_hash->flag = 0;
     for(i=0; i<NOISE_NUM_VALUES; i++) {
-      noise_hash->dist[i] = 0;
+      noise_hash->dist[i] = 0.0f;
     }
+
     hashtable_insert(pnoiseTable, key, noise_hash);
+
+#ifdef DEBUG
     dbg("Insert", "Inserting %p into table %p with key ", noise_hash, pnoiseTable);
     {
       int ctr;
@@ -166,6 +169,7 @@ void sim_noise_add(uint16_t node_id, char noise)__attribute__ ((C, spontaneous))
         dbg_clear("Insert", "%0.3hhi ", key[ctr]);
     }
     dbg_clear("Insert", "\n");
+#endif
   }
 
   if (noise_hash->numElements == noise_hash->size)
@@ -196,7 +200,7 @@ void sim_noise_dist(uint16_t node_id)__attribute__ ((C, spontaneous))
     return;
 
   for (i=0; i < NOISE_NUM_VALUES; i++) {
-    noise_hash->dist[i] = 0.0;
+    noise_hash->dist[i] = 0.0f;
   }
   
   for (i=0; i< noise_hash->numElements; i++)
@@ -369,7 +373,6 @@ char sim_noise_generate(uint16_t node_id, uint32_t cur_t)__attribute__ ((C, spon
   uint32_t i;
   uint32_t prev_t;
   uint32_t delta_t;
-  char *noiseG;
   char noise;
 
   prev_t = noiseData[node_id].noiseGenTime;
@@ -393,12 +396,13 @@ char sim_noise_generate(uint16_t node_id, uint32_t cur_t)__attribute__ ((C, spon
   
   dbg_clear("HASH", "delta_t = %d\n", delta_t);
   
-  if (delta_t == 0)
+  if (delta_t == 0) {
     noise = noiseData[node_id].lastNoiseVal;
+  }
   else {
-    noiseG = (char *)malloc(sizeof(char) * delta_t);
+    char *noiseG = (char *)malloc(sizeof(char) * delta_t);
     
-    for(i=0; i< delta_t; i++) {
+    for (i=0; i< delta_t; i++) {
       noiseG[i] = sim_noise_gen(node_id);
       arrangeKey(node_id);
       noiseData[node_id].key[NOISE_HISTORY-1] = search_bin_num(noiseG[i]);
@@ -408,11 +412,16 @@ char sim_noise_generate(uint16_t node_id, uint32_t cur_t)__attribute__ ((C, spon
     
     free(noiseG);
   }
+
   noiseData[node_id].noiseGenTime = cur_t;
+
+#ifdef DEBUG
   if (noise == 0) {
     dbg("HashZeroDebug", "Generated noise of zero.\n");
   }
 //  printf("%i\n", noise);
+#endif
+
   return noise;
 }
 
