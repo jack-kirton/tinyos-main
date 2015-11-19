@@ -52,7 +52,7 @@ enum {
   PRIMITIVE_UNKNOWN = 2
 };
 
-int lengthOfType(char* type) {
+int lengthOfType(const char* type) {
   if (strcmp(type, "uint8_t") == 0) {
     return sizeof(uint8_t);
   }
@@ -106,7 +106,7 @@ int lengthOfType(char* type) {
   }
 }
 
-int memoryToPrimitive(char* type, char* ptr, long* lval, double* dval) {
+int memoryToPrimitive(const char* type, const char* ptr, long* lval, double* dval) {
   if (strcmp(type, "uint8_t") == 0) {
     uint8_t val;
     memcpy(&val, ptr, sizeof(uint8_t));
@@ -208,7 +208,7 @@ int memoryToPrimitive(char* type, char* ptr, long* lval, double* dval) {
   }
 }
 
-PyObject* valueFromScalar(char* type, char* ptr, int len) {
+PyObject* valueFromScalar(const char* type, char* ptr, int len) {
   long lval;
   double dval;
   int rval = memoryToPrimitive(type, ptr, &lval, &dval);
@@ -223,7 +223,7 @@ PyObject* valueFromScalar(char* type, char* ptr, int len) {
   }
 }
 
-PyObject* listFromArray(char* type, char* ptr, int len) {
+PyObject* listFromArray(const char* type, char* ptr, int len) {
   long lval;
   double dval;
   int elementLen = lengthOfType(type);
@@ -281,13 +281,9 @@ PyObject* listFromArray(char* type, char* ptr, int len) {
     app = (nesc_app_t*)malloc(sizeof(nesc_app_t));
 
     app->numVariables = size / 3;
-    app->variableNames = (char**)malloc(sizeof(char*) * app->numVariables);
-    app->variableTypes = (char**)malloc(sizeof(char*) * app->numVariables);
-    app->variableArray = (int*)malloc(sizeof(int) * app->numVariables);
-
-    memset(app->variableNames, 0, sizeof(char*) * app->numVariables);
-    memset(app->variableTypes, 0, sizeof(char*) * app->numVariables);
-    memset(app->variableArray, 0, sizeof(int) * app->numVariables);
+    app->variableNames = (const char**)calloc(app->numVariables, sizeof(char*));
+    app->variableTypes = (const char**)calloc(app->numVariables, sizeof(char*));
+    app->variableArray = (int*)calloc(app->numVariables, sizeof(int));
 
     for (i = 0; i < app->numVariables; i++) {
       PyObject* name = PyList_GetItem($input, 3 * i);
@@ -306,8 +302,8 @@ PyObject* listFromArray(char* type, char* ptr, int len) {
         }
       }
       else {
-        app->variableNames[i] = (char*)"<bad string>";
-        app->variableTypes[i] = (char*)"<bad string>";
+        app->variableNames[i] = "<bad string>";
+        app->variableTypes[i] = "<bad string>";
       }
     }
 
@@ -316,7 +312,7 @@ PyObject* listFromArray(char* type, char* ptr, int len) {
 }
 
 typedef struct variable_string {
-  char* type;
+  const char* type;
   char* ptr;
   int len;
   int isArray;
@@ -324,14 +320,14 @@ typedef struct variable_string {
 
 typedef struct nesc_app {
   int numVariables;
-  char** variableNames;
-  char** variableTypes;
+  const char** variableNames;
+  const char** variableTypes;
   int* variableArray;
 } nesc_app_t;
 
 class Variable {
  public:
-  Variable(char* name, char* format, int array, int mote);
+  Variable(const char* name, const char* format, int array, int mote);
   ~Variable();
   variable_string_t getData();  
 };

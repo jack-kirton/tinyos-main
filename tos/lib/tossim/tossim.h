@@ -51,7 +51,7 @@
 #include <hashtable.h>
 
 typedef struct variable_string {
-  char* type;
+  const char* type;
   char* ptr;
   int len;
   int isArray;
@@ -59,20 +59,20 @@ typedef struct variable_string {
 
 typedef struct nesc_app {
   int numVariables;
-  char** variableNames;
-  char** variableTypes;
+  const char** variableNames;
+  const char** variableTypes;
   int* variableArray;
 } nesc_app_t;
 
 class Variable {
  public:
-  Variable(const char* name, char* format, int array, int mote);
+  Variable(const char* name, const char* format, int array, int mote);
   ~Variable();
   variable_string_t getData();
   
  private:
   char* realName;
-  char* format;
+  const char* format;
   void* ptr;
   char* data;
   size_t len;
