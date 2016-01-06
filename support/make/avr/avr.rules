@@ -146,6 +146,8 @@ exe: exe0 bytes FORCE
 
 ifeq ($(PLATFORM),micaz)
   AVR_CHIP = -D__AVR_ATmega128__
+else ifeq ($(PLATFORM),mica2)
+  AVR_CHIP = -D__AVR_ATmega128__
 else
   AVR_CHIP = 
 endif
