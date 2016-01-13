@@ -54,12 +54,20 @@ configuration ActiveMessageC {
 }
 implementation {
   components TossimActiveMessageC as AM;
-  components TossimPacketModelC as Network;
 
   components CpmModelC as Model;
 
   components ActiveMessageAddressC as Address;
   components MainC;
+
+// MAC Protocols
+#if defined(_MAC_CSMA_)
+  components MAC_CSMA as Network;
+#elif defined(_MAC_TOSSIM_)
+  components TossimPacketModelC as Network;
+#else
+  components TossimPacketModelC as Network;
+#endif
   
   MainC.SoftwareInit -> Network;
   SplitControl = Network;
@@ -75,5 +83,7 @@ implementation {
   AM.amAddress -> Address;
   
   Network.GainRadioModel -> Model;
+
+  //TODO Define MAC connections here
 }
 
