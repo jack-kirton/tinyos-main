@@ -42,9 +42,8 @@ create_hashtable(unsigned int minsize,
     }
     h = (struct hashtable *)malloc(sizeof(struct hashtable));
     if (NULL == h) return NULL; /*oom*/
-    h->table = (struct entry **)malloc(sizeof(struct entry*) * size);
+    h->table = (struct entry **)calloc(size, sizeof(struct entry*));
     if (NULL == h->table) { free(h); return NULL; } /*oom*/
-    memset(h->table, 0, size * sizeof(struct entry *));
     h->tablelength  = size;
     h->primeindex   = pindex;
     h->entrycount   = 0;
@@ -81,10 +80,9 @@ hashtable_expand(struct hashtable *h)
     if (h->primeindex == (prime_table_length - 1)) return 0;
     newsize = primes[++(h->primeindex)];
 
-    newtable = (struct entry **)malloc(sizeof(struct entry*) * newsize);
+    newtable = (struct entry **)calloc(newsize, sizeof(struct entry*));
     if (NULL != newtable)
     {
-        memset(newtable, 0, newsize * sizeof(struct entry *));
         /* This algorithm is not 'stable'. ie. it reverses the list
          * when it transfers entries between the tables */
         for (i = 0; i < h->tablelength; i++) {

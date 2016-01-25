@@ -176,7 +176,7 @@ void Mote::setID(unsigned long val) {
 }
 
 Variable* Mote::getVariable(char* name) {
-  char* typeStr = (char*)"";
+  const char* typeStr = "";
   int isArray;
   Variable* var;
   
@@ -187,11 +187,11 @@ Variable* Mote::getVariable(char* name) {
     // in Tossim class or a more complex typemap.
     if (app != NULL) {
       for (int i = 0; i < app->numVariables; i++) {
-	if(strcmp(name, app->variableNames[i]) == 0) {
-	  typeStr = app->variableTypes[i];
-	  isArray = app->variableArray[i];
-	  break;
-	}
+        if(strcmp(name, app->variableNames[i]) == 0) {
+          typeStr = app->variableTypes[i];
+          isArray = app->variableArray[i];
+          break;
+        }
       }
     }
     //  printf("Getting variable %s of type %s %s\n", name, typeStr, isArray? "[]" : "");
@@ -219,13 +219,17 @@ Tossim::Tossim(nesc_app_t* n) {
 }
 
 Tossim::~Tossim() {
+  for (size_t i = 0; i != (TOSSIM_MAX_NODES + 1); ++i)
+  {
+    delete motes[i];
+  }
+  free(motes);
   sim_end();
 }
 
 void Tossim::init() {
   sim_init();
-  motes = (Mote**)malloc(sizeof(Mote*) * (TOSSIM_MAX_NODES + 1));
-  memset(motes, 0, sizeof(Mote*) * TOSSIM_MAX_NODES);
+  motes = (Mote**)calloc(TOSSIM_MAX_NODES + 1, sizeof(Mote*));
 }
 
 long long int Tossim::time() {
@@ -258,10 +262,10 @@ Mote* Tossim::getNode(unsigned long nodeID) {
     if (motes[nodeID] == NULL) {
       motes[nodeID] = new Mote(app);
       if (nodeID == TOSSIM_MAX_NODES) {
-	motes[nodeID]->setID(0xffff);
+        motes[nodeID]->setID(0xffff);
       }
       else {
-	motes[nodeID]->setID(nodeID);
+        motes[nodeID]->setID(nodeID);
       }
     }
     return motes[nodeID];

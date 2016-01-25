@@ -58,7 +58,7 @@
 
 uint16_t TOS_NODE_ID = 1;
 
-Variable::Variable(const char* name, char* formatStr, int array, int which) {
+Variable::Variable(const char* name, const char* formatStr, int array, int which) {
   format = formatStr;
   isArray = array;
   mote = which;
@@ -118,15 +118,14 @@ variable_string_t Variable::getData() {
   }
   else {
     str.ptr = (char*)"<no such variable>";
-    str.type = (char*)"<no such variable>";
+    str.type = "<no such variable>";
     str.len = strlen("<no such variable>");
     str.isArray = 0;
   }
   return str;
 }
 
-Mote::Mote(nesc_app_t* n) {
-  app = n;
+Mote::Mote(nesc_app_t* n) : app(n) {
   varTable = create_hashtable(128, tossim_hash, tossim_hash_eq);
 }
 
@@ -178,7 +177,7 @@ void Mote::setID(unsigned long val) {
 }
 
 Variable* Mote::getVariable(const char* name) {
-  char* typeStr = (char*)"";
+  const char* typeStr = "";
   int isArray;
   Variable* var;
   

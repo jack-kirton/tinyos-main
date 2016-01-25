@@ -3598,7 +3598,7 @@ enum {
   PRIMITIVE_UNKNOWN = 2
 };
 
-int lengthOfType(char* type) {
+int lengthOfType(const char* type) {
   if (strcmp(type, "uint8_t") == 0) {
     return sizeof(uint8_t);
   }
@@ -3652,7 +3652,7 @@ int lengthOfType(char* type) {
   }
 }
 
-int memoryToPrimitive(char* type, char* ptr, long* lval, double* dval) {
+int memoryToPrimitive(const char* type, const char* ptr, long* lval, double* dval) {
   if (strcmp(type, "uint8_t") == 0) {
     uint8_t val;
     memcpy(&val, ptr, sizeof(uint8_t));
@@ -3754,7 +3754,7 @@ int memoryToPrimitive(char* type, char* ptr, long* lval, double* dval) {
   }
 }
 
-PyObject* valueFromScalar(char* type, char* ptr, int len) {
+PyObject* valueFromScalar(const char* type, char* ptr, int len) {
   long lval;
   double dval;
   int rval = memoryToPrimitive(type, ptr, &lval, &dval);
@@ -3769,7 +3769,7 @@ PyObject* valueFromScalar(char* type, char* ptr, int len) {
   }
 }
 
-PyObject* listFromArray(char* type, char* ptr, int len) {
+PyObject* listFromArray(const char* type, char* ptr, int len) {
   long lval;
   double dval;
   int elementLen = lengthOfType(type);
@@ -5539,13 +5539,12 @@ SWIGINTERN PyObject *_wrap_variable_string_t_type_set(PyObject *self, PyObject *
   arg1 = reinterpret_cast< variable_string * >(argp1);
   res2 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "variable_string_t_type_set" "', argument " "2"" of type '" "char *""'");
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "variable_string_t_type_set" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
-  if (arg1->type) delete[] arg1->type;
   if (arg2) {
-    size_t size = strlen(reinterpret_cast< const char * >(arg2)) + 1;
-    arg1->type = (char *)reinterpret_cast< char* >(memcpy((new char[size]), reinterpret_cast< const char * >(arg2), sizeof(char)*(size)));
+    size_t size = strlen(reinterpret_cast< const char * >(reinterpret_cast< const char * >(arg2))) + 1;
+    arg1->type = (char const *)reinterpret_cast< char* >(memcpy((new char[size]), arg2, sizeof(char)*(size)));
   } else {
     arg1->type = 0;
   }
@@ -5850,10 +5849,10 @@ SWIGINTERN PyObject *_wrap_nesc_app_t_variableNames_set(PyObject *self, PyObject
   arg1 = reinterpret_cast< nesc_app * >(argp1);
   res2 = SWIG_ConvertPtr(swig_obj[0], &argp2,SWIGTYPE_p_p_char, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "nesc_app_t_variableNames_set" "', argument " "2"" of type '" "char **""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "nesc_app_t_variableNames_set" "', argument " "2"" of type '" "char const **""'"); 
   }
   arg2 = reinterpret_cast< char ** >(argp2);
-  if (arg1) (arg1)->variableNames = arg2;
+  if (arg1) (arg1)->variableNames = (char const **)arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5902,10 +5901,10 @@ SWIGINTERN PyObject *_wrap_nesc_app_t_variableTypes_set(PyObject *self, PyObject
   arg1 = reinterpret_cast< nesc_app * >(argp1);
   res2 = SWIG_ConvertPtr(swig_obj[0], &argp2,SWIGTYPE_p_p_char, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "nesc_app_t_variableTypes_set" "', argument " "2"" of type '" "char **""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "nesc_app_t_variableTypes_set" "', argument " "2"" of type '" "char const **""'"); 
   }
   arg2 = reinterpret_cast< char ** >(argp2);
-  if (arg1) (arg1)->variableTypes = arg2;
+  if (arg1) (arg1)->variableTypes = (char const **)arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -6043,12 +6042,12 @@ SWIGINTERN int _wrap_new_Variable(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"new_Variable",4,4,swig_obj)) SWIG_fail;
   res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Variable" "', argument " "1"" of type '" "char *""'");
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Variable" "', argument " "1"" of type '" "char const *""'");
   }
   arg1 = reinterpret_cast< char * >(buf1);
   res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_Variable" "', argument " "2"" of type '" "char *""'");
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_Variable" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
   ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
@@ -6061,7 +6060,7 @@ SWIGINTERN int _wrap_new_Variable(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "new_Variable" "', argument " "4"" of type '" "int""'");
   } 
   arg4 = static_cast< int >(val4);
-  result = (Variable *)new Variable(arg1,arg2,arg3,arg4);
+  result = (Variable *)new Variable((char const *)arg1,(char const *)arg2,arg3,arg4);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Variable, SWIG_BUILTIN_INIT |  0 );
   if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -6153,13 +6152,9 @@ SWIGINTERN int _wrap_new_Mote(PyObject *self, PyObject *args) {
       app = (nesc_app_t*)malloc(sizeof(nesc_app_t));
       
       app->numVariables = size / 3;
-      app->variableNames = (char**)malloc(sizeof(char*) * app->numVariables);
-      app->variableTypes = (char**)malloc(sizeof(char*) * app->numVariables);
-      app->variableArray = (int*)malloc(sizeof(int) * app->numVariables);
-      
-      memset(app->variableNames, 0, sizeof(char*) * app->numVariables);
-      memset(app->variableTypes, 0, sizeof(char*) * app->numVariables);
-      memset(app->variableArray, 0, sizeof(int) * app->numVariables);
+      app->variableNames = (const char**)calloc(app->numVariables, sizeof(char*));
+      app->variableTypes = (const char**)calloc(app->numVariables, sizeof(char*));
+      app->variableArray = (int*)calloc(app->numVariables, sizeof(int));
       
       for (i = 0; i < app->numVariables; i++) {
         PyObject* name = PyList_GetItem(swig_obj[0], 3 * i);
@@ -6178,8 +6173,8 @@ SWIGINTERN int _wrap_new_Mote(PyObject *self, PyObject *args) {
           }
         }
         else {
-          app->variableNames[i] = (char*)"<bad string>";
-          app->variableTypes[i] = (char*)"<bad string>";
+          app->variableNames[i] = "<bad string>";
+          app->variableTypes[i] = "<bad string>";
         }
       }
       
@@ -6546,13 +6541,9 @@ SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
       app = (nesc_app_t*)malloc(sizeof(nesc_app_t));
       
       app->numVariables = size / 3;
-      app->variableNames = (char**)malloc(sizeof(char*) * app->numVariables);
-      app->variableTypes = (char**)malloc(sizeof(char*) * app->numVariables);
-      app->variableArray = (int*)malloc(sizeof(int) * app->numVariables);
-      
-      memset(app->variableNames, 0, sizeof(char*) * app->numVariables);
-      memset(app->variableTypes, 0, sizeof(char*) * app->numVariables);
-      memset(app->variableArray, 0, sizeof(int) * app->numVariables);
+      app->variableNames = (const char**)calloc(app->numVariables, sizeof(char*));
+      app->variableTypes = (const char**)calloc(app->numVariables, sizeof(char*));
+      app->variableArray = (int*)calloc(app->numVariables, sizeof(int));
       
       for (i = 0; i < app->numVariables; i++) {
         PyObject* name = PyList_GetItem(swig_obj[0], 3 * i);
@@ -6571,8 +6562,8 @@ SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
           }
         }
         else {
-          app->variableNames[i] = (char*)"<bad string>";
-          app->variableTypes[i] = (char*)"<bad string>";
+          app->variableNames[i] = "<bad string>";
+          app->variableTypes[i] = "<bad string>";
         }
       }
       

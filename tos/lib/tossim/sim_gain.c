@@ -32,13 +32,11 @@ void sim_gain_add(int src, int dest, double gain) __attribute__ ((C, spontaneous
   }
   sim_set_node(src);
 
-  current = sim_gain_first(src);
-  while (current != NULL) {
+  for (current = sim_gain_first(src); current != NULL; current = current->next) {
     if (current->mote == dest) {
       sim_set_node(temp);
       break;
     }
-    current = current->next;
   }
 
   if (current == NULL) {
@@ -56,14 +54,12 @@ double sim_gain_value(int src, int dest) __attribute__ ((C, spontaneous))  {
   gain_entry_t* current;
   int temp = sim_node();
   sim_set_node(src);
-  current = sim_gain_first(src);
-  while (current != NULL) {
+  for (current = sim_gain_first(src); current != NULL; current = current->next) {
     if (current->mote == dest) {
       sim_set_node(temp);
       dbg("Gain", "Getting link from %i to %i with gain %f\n", src, dest, current->gain);
       return current->gain;
     }
-    current = current->next;
   }
   sim_set_node(temp);
   dbg("Gain", "Getting default link from %i to %i with gain %f\n", src, dest, 1.0);
@@ -74,13 +70,11 @@ bool sim_gain_connected(int src, int dest) __attribute__ ((C, spontaneous)) {
   gain_entry_t* current;
   int temp = sim_node();
   sim_set_node(src);
-  current = sim_gain_first(src);
-  while (current != NULL) {
+  for (current = sim_gain_first(src); current != NULL; current = current->next) {
     if (current->mote == dest) {
       sim_set_node(temp);
       return TRUE;
     }
-    current = current->next;
   }
   sim_set_node(temp);
   return FALSE;
