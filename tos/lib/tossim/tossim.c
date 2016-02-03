@@ -231,8 +231,8 @@ void Tossim::free_motes()
         delete motes[i];
     }
     free(motes);
+    motes = NULL;
   }
-  motes = NULL;
 }
 
 Tossim::~Tossim() {
@@ -254,7 +254,7 @@ long long int Tossim::ticksPerSecond() {
   return sim_ticks_per_sec();
 }
 
-char* Tossim::timeStr() {
+const char* Tossim::timeStr() {
   sim_print_now(timeBuf, 256);
   return timeBuf;
 }
@@ -291,11 +291,11 @@ void Tossim::setCurrentNode(unsigned long nodeID) {
   sim_set_node(nodeID);
 }
 
-void Tossim::addChannel(char* channel, FILE* file) {
+void Tossim::addChannel(const char* channel, FILE* file) {
   sim_add_channel(channel, file);
 }
 
-bool Tossim::removeChannel(char* channel, FILE* file) {
+bool Tossim::removeChannel(const char* channel, FILE* file) {
   return sim_remove_channel(channel, file);
 }
 

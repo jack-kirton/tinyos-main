@@ -121,15 +121,15 @@ class Tossim {
   
   long long int time();
   long long int ticksPerSecond();
-  char* timeStr();
+  const char* timeStr();
   void setTime(long long int time);
   
   Mote* currentNode();
   Mote* getNode(unsigned long nodeID);
   void setCurrentNode(unsigned long nodeID);
 
-  void addChannel(char* channel, FILE* file);
-  bool removeChannel(char* channel, FILE* file);
+  void addChannel(const char* channel, FILE* file);
+  bool removeChannel(const char* channel, FILE* file);
   void randomSeed(int seed);
   
   bool runNextEvent();
@@ -145,7 +145,7 @@ private:
  private:
   nesc_app_t* app;
   Mote** motes;
-  char timeBuf[256];
+  char timeBuf[128];
 };
 
 #endif // TOSSIM_H_INCLUDED

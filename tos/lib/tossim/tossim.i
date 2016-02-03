@@ -416,7 +416,7 @@ class Tossim {
   long long int time();
   long long int ticksPerSecond(); 
   void setTime(long long int time);
-  char* timeStr();
+  const char* timeStr();
 
   Mote* currentNode();
   Mote* getNode(unsigned long nodeID);

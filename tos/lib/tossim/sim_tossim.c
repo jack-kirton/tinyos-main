@@ -181,15 +181,15 @@ int sim_print_now(char* buf, int len) __attribute__ ((C, spontaneous)) {
 }
 
 char simTimeBuf[128];
-char* sim_time_string() __attribute__ ((C, spontaneous)) {
+const char* sim_time_string() __attribute__ ((C, spontaneous)) {
   sim_print_now(simTimeBuf, 128);
   return simTimeBuf;
 }
 
-void sim_add_channel(char* channel, FILE* file) __attribute__ ((C, spontaneous)) {
+void sim_add_channel(const char* channel, FILE* file) __attribute__ ((C, spontaneous)) {
   sim_log_add_channel(channel, file);
 }
 
-bool sim_remove_channel(char* channel, FILE* file)  __attribute__ ((C, spontaneous)) {
+bool sim_remove_channel(const char* channel, FILE* file)  __attribute__ ((C, spontaneous)) {
   return sim_log_remove_channel(channel, file);
 }
