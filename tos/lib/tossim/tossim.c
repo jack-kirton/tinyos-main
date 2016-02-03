@@ -307,6 +307,23 @@ bool Tossim::runNextEvent() {
   return sim_run_next_event();
 }
 
+unsigned int Tossim::runAllEvents(std::function<bool()> continue_events, std::function<void (unsigned int)> callback) {
+  unsigned int event_count = 0;
+  while (continue_events())
+  {
+    if (!runNextEvent())
+    {
+      break;
+    }
+
+    callback(event_count);
+
+    event_count += 1;
+  }
+
+  return event_count;
+}
+
 MAC* Tossim::mac() {
   return new MAC();
 }

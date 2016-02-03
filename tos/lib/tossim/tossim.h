@@ -50,6 +50,8 @@
 #include <packet.h>
 #include <hashtable.h>
 
+ #include <functional>
+
 typedef struct variable_string {
   const char* type;
   char* ptr;
@@ -131,6 +133,7 @@ class Tossim {
   void randomSeed(int seed);
   
   bool runNextEvent();
+  unsigned int runAllEvents(std::function<bool()> continue_events, std::function<void (unsigned int)> callback);
 
   MAC* mac();
   Radio* radio();
