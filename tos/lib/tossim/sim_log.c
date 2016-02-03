@@ -64,8 +64,8 @@ enum {
   SIM_LOG_OUTPUT_COUNT = uniqueCount("TOSSIM.debug")
 };
 
-sim_log_output_t outputs[SIM_LOG_OUTPUT_COUNT];
-struct hashtable* channelTable = NULL;
+static sim_log_output_t outputs[SIM_LOG_OUTPUT_COUNT];
+static struct hashtable* channelTable = NULL;
 
 
 static unsigned int sim_log_hash(const void* key);
