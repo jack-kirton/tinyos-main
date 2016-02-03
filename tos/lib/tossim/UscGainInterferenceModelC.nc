@@ -90,11 +90,15 @@ implementation {
     dbg("Gain", "Computing noise @ %s: %0.2f", sim_time_string(), localNoise);
     while (current != NULL) {
       sig += pow(10.0, current->power / 10.0);
+
+#ifdef DEBUG
       dbg_clear("Gain", " ");
       if (current->power >= 0.0) {
         dbg_clear("Gain", "+");
       }
       dbg_clear("Gain", "%0.2f ", current->power);
+#endif
+
       current = current->next;
     }
     dbg_clear("Gain", " = %0.2f\n", 10.0 * log(sig) / log(10.0));
@@ -116,8 +120,7 @@ implementation {
 
   command void Model.setClearValue(double value) {
     clearThreshold = value;
-    dbg("Gain", "Setting clear threshold to %f\n", clearThreshold);
-        
+    dbg("Gain", "Setting clear threshold to %f\n", clearThreshold);  
   }
   
   command bool Model.clearChannel() {

@@ -42,7 +42,7 @@
 
 /*
  *
- * Authors:		Alec Woo, David Gay, Philip Levis
+ * Authors:             Alec Woo, David Gay, Philip Levis
  * Date last modified:  8/8/05
  *
  */
@@ -88,7 +88,7 @@ implementation
       endbit = ((tmpShiftReg & 0x8000) != 0);
       tmpShiftReg <<= 1;
       if (endbit) 
-	tmpShiftReg ^= 0x100b;
+        tmpShiftReg ^= 0x100b;
       tmpShiftReg++;
       shiftReg = tmpShiftReg;
       tmpShiftReg = tmpShiftReg ^ mask;

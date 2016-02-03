@@ -111,11 +111,11 @@ double RandomUniform(void)
 #if 0
    	RandomInitialise(1802,9373);
 #else
- 	seed1 = sim_random() % 31329;
- 	seed2 = sim_random() % 30082;
-   	RandomInitialise(seed1,seed2);
+      seed1 = sim_random() % 31329;
+      seed2 = sim_random() % 30082;
+      RandomInitialise(seed1,seed2);
 #endif
-	}
+   }
    uni = randU[i97-1] - randU[j97-1];
    if (uni <= 0.0)
       uni++;

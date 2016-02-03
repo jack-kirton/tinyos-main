@@ -76,23 +76,23 @@ implementation
 
     for (num=0; num<NUM_TIMERS; num++)
       {
-	Timer_t* timer = &m_timers[num];
+        Timer_t* timer = &m_timers[num];
 
-	if (timer->isrunning)
-	  {
-	    uint32_t elapsed = now - timer->t0;
+        if (timer->isrunning)
+          {
+            uint32_t elapsed = now - timer->t0;
 
-	    if (elapsed >= timer->dt)
-	      {
-		if (timer->isoneshot)
-		  timer->isrunning = FALSE;
-		else // Update timer for next event
-		  timer->t0 += timer->dt;
+            if (elapsed >= timer->dt)
+              {
+                if (timer->isoneshot)
+                  timer->isrunning = FALSE;
+                else // Update timer for next event
+                  timer->t0 += timer->dt;
 
-		signal Timer.fired[num]();
+                signal Timer.fired[num]();
     break;
-	      }
-	  }
+              }
+          }
       }
     post updateFromTimer();
   }
@@ -112,27 +112,27 @@ implementation
 
     for (num=0; num<NUM_TIMERS; num++)
       {
-	Timer_t* timer = &m_timers[num];
+        Timer_t* timer = &m_timers[num];
 
-	if (timer->isrunning)
-	  {
-	    uint32_t elapsed = now - timer->t0;
-	    int32_t remaining = timer->dt - elapsed;
+        if (timer->isrunning)
+          {
+            uint32_t elapsed = now - timer->t0;
+            int32_t remaining = timer->dt - elapsed;
 
-	    if (remaining < min_remaining)
-	      {
-		min_remaining = remaining;
-		min_remaining_isset = TRUE;
-	      }
-	  }
+            if (remaining < min_remaining)
+              {
+                min_remaining = remaining;
+                min_remaining_isset = TRUE;
+              }
+          }
       }
 
     if (min_remaining_isset)
       {
-	if (min_remaining <= 0)
-	  fireTimers(now);
-	else
-	  call TimerFrom.startOneShotAt(now, min_remaining);
+        if (min_remaining <= 0)
+          fireTimers(now);
+        else
+          call TimerFrom.startOneShotAt(now, min_remaining);
       }
   }
   
