@@ -2,7 +2,7 @@
 #$Id: sim.extra,v 1.14 2009-11-14 02:14:18 razvanm Exp $
 
 export GCC=gcc
-GPP=g++ -std=c++11
+GPP=g++ -std=gnu++11
 #OPTFLAGS = -g -O0
 OPTFLAGS = -O2 -msse2
 LIBS = -lm -lstdc++ 
