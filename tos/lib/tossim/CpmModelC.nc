@@ -58,7 +58,7 @@ implementation {
   message_t* outgoing; // If I'm sending, this is my outgoing packet
   bool requestAck;
   bool receiving = 0;  // Whether or not I think I'm receiving a packet
-  bool transmitting = 0; // Whether or not I think I'm tranmitting a packet
+  bool transmitting = 0; // Whether or not I think I'm transmitting a packet
   sim_time_t transmissionEndTime; // to check pending transmission
   struct receive_message;
   typedef struct receive_message receive_message_t;
