@@ -46,6 +46,8 @@
 #include <memory.h>
 #include <tossim.h>
 
+#include <functional>
+
 enum {
   PRIMITIVE_INTEGER      = 0,
   PRIMITIVE_FLOAT   = 1,
@@ -208,7 +210,7 @@ int memoryToPrimitive(const char* type, const char* ptr, long* lval, double* dva
   }
 }
 
-PyObject* valueFromScalar(const char* type, char* ptr, int len) {
+PyObject* valueFromScalar(const char* type, const char* ptr, int len) {
   long lval;
   double dval;
   int rval = memoryToPrimitive(type, ptr, &lval, &dval);
@@ -223,24 +225,66 @@ PyObject* valueFromScalar(const char* type, char* ptr, int len) {
   }
 }
 
-PyObject* listFromArray(const char* type, char* ptr, int len) {
+PyObject* listFromArray(const char* type, const char* ptr, int len) {
   long lval;
   double dval;
   int elementLen = lengthOfType(type);
   PyObject* list = PyList_New(0);
   //printf("Generating list of %s\n", type);
-  for (char* tmpPtr = ptr; tmpPtr < ptr + len; tmpPtr += elementLen) {
+  for (const char* tmpPtr = ptr; tmpPtr < ptr + len; tmpPtr += elementLen) {
     PyList_Append(list, valueFromScalar(type, tmpPtr, elementLen));    
   }
   return list;
 }
+
+// From: https://stackoverflow.com/questions/11516809/c-back-end-call-the-python-level-defined-callbacks-with-swig-wrapper#new-answer
+class PyCallback
+{
+private:
+    PyObject *func;
+    PyCallback& operator=(const PyCallback&); // Not allowed
+public:
+    PyCallback(PyCallback&& o) : func(o.func) {
+      o.func = NULL;
+    }
+    PyCallback(const PyCallback& o) : func(o.func) {
+      Py_XINCREF(func);
+    }
+    PyCallback(PyObject *pfunc) : func(pfunc) {
+      Py_XINCREF(func);
+      assert(PyCallable_Check(func));
+    }
+    ~PyCallback() {
+      Py_XDECREF(func);
+    }
+    bool operator()() const {
+      if (!func || Py_None == func || !PyCallable_Check(func))
+        return false;
+      PyObject *args = PyTuple_New(0);
+      PyObject *result = PyObject_Call(func,args,NULL);
+      bool bool_result = result != NULL && PyObject_IsTrue(result);
+      Py_DECREF(args);
+      Py_XDECREF(result);
+      return bool_result;
+    }
+    void operator()(unsigned int i) const {
+      if (!func || Py_None == func || !PyCallable_Check(func))
+        return;
+      PyObject *args = Py_BuildValue("(i)", i);
+      PyObject *result = PyObject_Call(func,args,NULL);
+      Py_DECREF(args);
+      Py_XDECREF(result);
+    }
+};
+
 %}
 
 %include mac.i
 %include radio.i
 %include packet.i
 
-%typemap(python,in) FILE * {
+#ifdef SWIGPYTHON
+%typemap(in) FILE * {
   if (!PyFile_Check($input)) {
     PyErr_SetString(PyExc_TypeError, "Requires a file as a parameter.");
     return NULL;
@@ -248,7 +292,7 @@ PyObject* listFromArray(const char* type, char* ptr, int len) {
   $1 = PyFile_AsFile($input);
 }
 
-%typemap(python,out) variable_string_t {
+%typemap(out) variable_string_t {
   if ($1.isArray) {
     //printf("Generating array %s\n", $1.type);
     $result = listFromArray  ($1.type, $1.ptr, $1.len);
@@ -262,8 +306,7 @@ PyObject* listFromArray(const char* type, char* ptr, int len) {
   }
 }
 
-
-%typemap(python,in) nesc_app_t* {
+%typemap(in) nesc_app_t* {
   if (!PyList_Check($input)) {
     PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
     return NULL;
@@ -310,6 +353,7 @@ PyObject* listFromArray(const char* type, char* ptr, int len) {
     $1 = app;
   }
 }
+#endif
 
 typedef struct variable_string {
   const char* type;
@@ -356,6 +400,12 @@ class Mote {
   int generateNoise(int when);
 };
 
+%extend Tossim {
+  void runAllEvents(PyObject *continue_events, PyObject *callback) {
+    $self->runAllEvents(PyCallback(continue_events), PyCallback(callback));
+  }
+}
+
 class Tossim {
  public:
   Tossim(nesc_app_t* app);
@@ -366,7 +416,7 @@ class Tossim {
   long long int time();
   long long int ticksPerSecond(); 
   void setTime(long long int time);
-  char* timeStr();
+  const char* timeStr();
 
   Mote* currentNode();
   Mote* getNode(unsigned long nodeID);
@@ -377,6 +427,7 @@ class Tossim {
   void randomSeed(int seed);
 
   bool runNextEvent();
+  unsigned int runAllEvents(std::function<bool()> continue_events, std::function<void (unsigned int)> callback);
 
   MAC* mac();
   Radio* radio();

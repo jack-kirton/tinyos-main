@@ -109,19 +109,19 @@ implementation
       from_size_type low = call CounterFrom.get();
       if (call CounterFrom.isOverflowPending())
       {
-	// If we signalled CounterFrom.overflow, that might trigger a
-	// Counter.overflow, which breaks atomicity.  The right thing to do
-	// increment a cached version of high without overflow signals.
-	// m_upper will be handled normally as soon as the out-most atomic
-	// block is left unless Clear.clearOverflow is called in the interim.
-	// This is all together the expected behavior.
-	high++;
-	low = call CounterFrom.get();
+        // If we signalled CounterFrom.overflow, that might trigger a
+        // Counter.overflow, which breaks atomicity.  The right thing to do
+        // increment a cached version of high without overflow signals.
+        // m_upper will be handled normally as soon as the out-most atomic
+        // block is left unless Clear.clearOverflow is called in the interim.
+        // This is all together the expected behavior.
+        high++;
+        low = call CounterFrom.get();
       }
       {
-	to_size_type high_to = high;
-	to_size_type low_to = low >> LOW_SHIFT_RIGHT;
-	rv = (high_to << HIGH_SHIFT_LEFT) | low_to;
+        to_size_type high_to = high;
+        to_size_type low_to = low >> LOW_SHIFT_RIGHT;
+        rv = (high_to << HIGH_SHIFT_LEFT) | low_to;
       }
     }
     return rv;
@@ -134,7 +134,7 @@ implementation
   async command bool Counter.isOverflowPending()
   {
     return ((m_upper & OVERFLOW_MASK) == OVERFLOW_MASK)
-	   && call CounterFrom.isOverflowPending();
+           && call CounterFrom.isOverflowPending();
   }
 
   // clearOverflow also only makes sense inside a larger atomic block, but we
@@ -147,8 +147,8 @@ implementation
     {
       if (call Counter.isOverflowPending())
       {
-	m_upper++;
-	call CounterFrom.clearOverflow();
+        m_upper++;
+        call CounterFrom.clearOverflow();
       }
     }
   }
@@ -159,10 +159,10 @@ implementation
     {
       m_upper++;
       if ((m_upper & OVERFLOW_MASK) == 0)
-	signal Counter.overflow();
+        signal Counter.overflow();
 
       if (m_skip_overflows && !--m_skip_overflows)
-	set_alarm();
+        set_alarm();
     }
   }
 
@@ -202,31 +202,31 @@ implementation
       remaining = m_dt - elapsed;
 
       /* MAX_DELAY is 1/2 an underlying counter overflow time. Just count
-	 overflows if the timer is far in the future, and we'll set an
-	 alarm once we're close to the deadline. */
+         overflows if the timer is far in the future, and we'll set an
+         alarm once we're close to the deadline. */
       if (remaining > MAX_DELAY * 2)
       {
-	if (remaining >= MAX_DELAY * 2 * (to_size_type)256)
-	  m_skip_overflows = 255;
-	else
-	  m_skip_overflows = remaining / (MAX_DELAY * 2);
-	return;
+        if (remaining >= MAX_DELAY * 2 * (to_size_type)256)
+          m_skip_overflows = 255;
+        else
+          m_skip_overflows = remaining / (MAX_DELAY * 2);
+        return;
       }
 
       if (remaining > MAX_DELAY)
       {
-	m_t0 = now + MAX_DELAY;
-	m_dt = remaining - MAX_DELAY;
-	remaining = MAX_DELAY;
+        m_t0 = now + MAX_DELAY;
+        m_dt = remaining - MAX_DELAY;
+        remaining = MAX_DELAY;
       }
       else
       {
-	m_t0 += m_dt;
-	m_dt = 0;
+        m_t0 += m_dt;
+        m_dt = 0;
       }
     }
     call AlarmFrom.startAt((from_size_type)now << bit_shift_right,
-			   (from_size_type)remaining << bit_shift_right);
+                           (from_size_type)remaining << bit_shift_right);
   }
 
   async command void Alarm.startAt(to_size_type t0, to_size_type dt)
@@ -250,11 +250,11 @@ implementation
     {
       if (m_dt == 0)
       {
-	signal Alarm.fired();
+        signal Alarm.fired();
       }
       else
       {
-	set_alarm();
+        set_alarm();
       }
     }
   }

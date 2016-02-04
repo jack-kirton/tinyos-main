@@ -119,29 +119,29 @@ implementation
     /* if (expires <= now) remaining = 0; in wrap-around arithmetic */
     if (m_t0 <= now)
       {
-	if (expires >= m_t0 && // if it wraps, it's > now
-	    expires <= now)
-	  remaining = 0;
+        if (expires >= m_t0 && // if it wraps, it's > now
+            expires <= now)
+          remaining = 0;
       }
     else
       {
-	if (expires >= m_t0 || // didn't wrap so < now
-	    expires <= now)
-	  remaining = 0;
+        if (expires >= m_t0 || // didn't wrap so < now
+            expires <= now)
+          remaining = 0;
       }
     if (remaining > MAX_DELAY)
       {
-	m_t0 = now + MAX_DELAY;
-	m_dt = remaining - MAX_DELAY;
-	remaining = MAX_DELAY;
+        m_t0 = now + MAX_DELAY;
+        m_dt = remaining - MAX_DELAY;
+        remaining = MAX_DELAY;
       }
     else
       {
-	m_t0 += m_dt;
-	m_dt = 0;
+        m_t0 += m_dt;
+        m_dt = 0;
       }
     call AlarmFrom.startAt((from_size_type)now << bit_shift_right,
-			   (from_size_type)remaining << bit_shift_right);
+                           (from_size_type)remaining << bit_shift_right);
   }
 
   async command void Alarm.startAt(to_size_type t0, to_size_type dt)
@@ -165,11 +165,11 @@ implementation
     {
       if(m_dt == 0)
       {
-	signal Alarm.fired();
+        signal Alarm.fired();
       }
       else
       {
-	set_alarm();
+        set_alarm();
       }
     }
   }

@@ -2,7 +2,8 @@
 #$Id: sim.extra,v 1.14 2009-11-14 02:14:18 razvanm Exp $
 
 export GCC=gcc
-GPP=g++
+GPP=g++ -std=gnu++11
+#OPTFLAGS = -g -O0
 OPTFLAGS = -O2 -msse2 -flto
 LIBS = -lm -lstdc++ 
 PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc=$(GCC)

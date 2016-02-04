@@ -117,7 +117,9 @@ implementation {
     int tmpID = sim_node();
     sim_set_node(mote);
     result = call SimMote.getVariableInfo(name, ptr, len);
+#ifdef DEBUG
     dbg("SimMoteP", "Fetched %s of %i to be %p with len %i (result %i)\n", name, mote, *ptr, *len, result);
+#endif
     sim_set_node(tmpID);
     return result;
   }

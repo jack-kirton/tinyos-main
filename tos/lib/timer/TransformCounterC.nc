@@ -86,19 +86,19 @@ implementation
       from_size_type low = call CounterFrom.get();
       if (call CounterFrom.isOverflowPending())
       {
-	// If we signalled CounterFrom.overflow, that might trigger a
-	// Counter.overflow, which breaks atomicity.  The right thing to do
-	// increment a cached version of high without overflow signals.
-	// m_upper will be handled normally as soon as the out-most atomic
-	// block is left unless Clear.clearOverflow is called in the interim.
-	// This is all together the expected behavior.
-	high++;
-	low = call CounterFrom.get();
+        // If we signalled CounterFrom.overflow, that might trigger a
+        // Counter.overflow, which breaks atomicity.  The right thing to do
+        // increment a cached version of high without overflow signals.
+        // m_upper will be handled normally as soon as the out-most atomic
+        // block is left unless Clear.clearOverflow is called in the interim.
+        // This is all together the expected behavior.
+        high++;
+        low = call CounterFrom.get();
       }
       {
-	to_size_type high_to = high;
-	to_size_type low_to = low >> LOW_SHIFT_RIGHT;
-	rv = (high_to << HIGH_SHIFT_LEFT) | low_to;
+        to_size_type high_to = high;
+        to_size_type low_to = low >> LOW_SHIFT_RIGHT;
+        rv = (high_to << HIGH_SHIFT_LEFT) | low_to;
       }
     }
     return rv;
@@ -111,7 +111,7 @@ implementation
   async command bool Counter.isOverflowPending()
   {
     return ((m_upper & OVERFLOW_MASK) == OVERFLOW_MASK)
-	   && call CounterFrom.isOverflowPending();
+           && call CounterFrom.isOverflowPending();
   }
 
   // clearOverflow also only makes sense inside a larger atomic block, but we
@@ -124,8 +124,8 @@ implementation
     {
       if (call Counter.isOverflowPending())
       {
-	m_upper++;
-	call CounterFrom.clearOverflow();
+        m_upper++;
+        call CounterFrom.clearOverflow();
       }
     }
   }
@@ -136,7 +136,7 @@ implementation
     {
       m_upper++;
       if ((m_upper & OVERFLOW_MASK) == 0)
-	signal Counter.overflow();
+        signal Counter.overflow();
     }
   }
 }
