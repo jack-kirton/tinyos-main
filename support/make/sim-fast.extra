@@ -19,11 +19,7 @@ HASHOBJFILE = $(BUILDDIR)/c-support.o
 PYFILE     = $(TOSDIR)/lib/tossim/tossim_wrap.cxx
 PYOBJFILE  = $(BUILDDIR)/pytossim.o
 PYDIR      = $(shell python$(PYTHON_VERSION)-config --prefix)/include/python$(PYTHON_VERSION)
-<<<<<<< HEAD
 SIMDIR     = $(TOSDIR)/lib/tossim
-=======
-SIMDIR     =$(TOSDIR)/lib/tossim
->>>>>>> 6acb2e936efe255cf886108074af089b951e912a
 XML        = app.xml
 DUMPTYPES = -fnesc-dump=components -fnesc-dump=variables -fnesc-dump=constants -fnesc-dump=typedefs -fnesc-dump=interfacedefs -fnesc-dump=tags
 
