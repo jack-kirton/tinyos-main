@@ -264,7 +264,10 @@ void arrangeKey(uint16_t node_id)__attribute__ ((C, spontaneous))
 {
   size_t i;
   char *pKey = noiseData[node_id].key;
+
+#ifdef DEBUG
   char *fKey = noiseData[node_id].freqKey;
+#endif
 
   FreqKeyNum = 0;
   for (i=0; i < NOISE_HISTORY; i++) {
