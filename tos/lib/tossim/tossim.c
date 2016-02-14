@@ -308,7 +308,7 @@ bool Tossim::runNextEvent() {
 }
 
 unsigned int Tossim::runAllEvents(std::function<bool()> continue_events, std::function<void (unsigned int)> callback) {
-  unsigned int event_count = 0;
+  int event_count = 0;
   while (continue_events())
   {
     if (!runNextEvent())

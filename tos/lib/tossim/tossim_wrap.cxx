@@ -15,9 +15,6 @@
 
 #define SWIG_PYTHON_NO_THREADS
 #define SWIG_PYTHON_NO_BUILD_NONE
-#ifndef SWIG_DIRECTOR_NORTTI
-#define SWIG_DIRECTOR_NORTTI
-#endif
 #define SWIGPYTHON_BUILTIN
 
 
@@ -4353,8 +4350,8 @@ SWIGINTERNINLINE PyObject*
   return PyInt_FromSize_t((size_t) value);
 }
 
-SWIGINTERN void Tossim_runAllEvents__SWIG_1(Tossim *self,PyObject *continue_events,PyObject *callback){
-    self->runAllEvents(PyCallback(continue_events), PyCallback(callback));
+SWIGINTERN unsigned int Tossim_runAllEvents__SWIG_1(Tossim *self,PyObject *continue_events,PyObject *callback){
+    return self->runAllEvents(PyCallback(continue_events), PyCallback(callback));
   }
 #ifdef __cplusplus
 extern "C" {
@@ -7242,6 +7239,7 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEvents__SWIG_1(PyObject *self, int nobjs
   PyObject *arg3 = (PyObject *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  unsigned int result;
   
   if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
@@ -7251,8 +7249,8 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEvents__SWIG_1(PyObject *self, int nobjs
   arg1 = reinterpret_cast< Tossim * >(argp1);
   arg2 = swig_obj[1];
   arg3 = swig_obj[2];
-  Tossim_runAllEvents__SWIG_1(arg1,arg2,arg3);
-  resultobj = SWIG_Py_Void();
+  result = (unsigned int)Tossim_runAllEvents__SWIG_1(arg1,arg2,arg3);
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
   return NULL;

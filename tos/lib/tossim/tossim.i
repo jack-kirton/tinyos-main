@@ -401,8 +401,8 @@ class Mote {
 };
 
 %extend Tossim {
-  void runAllEvents(PyObject *continue_events, PyObject *callback) {
-    $self->runAllEvents(PyCallback(continue_events), PyCallback(callback));
+  unsigned int runAllEvents(PyObject *continue_events, PyObject *callback) {
+    return $self->runAllEvents(PyCallback(continue_events), PyCallback(callback));
   }
 }
 
