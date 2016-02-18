@@ -4,7 +4,8 @@
 export GCC=gcc
 GPP=g++ -std=gnu++11
 #OPTFLAGS = -g -O0
-OPTFLAGS = -O2 -msse2 -flto
+OPTFLAGS = -O2 -msse4.2 -maes -mpclmul -flto
+#-march=westmere
 LIBS = -lm -lstdc++ 
 PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc=$(GCC)
 WFLAGS = -Wno-nesc-data-race
