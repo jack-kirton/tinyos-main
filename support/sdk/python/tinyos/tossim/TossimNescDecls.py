@@ -71,7 +71,7 @@ def findBuildFile(givenString, desiredFilename) :
         filename = desiredFilename
         
     #check to see if the file was successfully found
-    if not os.path.isfile(filename) :
+    if not os.path.isfile(filename):
         raise IOError("File %s not found" % filename)
     return filename
 
@@ -88,8 +88,8 @@ class nescType( object ) :
     print nescType
     """
 
-    def __init__( self , nescType, cType, pythonType, xmlTag,
-                                conversionString, size, defaultValue) :
+    def __init__(self, nescType, cType, pythonType, xmlTag,
+                 conversionString, size, defaultValue):
         """create a new nescType"""
         self.nescType = nescType
         self.cType = cType
@@ -104,9 +104,9 @@ class nescType( object ) :
 
     def __str__(self) :
         if self._conversionString == "c" :
-                return "'" + str(self.value) + "'"
-        else :
-                return str(self.value)
+            return "'" + str(self.value) + "'"
+        else:
+            return str(self.value)
 
     #   this func could be used for type checking 
     def __setattr__(self, name, value) :
@@ -120,12 +120,12 @@ class nescType( object ) :
 
     def __deepcopy__(self, memo={}) :
         result = nescType(self.nescType, self.cType, self.pythonType,
-                                        self._xmlTag, self._conversionString, self.size,
-                                        deepcopy(self.value, memo))
+                          self._xmlTag, self._conversionString, self.size,
+                          deepcopy(self.value, memo))
         memo[id(self)] = result
         return result
     
-    def isType(self, xmlDefinition) :
+    def isType(self, xmlDefinition):
         """returns 1 if the xml definition describes this type.
         Returns 0 otherwise."""
         if xmlDefinition != None and xmlDefinition.tagName == self._xmlTag and \
@@ -586,8 +586,8 @@ class nescStruct( object ) :
             bits += newBits[-field["bitSize"]:]
             #the following loop is just type checking for bit fields.  Can we do this on setattr?
             for i in range(len(newBits)-field["bitSize"]):
-                    if newBits[i] == "1":
-                            print("Bit-field type error: value of %s.%s being truncated" % (self.nescType, field["name"]))
+                if newBits[i] == "1":
+                    print("Bit-field type error: value of %s.%s being truncated" % (self.nescType, field["name"]))
         for i in range(len(bits), self.size*8) :
             bits += "0"
         bytes = bin2hex(bits)
@@ -665,13 +665,13 @@ class TosMsg ( nescStruct ) :
                 self.amType = amType
                 self.parentMsg = None
                 #if this is a nescStruct argument, make myself a clone of it
-                if len(varargs) == 1 and issubclass(type(varargs[0]), nescStruct) :
+                if len(varargs) == 1 and issubclass(type(varargs[0]), nescStruct):
                         nescStruct._copyFields(varargs[0],self)
                 #otherwise, make myself into a struct with the struct args
                 elif len(varargs) >= 1:
                         nescStruct.__init__(self, *varargs)
 
-        def __deepcopy__(self, memo={}) :
+        def __deepcopy__(self, memo={}):
             result = self.__class__(self.amType)
             memo[id(self)] = result
             self._copyFields(result, memo)
@@ -746,7 +746,7 @@ class TosMsg ( nescStruct ) :
                 if len(bytes) != self.size :#trueSize() :
                     raise Exception("Incorrect number of bytes for TosMsg. Byte conversion error: %s %d bytes to %d" % ( self.nescType, len(bytes), self.size) )
                 #print "passing to child to set bytes."
-                nescStruct.setBytes(self,bytes)
+                nescStruct.setBytes(self, bytes)
 
 
 
@@ -776,14 +776,14 @@ def hex2bin(bytes):
             if val >= pow(2, j):
                 bits += "1"
                 val -= pow(2, j)
-            else :
+            else:
                 bits += "0"
     return bits
 
 
-def TestAppTypes() :
-    testRpc = appTypes('/home/kamin/tinyos-1.x/contrib/hood/apps/TestRpc/build/telosb/nesc.xml')
-    print(testRpc)
-        
-if __name__ == "__main__":
-        TestAppTypes()
+#def TestAppTypes() :
+#    testRpc = appTypes('/home/kamin/tinyos-1.x/contrib/hood/apps/TestRpc/build/telosb/nesc.xml')
+#    print(testRpc)
+#        
+#if __name__ == "__main__":
+#    TestAppTypes()
