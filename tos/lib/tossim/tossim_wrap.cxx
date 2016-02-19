@@ -3557,8 +3557,9 @@ SwigPyBuiltin_SetMetaType (PyTypeObject *type, PyTypeObject *metatype)
 #define SWIGTYPE_p_std__functionT_bool_fF_t swig_types[12]
 #define SWIGTYPE_p_std__functionT_void_funsigned_intF_t swig_types[13]
 #define SWIGTYPE_p_variable_string swig_types[14]
-static swig_type_info *swig_types[16];
-static swig_module_info swig_module = {swig_types, 15, 0, 0, 0, 0};
+#define SWIGTYPE_p_void swig_types[15]
+static swig_type_info *swig_types[17];
+static swig_module_info swig_module = {swig_types, 16, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -3684,190 +3685,74 @@ namespace swig {
 
 #include <functional>
 
-enum {
-  PRIMITIVE_INTEGER      = 0,
-  PRIMITIVE_FLOAT   = 1,
-  PRIMITIVE_UNKNOWN = 2
-};
+#define LENGTH_TYPE(NAME) \
+if (strcmp(type, #NAME) == 0) { \
+    return sizeof(NAME); \
+  }
 
-int lengthOfType(const char* type) {
-  if (strcmp(type, "uint8_t") == 0) {
-    return sizeof(uint8_t);
-  }
-  else if (strcmp(type, "uint16_t") == 0) {
-    return sizeof(uint16_t);
-  }
-  else if (strcmp(type, "uint32_t") == 0) {
-    return sizeof(uint32_t);
-  }
-  else if (strcmp(type, "int8_t") == 0) {
-    return sizeof(int8_t);
-  }
-  else if (strcmp(type, "int16_t") == 0) {
-    return sizeof(int16_t);
-  }
-  else if (strcmp(type, "int32_t") == 0) {
-    return sizeof(int32_t);
-  }
-  else if (strcmp(type, "char") == 0) {
-    return sizeof(char);
-  }
-  else if (strcmp(type, "short") == 0) {
-    return sizeof(short);
-  }
-  else if (strcmp(type, "int") == 0) {
-    return sizeof(int);
-  }
-  else if (strcmp(type, "long") == 0) {
-    return sizeof(long);
-  }
-  else if (strcmp(type, "unsigned char") == 0) {
-    return sizeof(unsigned char);
-  }
-  else if (strcmp(type, "unsigned short") == 0) {
-    return sizeof(unsigned short);
-  }
-  else if (strcmp(type, "unsigned int") == 0) {
-    return sizeof(unsigned int);
-  }
-  else if (strcmp(type, "unsigned long") == 0) {
-    return sizeof(unsigned long);
-  }
-  else if (strcmp(type, "float") == 0) {
-    return sizeof(float);
-  }
-  else if (strcmp(type, "double") == 0) {
-    return sizeof(double);
-  }
-  else {
-    return 1;
-  }
+size_t lengthOfType(const char* type) {
+  LENGTH_TYPE(uint8_t)
+  LENGTH_TYPE(uint16_t)
+  LENGTH_TYPE(uint32_t)
+  LENGTH_TYPE(int8_t)
+  LENGTH_TYPE(int16_t)
+  LENGTH_TYPE(int32_t)
+  LENGTH_TYPE(char)
+  LENGTH_TYPE(short)
+  LENGTH_TYPE(int)
+  LENGTH_TYPE(long)
+  LENGTH_TYPE(signed char)
+  LENGTH_TYPE(unsigned char)
+  LENGTH_TYPE(unsigned short)
+  LENGTH_TYPE(unsigned int)
+  LENGTH_TYPE(unsigned long)
+  LENGTH_TYPE(float)
+  LENGTH_TYPE(double)
+
+  printf("Unknown type (size) '%s'\n", type);
+
+  return 1;
 }
 
-int memoryToPrimitive(const char* type, const char* ptr, long* lval, double* dval) {
-  if (strcmp(type, "uint8_t") == 0) {
-    uint8_t val;
-    memcpy(&val, ptr, sizeof(uint8_t));
-    *lval = (long)val;
-    return PRIMITIVE_INTEGER;
-  }
-  else if (strcmp(type, "uint16_t") == 0) {
-    uint16_t val;
-    memcpy(&val, ptr, sizeof(uint16_t));
-    *lval = (long)val;
-    return PRIMITIVE_INTEGER;
-  }
-  else if (strcmp(type, "uint32_t") == 0) {
-    uint32_t val;
-    memcpy(&val, ptr, sizeof(uint32_t));
-    *lval = (long)val;
-    return PRIMITIVE_INTEGER;
-  }
-  else if (strcmp(type, "int8_t") == 0) {
-    int8_t val;
-    memcpy(&val, ptr, sizeof(int8_t));
-    *lval = (long)val;
-    return PRIMITIVE_INTEGER;
-  }
-  else if (strcmp(type, "int16_t") == 0) {
-    int16_t val;
-    memcpy(&val, ptr, sizeof(int16_t));
-    *lval = (long)val;
-    return PRIMITIVE_INTEGER;
-  }
-  else if (strcmp(type, "int32_t") == 0) {
-    int32_t val;
-    memcpy(&val, ptr, sizeof(int32_t));
-    *lval = (long)val;
-    return PRIMITIVE_INTEGER;
-  }
-  else if (strcmp(type, "char") == 0) {
-    long val;
-    memcpy(&val, ptr, sizeof(char));
-    *lval = (long)val;
-    return PRIMITIVE_INTEGER;
-  }
-  else if (strcmp(type, "short") == 0) {
-    short val;
-    memcpy(&val, ptr, sizeof(short));
-    *lval = (long)val;
-    return PRIMITIVE_INTEGER;
-  }
-  else if (strcmp(type, "int") == 0) {
-    int val;
-    memcpy(&val, ptr, sizeof(int));
-    *lval = (long)val;
-    return PRIMITIVE_INTEGER;
-  }
-  else if (strcmp(type, "long") == 0) {
-    long val;
-    memcpy(&val, ptr, sizeof(long));
-    *lval = val;
-    return PRIMITIVE_INTEGER;
-  }
-  else if (strcmp(type, "unsigned char") == 0) {
-    unsigned char val;
-    memcpy(&val, ptr, sizeof(unsigned char));
-    *lval = (long)val;
-    return PRIMITIVE_INTEGER;
-  }
-  else if (strcmp(type, "unsigned short") == 0) {
-    unsigned short val;
-    memcpy(&val, ptr, sizeof(unsigned short));
-    *lval = (long)val;
-    return PRIMITIVE_INTEGER;
-  }
-  else if (strcmp(type, "unsigned int") == 0) {
-    unsigned int val;
-    memcpy(&val, ptr, sizeof(unsigned int));
-    *lval = (long)val;
-    return PRIMITIVE_INTEGER;
-  }
-  else if (strcmp(type, "unsigned long") == 0) {
-    unsigned long val;
-    memcpy(&val, ptr, sizeof(unsigned long));
-    *lval = (long)val;
-    return PRIMITIVE_INTEGER;
-  }
-  else if (strcmp(type, "float") == 0) {
-    float val;
-    memcpy(&val, ptr, sizeof(float));
-    *dval = (double)val;
-    return PRIMITIVE_FLOAT;
-  }
-  else if (strcmp(type, "double") == 0) {
-    double val;
-    memcpy(&val, ptr, sizeof(double));
-    *dval = val;
-    return PRIMITIVE_FLOAT;
-  }
-  else {
-    return PRIMITIVE_UNKNOWN;
-  }
+#define CONVERT_TYPE(NAME, CONVERT_FUNCTION) \
+if (strcmp(type, #NAME) == 0) { \
+  NAME val; \
+  memcpy(&val, ptr, sizeof(NAME)); \
+  return CONVERT_FUNCTION(val); \
 }
 
-PyObject* valueFromScalar(const char* type, const char* ptr, int len) {
-  long lval;
-  double dval;
-  int rval = memoryToPrimitive(type, ptr, &lval, &dval);
-  switch(rval) {
-    case PRIMITIVE_INTEGER:
-      return PyInt_FromLong(lval);
-    case PRIMITIVE_FLOAT:
-      return PyFloat_FromDouble(dval);
-    case PRIMITIVE_UNKNOWN:
-    default:
-      return PyString_FromStringAndSize(ptr, len);
-  }
+PyObject* valueFromScalar(const char* type, const void* ptr, size_t len) {
+  CONVERT_TYPE(uint8_t, PyLong_FromUnsignedLong)
+  CONVERT_TYPE(uint16_t, PyLong_FromUnsignedLong)
+  CONVERT_TYPE(uint32_t, PyLong_FromUnsignedLong)
+  CONVERT_TYPE(int8_t, PyLong_FromLong)
+  CONVERT_TYPE(int16_t, PyLong_FromLong)
+  CONVERT_TYPE(int32_t, PyLong_FromLong)
+  CONVERT_TYPE(char, PyLong_FromLong)
+  CONVERT_TYPE(short, PyLong_FromLong)
+  CONVERT_TYPE(int, PyLong_FromLong)
+  CONVERT_TYPE(long, PyLong_FromLong)
+  CONVERT_TYPE(unsigned char, PyLong_FromUnsignedLong)
+  CONVERT_TYPE(unsigned short, PyLong_FromUnsignedLong)
+  CONVERT_TYPE(unsigned int, PyLong_FromUnsignedLong)
+  CONVERT_TYPE(unsigned long, PyLong_FromUnsignedLong)
+  CONVERT_TYPE(float, PyFloat_FromDouble)
+  CONVERT_TYPE(double, PyFloat_FromDouble)
+
+  //printf("Unknown type (value) '%s'\n", type);
+
+#if PY_VERSION_HEX < 0x03000000
+  return PyString_FromStringAndSize((const char*)ptr, len);
+#else
+  return PyUnicode_DecodeASCII((const char*)ptr, len, "strict");
+#endif
 }
 
-PyObject* listFromArray(const char* type, const char* ptr, int len) {
-  long lval;
-  double dval;
-  int elementLen = lengthOfType(type);
+PyObject* listFromArray(const char* type, const void* ptr, int len) {
+  size_t elementLen = lengthOfType(type);
   PyObject* list = PyList_New(0);
   //printf("Generating list of %s\n", type);
-  for (const char* tmpPtr = ptr; tmpPtr < ptr + len; tmpPtr += elementLen) {
+  for (const uint8_t* tmpPtr = (const uint8_t*)ptr; tmpPtr < ptr + len; tmpPtr += elementLen) {
     PyList_Append(list, valueFromScalar(type, tmpPtr, elementLen));    
   }
   return list;
@@ -3878,7 +3763,7 @@ class PyCallback
 {
 private:
     PyObject *func;
-    PyCallback& operator=(const PyCallback&); // Not allowed
+    PyCallback& operator=(const PyCallback&) = delete; // Not allowed
 public:
     PyCallback(PyCallback&& o) : func(o.func) {
       o.func = NULL;
@@ -3901,6 +3786,12 @@ public:
       bool bool_result = result != NULL && PyObject_IsTrue(result);
       Py_DECREF(args);
       Py_XDECREF(result);
+
+      if (PyErr_Occurred() != NULL)
+      {
+        throw std::runtime_error("Python exception occurred");
+      }
+
       return bool_result;
     }
     void operator()(unsigned int i) const {
@@ -3910,8 +3801,64 @@ public:
       PyObject *result = PyObject_Call(func,args,NULL);
       Py_DECREF(args);
       Py_XDECREF(result);
+
+      if (PyErr_Occurred() != NULL)
+      {
+        throw std::runtime_error("Python exception occurred");
+      }
     }
 };
+
+FILE* object_to_file(PyObject* o)
+{
+#if PY_VERSION_HEX < 0x03000000
+  if (!PyFile_Check(o)) {
+    PyErr_SetString(PyExc_TypeError, "Requires a file as a parameter.");
+    return NULL;
+  }
+  return PyFile_AsFile(o);
+#else
+  if (PyObject_HasAttrString(o, "fileno"))
+  {
+    PyObject* fileno_obj = PyObject_CallMethod(o, "fileno", NULL);
+    if (fileno_obj == NULL)
+    {
+      PyErr_SetString(PyExc_TypeError, "Calling fileno failed.");
+      return NULL;
+    }
+
+    long fileno = PyLong_AsLong(fileno_obj);
+    Py_DECREF(fileno_obj);
+
+    if (fileno == -1 && PyErr_Occurred())
+    {
+      PyErr_SetString(PyExc_TypeError, "The result of fileno was incorrect.");
+      return NULL;
+    }
+
+    long fileno_dup = dup(fileno);
+    if (fileno_dup == -1)
+    {
+      PyErr_Format(PyExc_TypeError, "Failed to duplicate fileno with error %d.", errno);
+      return NULL;
+    }
+
+    FILE* result = fdopen(fileno_dup, "w");
+    if (result == NULL)
+    {
+      PyErr_SetString(PyExc_TypeError, "Failed to fdopen file.");
+      return NULL;
+    }
+
+    return result;
+  }
+  else
+  {
+    PyErr_SetString(PyExc_TypeError, "Requires an object with a fileno function.");
+    return NULL;
+  }
+#endif
+}
 
 
 
@@ -4277,6 +4224,53 @@ SWIG_AsVal_long_SS_long (PyObject *obj, long long *val)
 }
 
 
+// TODO: Fix the memory leak introduced here  by strdup
+bool fill_nesc_app(nesc_app_t* app, int i, PyObject* name, PyObject* array, PyObject* format)
+{
+#if PY_VERSION_HEX < 0x03000000
+  if (PyString_Check(name) && PyString_Check(format)) {
+    app->variableNames[i] = PyString_AsString(name); // TODO: Should this be strdup'ed?
+    app->variableTypes[i] = PyString_AsString(format); // TODO: Should this be strdup'ed?
+    app->variableArray[i] = (strcmp(PyString_AsString(array), "array") == 0);
+
+    return true;
+  }
+  else {
+    free(app->variableNames);
+    free(app->variableTypes);
+    free(app->variableArray);
+    free(app);
+    PyErr_SetString(PyExc_RuntimeError, "bad string");
+    return false;
+  }
+#else
+  if (PyUnicode_Check(name) && PyUnicode_Check(format)) {
+
+    PyObject* name_ascii = PyUnicode_AsASCIIString(name);
+    PyObject* format_ascii = PyUnicode_AsASCIIString(format);
+
+    app->variableNames[i] = strdup(PyBytes_AsString(name_ascii));
+    app->variableTypes[i] = strdup(PyBytes_AsString(format_ascii));
+
+    Py_DECREF(name_ascii);
+    Py_DECREF(format_ascii);
+
+    PyObject* array_ascii = PyUnicode_AsASCIIString(array);
+    
+    app->variableArray[i] = (strcmp(PyBytes_AsString(array_ascii), "array") == 0);
+
+    Py_DECREF(array_ascii);
+    return true;
+  }
+  else {
+    PyErr_SetString(PyExc_RuntimeError, "bad string");
+    return false;
+  }
+#endif
+}
+
+
+
   #define SWIG_From_long   PyLong_FromLong 
 
 
@@ -4350,8 +4344,16 @@ SWIGINTERNINLINE PyObject*
   return PyInt_FromSize_t((size_t) value);
 }
 
-SWIGINTERN unsigned int Tossim_runAllEvents__SWIG_1(Tossim *self,PyObject *continue_events,PyObject *callback){
-    return self->runAllEvents(PyCallback(continue_events), PyCallback(callback));
+SWIGINTERN PyObject *Tossim_runAllEvents__SWIG_1(Tossim *self,PyObject *continue_events,PyObject *callback){
+    try
+    {
+      unsigned int result = self->runAllEvents(PyCallback(continue_events), PyCallback(callback));
+      return PyLong_FromUnsignedLong(result);
+    }
+    catch (std::runtime_error ex)
+    {
+      return NULL;
+    }
   }
 #ifdef __cplusplus
 extern "C" {
@@ -5763,12 +5765,10 @@ fail:
 SWIGINTERN PyObject *_wrap_variable_string_t_ptr_set(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   variable_string *arg1 = (variable_string *) 0 ;
-  char *arg2 = (char *) 0 ;
+  void *arg2 = (void *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int res2 ;
-  char *buf2 = 0 ;
-  int alloc2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
@@ -5778,23 +5778,14 @@ SWIGINTERN PyObject *_wrap_variable_string_t_ptr_set(PyObject *self, PyObject *a
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "variable_string_t_ptr_set" "', argument " "1"" of type '" "variable_string *""'"); 
   }
   arg1 = reinterpret_cast< variable_string * >(argp1);
-  res2 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf2, NULL, &alloc2);
+  res2 = SWIG_ConvertPtr(swig_obj[0],SWIG_as_voidptrptr(&arg2), 0, SWIG_POINTER_DISOWN);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "variable_string_t_ptr_set" "', argument " "2"" of type '" "char *""'");
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "variable_string_t_ptr_set" "', argument " "2"" of type '" "void *""'"); 
   }
-  arg2 = reinterpret_cast< char * >(buf2);
-  if (arg1->ptr) delete[] arg1->ptr;
-  if (arg2) {
-    size_t size = strlen(reinterpret_cast< const char * >(arg2)) + 1;
-    arg1->ptr = (char *)reinterpret_cast< char* >(memcpy((new char[size]), reinterpret_cast< const char * >(arg2), sizeof(char)*(size)));
-  } else {
-    arg1->ptr = 0;
-  }
+  if (arg1) (arg1)->ptr = arg2;
   resultobj = SWIG_Py_Void();
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
   return resultobj;
 fail:
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
   return NULL;
 }
 
@@ -5805,7 +5796,7 @@ SWIGINTERN PyObject *_wrap_variable_string_t_ptr_get(PyObject *self, PyObject *a
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  char *result = 0 ;
+  void *result = 0 ;
   
   if (!SWIG_Python_UnpackTuple(args,"variable_string_t_ptr_get",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_variable_string, 0 |  0 );
@@ -5813,8 +5804,8 @@ SWIGINTERN PyObject *_wrap_variable_string_t_ptr_get(PyObject *self, PyObject *a
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "variable_string_t_ptr_get" "', argument " "1"" of type '" "variable_string *""'"); 
   }
   arg1 = reinterpret_cast< variable_string * >(argp1);
-  result = (char *) ((arg1)->ptr);
-  resultobj = SWIG_FromCharPtr((const char *)result);
+  result = (void *) ((arg1)->ptr);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_void, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -6291,11 +6282,9 @@ SWIGINTERN PyObject *_wrap_Variable_getData(PyObject *self, PyObject *args) {
   result = (arg1)->getData();
   {
     if ((&result)->isArray) {
-      //printf("Generating array %s\n", (&result)->type);
-      resultobj = listFromArray  ((&result)->type, (&result)->ptr, (&result)->len);
+      resultobj = listFromArray((&result)->type, (&result)->ptr, (&result)->len);
     }
     else {
-      //printf("Generating scalar %s\n", (&result)->type);
       resultobj = valueFromScalar((&result)->type, (&result)->ptr, (&result)->len);
     }
     if (resultobj == NULL) {
@@ -6333,29 +6322,21 @@ SWIGINTERN int _wrap_new_Mote(PyObject *self, PyObject *args) {
       app = (nesc_app_t*)malloc(sizeof(nesc_app_t));
       
       app->numVariables = size / 3;
-      app->variableNames = (const char**)calloc(app->numVariables, sizeof(char*));
-      app->variableTypes = (const char**)calloc(app->numVariables, sizeof(char*));
-      app->variableArray = (int*)calloc(app->numVariables, sizeof(int));
+      app->variableNames = (const char**)malloc(app->numVariables * sizeof(char*));
+      app->variableTypes = (const char**)malloc(app->numVariables * sizeof(char*));
+      app->variableArray = (int*)malloc(app->numVariables * sizeof(int));
       
       for (i = 0; i < app->numVariables; i++) {
         PyObject* name = PyList_GetItem(swig_obj[0], 3 * i);
         PyObject* array = PyList_GetItem(swig_obj[0], (3 * i) + 1);
         PyObject* format = PyList_GetItem(swig_obj[0], (3 * i) + 2);
-        if (PyString_Check(name) && PyString_Check(format)) {
-          app->variableNames[i] = PyString_AsString(name);
-          app->variableTypes[i] = PyString_AsString(format);
-          if (strcmp(PyString_AsString(array), "array") == 0) {
-            app->variableArray[i] = 1;
-            //printf("%s is an array\n", PyString_AsString(name));
-          }
-          else {
-            app->variableArray[i] = 0;
-            //printf("%s is a scalar\n", PyString_AsString(name));
-          }
-        }
-        else {
-          app->variableNames[i] = "<bad string>";
-          app->variableTypes[i] = "<bad string>";
+        if (!fill_nesc_app(app, i, name, array, format))
+        {
+          free(app->variableNames);
+          free(app->variableTypes);
+          free(app->variableArray);
+          free(app);
+          return NULL;
         }
       }
       
@@ -6722,29 +6703,21 @@ SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
       app = (nesc_app_t*)malloc(sizeof(nesc_app_t));
       
       app->numVariables = size / 3;
-      app->variableNames = (const char**)calloc(app->numVariables, sizeof(char*));
-      app->variableTypes = (const char**)calloc(app->numVariables, sizeof(char*));
-      app->variableArray = (int*)calloc(app->numVariables, sizeof(int));
+      app->variableNames = (const char**)malloc(app->numVariables * sizeof(char*));
+      app->variableTypes = (const char**)malloc(app->numVariables * sizeof(char*));
+      app->variableArray = (int*)malloc(app->numVariables * sizeof(int));
       
       for (i = 0; i < app->numVariables; i++) {
         PyObject* name = PyList_GetItem(swig_obj[0], 3 * i);
         PyObject* array = PyList_GetItem(swig_obj[0], (3 * i) + 1);
         PyObject* format = PyList_GetItem(swig_obj[0], (3 * i) + 2);
-        if (PyString_Check(name) && PyString_Check(format)) {
-          app->variableNames[i] = PyString_AsString(name);
-          app->variableTypes[i] = PyString_AsString(format);
-          if (strcmp(PyString_AsString(array), "array") == 0) {
-            app->variableArray[i] = 1;
-            //printf("%s is an array\n", PyString_AsString(name));
-          }
-          else {
-            app->variableArray[i] = 0;
-            //printf("%s is a scalar\n", PyString_AsString(name));
-          }
-        }
-        else {
-          app->variableNames[i] = "<bad string>";
-          app->variableTypes[i] = "<bad string>";
+        if (!fill_nesc_app(app, i, name, array, format))
+        {
+          free(app->variableNames);
+          free(app->variableTypes);
+          free(app->variableArray);
+          free(app);
+          return NULL;
         }
       }
       
@@ -7000,17 +6973,17 @@ SWIGINTERN PyObject *_wrap_Tossim_addChannel(PyObject *self, PyObject *args) {
   arg1 = reinterpret_cast< Tossim * >(argp1);
   res2 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Tossim_addChannel" "', argument " "2"" of type '" "char *""'");
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Tossim_addChannel" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
   {
-    if (!PyFile_Check(swig_obj[1])) {
-      PyErr_SetString(PyExc_TypeError, "Requires a file as a parameter.");
+    arg3 = object_to_file(swig_obj[1]);
+    if (arg3 == NULL)
+    {
       return NULL;
     }
-    arg3 = PyFile_AsFile(swig_obj[1]);
   }
-  (arg1)->addChannel(arg2,arg3);
+  (arg1)->addChannel((char const *)arg2,arg3);
   resultobj = SWIG_Py_Void();
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
   return resultobj;
@@ -7041,17 +7014,17 @@ SWIGINTERN PyObject *_wrap_Tossim_removeChannel(PyObject *self, PyObject *args) 
   arg1 = reinterpret_cast< Tossim * >(argp1);
   res2 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Tossim_removeChannel" "', argument " "2"" of type '" "char *""'");
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Tossim_removeChannel" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
   {
-    if (!PyFile_Check(swig_obj[1])) {
-      PyErr_SetString(PyExc_TypeError, "Requires a file as a parameter.");
+    arg3 = object_to_file(swig_obj[1]);
+    if (arg3 == NULL)
+    {
       return NULL;
     }
-    arg3 = PyFile_AsFile(swig_obj[1]);
   }
-  result = (bool)(arg1)->removeChannel(arg2,arg3);
+  result = (bool)(arg1)->removeChannel((char const *)arg2,arg3);
   resultobj = SWIG_From_bool(static_cast< bool >(result));
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
   return resultobj;
@@ -7239,7 +7212,7 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEvents__SWIG_1(PyObject *self, int nobjs
   PyObject *arg3 = (PyObject *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  unsigned int result;
+  PyObject *result = 0 ;
   
   if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
@@ -7249,8 +7222,8 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEvents__SWIG_1(PyObject *self, int nobjs
   arg1 = reinterpret_cast< Tossim * >(argp1);
   arg2 = swig_obj[1];
   arg3 = swig_obj[2];
-  result = (unsigned int)Tossim_runAllEvents__SWIG_1(arg1,arg2,arg3);
-  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  result = (PyObject *)Tossim_runAllEvents__SWIG_1(arg1,arg2,arg3);
+  resultobj = result;
   return resultobj;
 fail:
   return NULL;
@@ -9142,6 +9115,7 @@ static swig_type_info _swigt__p_p_char = {"_p_p_char", "char **", 0, 0, (void*)0
 static swig_type_info _swigt__p_std__functionT_bool_fF_t = {"_p_std__functionT_bool_fF_t", "std::function< bool () > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_void_funsigned_intF_t = {"_p_std__functionT_void_funsigned_intF_t", "std::function< void (unsigned int) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_variable_string = {"_p_variable_string", "variable_string *|variable_string_t *", 0, 0, (void*)&SwigPyBuiltin__variable_string_clientdata, 0};
+static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_FILE,
@@ -9159,6 +9133,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__functionT_bool_fF_t,
   &_swigt__p_std__functionT_void_funsigned_intF_t,
   &_swigt__p_variable_string,
+  &_swigt__p_void,
 };
 
 static swig_cast_info _swigc__p_FILE[] = {  {&_swigt__p_FILE, 0, 0, 0},{0, 0, 0, 0}};
@@ -9176,6 +9151,7 @@ static swig_cast_info _swigc__p_p_char[] = {  {&_swigt__p_p_char, 0, 0, 0},{0, 0
 static swig_cast_info _swigc__p_std__functionT_bool_fF_t[] = {  {&_swigt__p_std__functionT_bool_fF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_void_funsigned_intF_t[] = {  {&_swigt__p_std__functionT_void_funsigned_intF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_variable_string[] = {  {&_swigt__p_variable_string, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_FILE,
@@ -9193,6 +9169,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__functionT_bool_fF_t,
   _swigc__p_std__functionT_void_funsigned_intF_t,
   _swigc__p_variable_string,
+  _swigc__p_void,
 };
 
 

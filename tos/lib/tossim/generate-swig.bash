@@ -35,5 +35,5 @@
 #
 # $Id: generate-swig.bash,v 1.5 2010-06-29 22:07:51 scipio Exp $
 
-swig -shadow -O -builtin -dirvtable -nothreads -python -c++ tossim.i
+swig -shadow -O -builtin -dirvtable -nothreads -py3 -python -c++ tossim.i
 

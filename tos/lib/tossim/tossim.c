@@ -59,7 +59,7 @@
 uint16_t TOS_NODE_ID = 1;
 
 Variable::Variable(const char* name, const char* formatStr, int array, int which) {
-  format = formatStr;
+  format = strdup(formatStr);
   isArray = array;
   mote = which;
   
@@ -68,10 +68,10 @@ Variable::Variable(const char* name, const char* formatStr, int array, int which
 
   std::replace(realName, realName + sLen, '.', '$');
 
-  //  printf("Creating %s realName: %s format: %s %s\n", name, realName, formatStr, array? "[]":"");
+  //printf("Creating %s realName: %s format: '%s' %s\n", name, realName, formatStr, array? "[]":"");
 
   if (sim_mote_get_variable_info(mote, realName, &ptr, &len) == 0) {
-    data = (char*)malloc(len + 1);
+    data = (uint8_t*)malloc(len + 1);
     data[len] = 0;
   }
   else {
@@ -86,6 +86,7 @@ Variable::~Variable() {
   //fprintf(stderr, "Freeing variable %s\n", realName);
   free(data);
   free(realName);
+  free(format);
 }
 
 /* This is the sdbm algorithm, taken from
@@ -113,8 +114,8 @@ variable_string_t Variable::getData() {
     str.type = format;
     str.len = len;
     str.isArray = isArray;
-    //    printf("Getting %s %s %s\n", format, isArray? "[]":"", name);
     memcpy(data, ptr, len);
+    //printf("Getting '%s' %s %d %s\n", format, isArray? "[]":"", len, realName);
   }
   else {
     str.ptr = (char*)"<no such variable>";
@@ -178,7 +179,7 @@ void Mote::setID(unsigned long val) {
 
 Variable* Mote::getVariable(const char* name) {
   const char* typeStr = "";
-  int isArray;
+  int isArray = 0;
   Variable* var;
   
   var = (Variable*)hashtable_search(varTable, name);
@@ -195,7 +196,7 @@ Variable* Mote::getVariable(const char* name) {
         }
       }
     }
-    //  printf("Getting variable %s of type %s %s\n", name, typeStr, isArray? "[]" : "");
+    //printf("Getting variable %s of type %s %s\n", name, typeStr, isArray? "[]" : "");
     var = new Variable(name, typeStr, isArray, nodeID);
     hashtable_insert(varTable, strdup(name), var);
   }
@@ -212,11 +213,10 @@ void Mote::createNoiseModel() {
 }
 
 int Mote::generateNoise(int when) {
-  return (int)sim_noise_generate(id(), when);
+  return static_cast<int>(sim_noise_generate(id(), when));
 }
 
-Tossim::Tossim(nesc_app_t* n) {
-  app = n;
+Tossim::Tossim(nesc_app_t* n) : app(n) {
   motes = NULL;
   init();
 }

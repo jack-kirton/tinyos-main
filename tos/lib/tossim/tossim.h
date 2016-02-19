@@ -54,7 +54,7 @@
 
 typedef struct variable_string {
   const char* type;
-  char* ptr;
+  void* ptr;
   int len;
   int isArray;
 } variable_string_t;
@@ -74,9 +74,9 @@ class Variable {
   
  private:
   char* realName;
-  const char* format;
+  char* format;
   void* ptr;
-  char* data;
+  uint8_t* data;
   size_t len;
   int mote;
   int isArray;

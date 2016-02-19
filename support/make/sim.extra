@@ -20,7 +20,7 @@ HASHFILE    = $(TOSDIR)/lib/tossim/hashtable.c
 HASHOBJFILE = $(BUILDDIR)/c-support.o
 PYFILE     = $(TOSDIR)/lib/tossim/tossim_wrap.cxx
 PYOBJFILE  = $(BUILDDIR)/pytossim.o
-PYDIR      = $(shell python$(PYTHON_VERSION)-config --prefix)/include/python$(PYTHON_VERSION)
+PYDIR      = $(shell python$(PYTHON_VERSION)-config --includes)
 SIMDIR     = $(TOSDIR)/lib/tossim
 XML        = app.xml
 DUMPTYPES = -fnesc-dump=components -fnesc-dump=variables -fnesc-dump=constants -fnesc-dump=typedefs -fnesc-dump=interfacedefs -fnesc-dump=tags
@@ -44,7 +44,7 @@ ifeq ($(findstring Darwin, $(shell uname)), Darwin)
   SIM_DARWIN = TRUE  
 else # linux
   PLATFORM_FLAGS=-shared -fPIC
-  SHARED_OBJECT=_TOSSIMmodule.so
+  SHARED_OBJECT=_TOSSIM.so
   PLATFORM_LIB_FLAGS = -lstdc++ 
   PLATFORM_BUILD_FLAGS= -shared -fPIC
 endif
@@ -54,7 +54,7 @@ endif
 ifdef SIM_DARWIN
   PLATFORM_FLAGS=-fPIC -D_FORTIFY_SOURCE=0
   PLATFORM_CC_FLAGS=-bundle
-  SHARED_OBJECT=_TOSSIMmodule.so
+  SHARED_OBJECT=_TOSSIM.so
   PLATFORM_BUILD_FLAGS=-flat_namespace -undefined suppress 
   PLATFORM_LIB_FLAGS = -lstdc++ 
 endif 

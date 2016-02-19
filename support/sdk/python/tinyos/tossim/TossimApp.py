@@ -32,6 +32,8 @@
 # @author Kamin Whitehouse 
 # @author Philip Levis
 
+from __future__ import print_function
+
 from tinyos.tossim.TossimNescDecls import *
 
 class NescVariables(object) :
@@ -78,7 +80,7 @@ class NescVariables(object) :
         if (len(variable.getElementsByTagName("type-array")) > 0):
           isArray = 1
           
-        if (len(varTypes) > 0):
+        if len(varTypes) > 0:
           varTypeEntry = varTypes[0]
           varType = varTypeEntry.getAttribute("cname")
 
@@ -117,7 +119,7 @@ class NescTypes( object ) :
   print myTypes
   var = myTypes.typeName
   """
-  def __init__( self, applicationName="Unknown App", xmlFilename = None) :
+  def __init__( self, applicationName="Unknown App", xmlFilename = None):
     self.applicationName = applicationName
     self._typeNames = []
     self._types = {}
@@ -130,53 +132,33 @@ class NescTypes( object ) :
       if match != None:
         platformTypes[match.groups()[0]] = int(match.groups()[1])      
     #define all the basic types
-    self.addType(
-      nescType("uint8_t", "unsigned char", "int", "type-int", "B",1,0))
-    self.addType(
-      nescType("int8_t", "signed char", "int", "type-int", "b", 1, 0))
-    if (platformTypes.has_key("int") and platformTypes["int"] == 4) or \
-       (platformTypes.has_key("unsigned int") and platformTypes["unsigned int"] == 4) :
-      self.addType(
-        nescType("uint16_t", "unsigned short", "int", "type-int", "H", 2, 0))
-      self.addType(
-        nescType("int16_t", "short", "int", "type-int", "h", 2, 0))
-      self.addType(
-        nescType("uint32_t", "unsigned int", "int", "type-int", "L",4,0))
-      self.addType(
-        nescType("int32_t", "int", "int", "type-int", "L", 4, 0))
-      self.addType(
-        nescType("unsigned long", "unsigned long", "int", "type-int", "L",4,0))
-      self.addType(
-        nescType("long", "long", "int", "type-int", "l", 4, 0))
-    else : #int is 2 bytes long (the default)
-      self.addType(
-        nescType("unsigned short", "unsigned short", "int", "type-int", "H", 2, 0))
-      self.addType(
-        nescType("short", "short", "int", "type-int", "h", 2, 0))
-      self.addType(
-        nescType("uint16_t", "unsigned int", "int", "type-int", "H", 2, 0))
-      self.addType(
-        nescType("int16_t", "int", "int", "type-int", "h", 2, 0))
-      self.addType(
-        nescType("uint32_t", "unsigned long", "int", "type-int", "L",4,0))
-      self.addType(
-        nescType("int32_t", "long", "int", "type-int", "l", 4, 0))
-    self.addType(
-      nescType("int64_t", "long long", "long", "type-int", "q", 8, 0))
-    self.addType(
-      nescType("uint64_t", "unsigned long long", "long", "type-int", "Q", 8, 0))
-    self.addType(
-      nescType("float", "float", "float", "type-float", "f", 4, 0))
-    if platformTypes.has_key("double") and platformTypes["double"] == 8 :
-      self.addType(
-        nescType("double", "double", "float", "type-float", "d", 8, 0))
-    else : #double is 4 bytes (the default)
-      self.addType(
-        nescType("double", "double", "float", "type-float", "f", 4, 0))
-    self.addType(
-      nescType("char", "char", "str", "type-int", "c", 1, '\x00'))
-    self.addType(
-      nescType("void", "void", "", "type-void", "", 0, ''))
+    self.addType(nescType("uint8_t", "unsigned char", "int", "type-int", "B", 1, 0))
+    self.addType(nescType("int8_t", "signed char", "int", "type-int", "b", 1, 0))
+    if ("int" in platformTypes and platformTypes["int"] == 4) or \
+       ("unsigned int" in platformTypes and platformTypes["unsigned int"] == 4):
+      self.addType(nescType("uint16_t", "unsigned short", "int", "type-int", "H", 2, 0))
+      self.addType(nescType("int16_t", "short", "int", "type-int", "h", 2, 0))
+      self.addType(nescType("uint32_t", "unsigned int", "int", "type-int", "L",4,0))
+      self.addType(nescType("int32_t", "int", "int", "type-int", "L", 4, 0))
+      self.addType(nescType("unsigned long", "unsigned long", "int", "type-int", "L",4,0))
+      self.addType(nescType("long", "long", "int", "type-int", "l", 4, 0))
+    else: #int is 2 bytes long (the default)
+      self.addType(nescType("unsigned short", "unsigned short", "int", "type-int", "H", 2, 0))
+      self.addType(nescType("short", "short", "int", "type-int", "h", 2, 0))
+      self.addType(nescType("uint16_t", "unsigned int", "int", "type-int", "H", 2, 0))
+      self.addType(nescType("int16_t", "int", "int", "type-int", "h", 2, 0))
+      self.addType(nescType("uint32_t", "unsigned long", "int", "type-int", "L",4,0))
+      self.addType(nescType("int32_t", "long", "int", "type-int", "l", 4, 0))
+    self.addType(nescType("int64_t", "long long", "long", "type-int", "q", 8, 0))
+    self.addType(nescType("uint64_t", "unsigned long long", "long", "type-int", "Q", 8, 0))
+    self.addType(nescType("float", "float", "float", "type-float", "f", 4, 0))
+    if "double" in platformTypes:
+      if platformTypes["double"] == 8:
+        self.addType(nescType("double", "double", "float", "type-float", "d", 8, 0))
+      else: #double is 4 bytes (the default)
+        self.addType(nescType("double", "double", "float", "type-float", "f", 4, 0))
+    self.addType(nescType("char", "char", "str", "type-int", "c", 1, '\x00'))
+    self.addType(nescType("void", "void", "", "type-void", "", 0, ''))
 
     #some arrays for error reporting:
     self.unknownStructs = []
@@ -188,10 +170,11 @@ class NescTypes( object ) :
     #self.printSkippedTypes()
   
   def addType(self, value) :
-    if not value.nescType in self._typeNames :
+    if not value.nescType in self._typeNames:
       self._typeNames.append(value.nescType)
     self._types[value.nescType] = value #XXX: why does this have to be unconditional??
-    if not self._types.has_key(value.cType):
+
+    if value.cType not in self._types:
       self._types[value.cType] = value
       self._typeNames.append(value.cType)
     
@@ -236,7 +219,7 @@ class NescTypes( object ) :
         value = typeDef.getAttribute("value")
         name = typeDef.getAttribute("name")
         #if the real value exists and typedef doesn't already exist, copy and rename original
-        if self._types.has_key(value) :
+        if value in self._types:
           newType = deepcopy(self._types[value])
           newType.nescType = name
           self.addType(newType)
@@ -252,7 +235,7 @@ class NescTypes( object ) :
           self.addType(nescStruct(self, typeDef ) )
           numSkipped=0
 
-        except Exception, e:
+        except Exception as e:
           if len(e.args) > 0 and e.args[0] == "Undefined struct":
             #otherwise, put it back in the queue and move on to the next one
             typeDefs.append(typeDef)
@@ -291,7 +274,8 @@ class NescTypes( object ) :
       for pair in self.unknownStructs :
         err += "\t%s (%s)\n" % (pair[0].getAttribute("name"),
                                 pair[1].tagName )
-    if len(err) > 0 : print err
+    if len(err) > 0:
+      print(err)
     
   def getTypeFromXML(self, xmlDefinition) :
     """Find the type name value given an xml definition.
@@ -323,12 +307,12 @@ class NescTypes( object ) :
     #if the type doesn't already exist, try creating a new one
     try :
       return nescArray(self, xmlDefinition)
-    except Exception, e:
+    except Exception as e:
         if len(e.args) <= 0 or e.args[0] != "Not array definition":
           raise
     try :
       return nescPointer(self, xmlDefinition)
-    except Exception, e:
+    except Exception as e:
         if len(e.args) <= 0 or e.args[0] != "Not pointer definition":
           raise
       
