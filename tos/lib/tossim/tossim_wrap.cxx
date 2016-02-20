@@ -3752,7 +3752,7 @@ PyObject* listFromArray(const char* type, const void* ptr, int len) {
   size_t elementLen = lengthOfType(type);
   PyObject* list = PyList_New(0);
   //printf("Generating list of %s\n", type);
-  for (const uint8_t* tmpPtr = (const uint8_t*)ptr; tmpPtr < ptr + len; tmpPtr += elementLen) {
+  for (const uint8_t* tmpPtr = (const uint8_t*)ptr; tmpPtr < (const uint8_t*)ptr + len; tmpPtr += elementLen) {
     PyList_Append(list, valueFromScalar(type, tmpPtr, elementLen));    
   }
   return list;
@@ -3771,19 +3771,26 @@ public:
     PyCallback(const PyCallback& o) : func(o.func) {
       Py_XINCREF(func);
     }
-    PyCallback(PyObject *pfunc) : func(pfunc) {
+    PyCallback(PyObject *pfunc) {
+      if (!pfunc || Py_None == pfunc || !PyCallable_Check(pfunc))
+      {
+        PyErr_SetString(PyExc_TypeError, "Requires a callable as a parameter.");
+        throw std::runtime_error("Python exception occurred");
+      }
+      func = pfunc;
       Py_XINCREF(func);
-      assert(PyCallable_Check(func));
     }
     ~PyCallback() {
       Py_XDECREF(func);
     }
+
     bool operator()() const {
-      if (!func || Py_None == func || !PyCallable_Check(func))
-        return false;
       PyObject *args = PyTuple_New(0);
-      PyObject *result = PyObject_Call(func,args,NULL);
+
+      PyObject *result = PyObject_Call(func, args, NULL);
+
       bool bool_result = result != NULL && PyObject_IsTrue(result);
+
       Py_DECREF(args);
       Py_XDECREF(result);
 
@@ -3794,11 +3801,13 @@ public:
 
       return bool_result;
     }
+
     void operator()(unsigned int i) const {
-      if (!func || Py_None == func || !PyCallable_Check(func))
-        return;
-      PyObject *args = Py_BuildValue("(i)", i);
-      PyObject *result = PyObject_Call(func,args,NULL);
+      PyObject *args = PyTuple_New(1);
+      PyTuple_SetItem(args, 0, PyLong_FromUnsignedLong(i));
+
+      PyObject *result = PyObject_Call(func, args, NULL);
+
       Py_DECREF(args);
       Py_XDECREF(result);
 
@@ -3818,7 +3827,12 @@ FILE* object_to_file(PyObject* o)
   }
   return PyFile_AsFile(o);
 #else
-  if (PyObject_HasAttrString(o, "fileno"))
+  long fileno = -1;
+  if (PyLong_Check(o))
+  {
+    fileno = PyLong_AsLong(o);
+  }
+  else if (PyObject_HasAttrString(o, "fileno"))
   {
     PyObject* fileno_obj = PyObject_CallMethod(o, "fileno", NULL);
     if (fileno_obj == NULL)
@@ -3827,7 +3841,7 @@ FILE* object_to_file(PyObject* o)
       return NULL;
     }
 
-    long fileno = PyLong_AsLong(fileno_obj);
+    fileno = PyLong_AsLong(fileno_obj);
     Py_DECREF(fileno_obj);
 
     if (fileno == -1 && PyErr_Occurred())
@@ -3835,28 +3849,28 @@ FILE* object_to_file(PyObject* o)
       PyErr_SetString(PyExc_TypeError, "The result of fileno was incorrect.");
       return NULL;
     }
-
-    long fileno_dup = dup(fileno);
-    if (fileno_dup == -1)
-    {
-      PyErr_Format(PyExc_TypeError, "Failed to duplicate fileno with error %d.", errno);
-      return NULL;
-    }
-
-    FILE* result = fdopen(fileno_dup, "w");
-    if (result == NULL)
-    {
-      PyErr_SetString(PyExc_TypeError, "Failed to fdopen file.");
-      return NULL;
-    }
-
-    return result;
   }
   else
   {
-    PyErr_SetString(PyExc_TypeError, "Requires an object with a fileno function.");
+    PyErr_SetString(PyExc_TypeError, "Requires an object with a fileno function or a fileno.");
     return NULL;
   }
+
+  long fileno_dup = dup(fileno);
+  if (fileno_dup == -1)
+  {
+    PyErr_Format(PyExc_TypeError, "Failed to duplicate fileno with error %d.", errno);
+    return NULL;
+  }
+
+  FILE* result = fdopen(fileno_dup, "w");
+  if (result == NULL)
+  {
+    PyErr_SetString(PyExc_TypeError, "Failed to fdopen file.");
+    return NULL;
+  }
+
+  return result;
 #endif
 }
 

@@ -87,18 +87,18 @@ class Mote {
   Mote(nesc_app_t* app);
   ~Mote();
 
-  unsigned long id();
+  unsigned long id() noexcept;
   
-  long long int euid();
-  void setEuid(long long int id);
+  long long int euid() noexcept;
+  void setEuid(long long int id) noexcept;
 
-  long long int bootTime();
-  void bootAtTime(long long int time);
+  long long int bootTime() noexcept;
+  void bootAtTime(long long int time) noexcept;
 
-  bool isOn();
-  void turnOff();
-  void turnOn();
-  void setID(unsigned long id);  
+  bool isOn() noexcept;
+  void turnOff() noexcept;
+  void turnOn() noexcept;
+  void setID(unsigned long id) noexcept;  
 
   void addNoiseTraceReading(int val);
   void createNoiseModel();
@@ -119,14 +119,14 @@ class Tossim {
   
   void init();
   
-  long long int time();
-  long long int ticksPerSecond();
-  const char* timeStr();
-  void setTime(long long int time);
+  long long int time() noexcept;
+  long long int ticksPerSecond() noexcept;
+  const char* timeStr() noexcept;
+  void setTime(long long int time) noexcept;
   
-  Mote* currentNode();
-  Mote* getNode(unsigned long nodeID);
-  void setCurrentNode(unsigned long nodeID);
+  Mote* currentNode() noexcept;
+  Mote* getNode(unsigned long nodeID) noexcept;
+  void setCurrentNode(unsigned long nodeID) noexcept;
 
   void addChannel(const char* channel, FILE* file);
   bool removeChannel(const char* channel, FILE* file);

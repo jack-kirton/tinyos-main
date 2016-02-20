@@ -47,8 +47,8 @@ class NescVariables(object) :
         while len(variableList) > 0:
             variables = variableList.pop(0).getElementsByTagName("variable")
             while len(variables) > 0:
-                cVariable = 0
-                isArray = 0
+                cVariable = False
+                isArray = False
 
                 variable = variables.pop(0)
                 name = variable.getAttribute("name")
@@ -57,18 +57,18 @@ class NescVariables(object) :
                 if len(component) > 0:
                     name = component[0].getAttribute("qname") + "." + name
                 else:  # It's in a C file
-                    cVariable = 1
+                    cVariable = True
                     fileName = variable.getAttribute("loc")
                     index = fileName.rfind("/") # First check for a UNIX path
-                    if (index == -1):
+                    if index == -1:
                         index = fileName.rfind("\\") # Then a windows path
-                        if (index == -1):
+                        if index == -1:
                             index = fileName.rfind(":") # Then if it's in the local dir
 
                     if index != -1:
                         fileName = fileName[index+1:]
                         index = fileName.rfind(".")
-                        if (index != -1):
+                        if index != -1:
                             fileName = fileName[0:index]
                             name = fileName + "." + name
 
@@ -78,16 +78,16 @@ class NescVariables(object) :
                     varTypes = variable.getElementsByTagName("type-int")
 
                 if len(variable.getElementsByTagName("type-array")) > 0:
-                    isArray = 1
+                    isArray = True
                     
                 if len(varTypes) > 0:
                     varTypeEntry = varTypes[0]
                     varType = varTypeEntry.getAttribute("cname")
 
-                if cVariable == 0:
+                if not cVariable:
                     self._varNames.append(str(name))
                     self._vars.append(str(name))
-                    if (isArray):
+                    if isArray:
                         self._vars.append("array")
                     else:
                         self._vars.append("simple")
@@ -96,14 +96,14 @@ class NescVariables(object) :
     def __str__(self) :
         """ Print all available variables."""
         string = "\n"
-        name = 1
+        name = True
         for val in self._varNames :
             if name:
                 string += "\t" + val
-                name = 0
+                name = False
             else:
                 string += ": " + val + "\n"
-                name = 1
+                name = True
                 
         return string
          

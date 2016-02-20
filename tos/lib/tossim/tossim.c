@@ -140,40 +140,40 @@ Mote::~Mote(){
   hashtable_destroy(varTable, &delete_Variable);
 }
 
-unsigned long Mote::id() {
+unsigned long Mote::id() noexcept {
   return nodeID;
 }
 
-long long int Mote::euid() {
+long long int Mote::euid() noexcept {
   return sim_mote_euid(nodeID);
 }
 
-void Mote::setEuid(long long int val) {
+void Mote::setEuid(long long int val) noexcept {
   sim_mote_set_euid(nodeID, val);
 }
 
-long long int Mote::bootTime() {
+long long int Mote::bootTime() noexcept {
   return sim_mote_start_time(nodeID);
 }
 
-void Mote::bootAtTime(long long int time) {
+void Mote::bootAtTime(long long int time) noexcept {
   sim_mote_set_start_time(nodeID, time);
   sim_mote_enqueue_boot_event(nodeID);
 }
 
-bool Mote::isOn() {
+bool Mote::isOn() noexcept {
   return sim_mote_is_on(nodeID);
 }
 
-void Mote::turnOff() {
+void Mote::turnOff() noexcept {
   sim_mote_turn_off(nodeID);
 }
 
-void Mote::turnOn() {
+void Mote::turnOn() noexcept {
   sim_mote_turn_on(nodeID);
 }
 
-void Mote::setID(unsigned long val) {
+void Mote::setID(unsigned long val) noexcept {
   nodeID = val;
 }
 
@@ -246,28 +246,28 @@ void Tossim::init() {
   motes = (Mote**)calloc(TOSSIM_MAX_NODES + 1, sizeof(Mote*));
 }
 
-long long int Tossim::time() {
+long long int Tossim::time() noexcept {
   return sim_time();
 }
 
-long long int Tossim::ticksPerSecond() {
+long long int Tossim::ticksPerSecond() noexcept {
   return sim_ticks_per_sec();
 }
 
-const char* Tossim::timeStr() {
+const char* Tossim::timeStr() noexcept {
   sim_print_now(timeBuf, 256);
   return timeBuf;
 }
 
-void Tossim::setTime(long long int val) {
+void Tossim::setTime(long long int val) noexcept {
   sim_set_time(val);
 }
 
-Mote* Tossim::currentNode() {
+Mote* Tossim::currentNode() noexcept {
   return getNode(sim_node());
 }
 
-Mote* Tossim::getNode(unsigned long nodeID) {
+Mote* Tossim::getNode(unsigned long nodeID) noexcept {
   if (nodeID > TOSSIM_MAX_NODES) {
     nodeID = TOSSIM_MAX_NODES;
     // TODO: log an error, asked for an invalid node
@@ -287,7 +287,7 @@ Mote* Tossim::getNode(unsigned long nodeID) {
   }
 }
 
-void Tossim::setCurrentNode(unsigned long nodeID) {
+void Tossim::setCurrentNode(unsigned long nodeID) noexcept {
   sim_set_node(nodeID);
 }
 

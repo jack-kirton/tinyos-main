@@ -135,15 +135,15 @@ bool sim_run_next_event() __attribute__ ((C, spontaneous)) {
 
     // Need to test whether function pointers are for statically
     // allocted events that are zeroed out on reboot
-    dbg("Tossim", "CORE: popping event 0x%p for %i at %llu with handler %p... ", event, sim_node(), sim_time(), event->handle);
+    //dbg("Tossim", "CORE: popping event 0x%p for %i at %llu with handler %p... ", event, sim_node(), sim_time(), event->handle);
     if ((sim_mote_is_on(event->mote) || event->force) && event->handle != NULL) {
       result = TRUE;
-      dbg_clear("Tossim", " mote is on (or forced event), run it.\n");
+      //dbg_clear("Tossim", " mote is on (or forced event), run it.\n");
       event->handle(event);
     }
-    else {
-      dbg_clear("Tossim", "\n");
-    }
+    //else {
+    //  dbg_clear("Tossim", "\n");
+    //}
 
     if (event->cleanup != NULL) {
       event->cleanup(event);
@@ -157,7 +157,7 @@ int sim_print_time(char* buf, int len, sim_time_t ftime) __attribute__ ((C, spon
   int hours;
   int minutes;
   int seconds;
-  sim_time_t  secondBillionths;
+  sim_time_t secondBillionths;
 
   secondBillionths = (ftime % sim_ticks_per_sec());
   if (sim_ticks_per_sec() > (sim_time_t)1000000000) {

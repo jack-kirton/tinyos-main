@@ -49,9 +49,9 @@
 
 #ifdef DEBUG
 //Tal Debug, to count how often simulation hits the one match case
-int numCase1 = 0;
-int numCase2 = 0;
-int numTotal = 0;
+static int numCase1 = 0;
+static int numCase2 = 0;
+static int numTotal = 0;
 //End Tal Debug
 #endif
 

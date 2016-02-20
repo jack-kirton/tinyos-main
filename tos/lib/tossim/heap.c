@@ -55,7 +55,7 @@
 #include <stdlib.h> // for rand(3)
 #include <stdio.h>  // For printf(3)
 
-const int STARTING_SIZE = 511;
+static const int STARTING_SIZE = 511;
 
 #define HEAP_NODE(heap, index) (((node_t*)(heap->data))[index])
 
@@ -88,15 +88,15 @@ void free_heap(heap_t* heap) {
   }
 }
 
-int heap_size(heap_t* heap) {
+int heap_size(const heap_t* heap) {
   return heap->size;
 }
 
-int is_empty(heap_t* heap) {
+static inline int is_empty(const heap_t* heap) {
   return heap->size == 0;
 }
 
-int heap_is_empty(heap_t* heap) {
+int heap_is_empty(const heap_t* heap) {
   return is_empty(heap);
 }
 

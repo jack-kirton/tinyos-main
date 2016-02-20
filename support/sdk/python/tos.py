@@ -44,7 +44,7 @@ import traceback
 
 try: 
     import serial
-except ImportError, e: 
+except ImportError as e: 
     print "Please install PySerial first."
     sys.exit(1)
 

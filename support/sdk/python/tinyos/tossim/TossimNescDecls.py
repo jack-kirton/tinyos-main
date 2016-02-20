@@ -76,7 +76,7 @@ def findBuildFile(givenString, desiredFilename) :
     return filename
 
     
-class nescType( object ) :
+class nescType(object):
     """A python representation of a nesc type.
 
     usage:
@@ -115,7 +115,7 @@ class nescType( object ) :
                 pack(self._conversionString, value)
         self.__dict__[name] = value
 
-    def oneLineStr(self) :
+    def oneLineStr(self):
         return str(self)
 
     def __deepcopy__(self, memo={}) :
@@ -145,7 +145,6 @@ class nescType( object ) :
         try:
             packed_bytes = pack(self._conversionString, self.value)
         except Exception as inst:
-            print(inst)
             raise Exception("Bytes conversion error: %s %d bytes to %d" %
                                             (self.nescType, len(packed_bytes), self.size) )
         if len(packed_bytes) != self.size:
@@ -163,7 +162,6 @@ class nescType( object ) :
         try:
             self.value, = unpack( self._conversionString, bytes[:self.size])
         except Exception as inst:
-            print(inst)
             raise Exception("Bytes conversion error: %s %d bytes to %d" %
                                             ( self.nescType, len(given_bytes), self.size) )
         return given_bytes[self.size:]
@@ -172,7 +170,7 @@ class nescType( object ) :
 # Array of basic nesc types,
 ###########
 
-class nescArray( object ) :
+class nescArray(object):
     """A python representation of a nesc array.
 
     usage:
@@ -317,7 +315,7 @@ class nescArray( object ) :
     def setBytes(self, bytes) :
         """A value of this type from a hexidecimal representation"""
         if len(bytes) < self.size:
-                raise Exception("Byte conversion error: %s %d bytes to %d" %
+            raise Exception("Byte conversion error: %s %d bytes to %d" %
                                                 (self.nescType, len(bytes), self.size) )
         for i in range(self.len) :
             bytes = self.value[i].setBytes(bytes)
@@ -388,19 +386,19 @@ class nescPointer(object):
         if xmlDefinition != None and xmlDefinition.tagName == "type-pointer" :
             child = getUniqueChild(xmlDefinition)
             return self.value.isType(child)
-        else :
+        else:
             return 0
 
     def getBytes(self) :
             bytes = pack(str(self.size)+"s", '\x00')
             if len(bytes) != self.size:
-                    raise Exception("Byte conversion error: %s %d bytes to %d" %
+                raise Exception("Byte conversion error: %s %d bytes to %d" %
                                                     (self.nescType, len(bytes), self.size) )
             return bytes
     
     def setBytes(self, bytes) :
         if len(bytes) < self.size:
-                raise Exception("Byte conversion error: %s %d bytes to %d" %
+            raise Exception("Byte conversion error: %s %d bytes to %d" %
                                                 ( self.nescType, len(bytes), self.size) )
         return bytes[self.size:]
 
@@ -409,7 +407,7 @@ class nescPointer(object):
 # Struct of basic nesc types,
 ###########
 
-class nescStruct( object ) :
+class nescStruct(object):
     """A python representation of a nesc structure.
 
     usage:
@@ -643,110 +641,110 @@ class nescStruct( object ) :
 
 
 class TosMsg ( nescStruct ) :
-        """A python representation of a TosMsg.
-        Is a nescStruct object.
-        Can be used with
-        pytos.comm.send, pytos.comm.register, pytos.comm.unregister.
+    """A python representation of a TosMsg.
+    Is a nescStruct object.
+    Can be used with
+    pytos.comm.send, pytos.comm.register, pytos.comm.unregister.
+    
+    usage:
+    msg = TosMsg(amType)
+    msg = TosMsg(amType, nescStruct)
+    msg = TosMsg(amType, <nescStruct constructor args>)
+    print msg
+    msg.field = X
+    comm.send(msg)
+    comm.register(msg, f)
+    comm.unregister(msg, f)
+    migMsg = msg.createMigMsg()
+    msg.parseMigMsg(migMsg)
+    """
+
+    def __init__(self, amType, *varargs):
+        self.amType = amType
+        self.parentMsg = None
+        #if this is a nescStruct argument, make myself a clone of it
+        if len(varargs) == 1 and issubclass(type(varargs[0]), nescStruct):
+            nescStruct._copyFields(varargs[0],self)
+        #otherwise, make myself into a struct with the struct args
+        elif len(varargs) >= 1:
+            nescStruct.__init__(self, *varargs)
+
+    def __deepcopy__(self, memo={}):
+        result = self.__class__(self.amType)
+        memo[id(self)] = result
+        self._copyFields(result, memo)
+        result.parentMsg = deepcopy(self.parentMsg, memo)
+        return result
+
+    def getParentMsg(self, amOrName) :
+        """This function will get the parent message with the amType or name specified"""
+        if self.parentMsg == None :
+            return None
+        elif self.parentMsg.nescType == amOrName or self.parentMsg.amType == amOrName :
+            return self.parentMsg
+        else :
+            return self.parentMsg.getParentMsg(amOrName)
         
-        usage:
-        msg = TosMsg(amType)
-        msg = TosMsg(amType, nescStruct)
-        msg = TosMsg(amType, <nescStruct constructor args>)
-        print msg
-        msg.field = X
-        comm.send(msg)
-        comm.register(msg, f)
-        comm.unregister(msg, f)
-        migMsg = msg.createMigMsg()
-        msg.parseMigMsg(migMsg)
-        """
-
-        def __init__(self, amType, *varargs):
-                self.amType = amType
-                self.parentMsg = None
-                #if this is a nescStruct argument, make myself a clone of it
-                if len(varargs) == 1 and issubclass(type(varargs[0]), nescStruct):
-                        nescStruct._copyFields(varargs[0],self)
-                #otherwise, make myself into a struct with the struct args
-                elif len(varargs) >= 1:
-                        nescStruct.__init__(self, *varargs)
-
-        def __deepcopy__(self, memo={}):
-            result = self.__class__(self.amType)
-            memo[id(self)] = result
-            self._copyFields(result, memo)
-            result.parentMsg = deepcopy(self.parentMsg, memo)
-            return result
-
-        def getParentMsg(self, amOrName) :
-            """This function will get the parent message with the amType or name specified"""
-            if self.parentMsg == None :
-                return None
-            elif self.parentMsg.nescType == amOrName or self.parentMsg.amType == amOrName :
-                return self.parentMsg
-            else :
-                return self.parentMsg.getParentMsg(amOrName)
-            
-        def createMigMsg(self) :
-                """Returns a java BaseTOSMsg with same amType and length
-                and with data payload of same bytes"""
-                Message = tinyos.message.Message()
-                msg = Message(self.size)
-                msg.dataSet(unpack( str(self.size) + 'b', self.getBytes() ))
-                msg.amTypeSet(self.amType)
+    def createMigMsg(self) :
+        """Returns a java BaseTOSMsg with same amType and length
+        and with data payload of same bytes"""
+        Message = tinyos.message.Message()
+        msg = Message(self.size)
+        msg.dataSet(unpack( str(self.size) + 'b', self.getBytes() ))
+        msg.amTypeSet(self.amType)
 #        msg.set_type( self.amType )
 #        msg.set_length(self.size)
-                return msg
+        return msg
 
-        def parseMigMsg(self, msg) :
-                """Takes a java BaseTOSMsg and creates TosMsg
-                with same amType and length and with data payload of same bytes"""
-                self.amType = msg.amType()
-                data = list(msg.dataGet())
-                self.setBytes(pack(str(len(data)) + 'b', *data))
+    def parseMigMsg(self, msg) :
+        """Takes a java BaseTOSMsg and creates TosMsg
+        with same amType and length and with data payload of same bytes"""
+        self.amType = msg.amType()
+        data = list(msg.dataGet())
+        self.setBytes(pack(str(len(data)) + 'b', *data))
 
-        def __repr__(self) :
-            return "%s object at %s:\n\n\t%s" % (self.__class__, hex(id(self)), str(self))
+    def __repr__(self) :
+        return "%s object at %s:\n\n\t%s" % (self.__class__, hex(id(self)), str(self))
+        
+    def __str__(self) :
+        """All fields and values as a readable string"""
+        return "TosMsg(am=%d) " % self.amType + nescStruct.__str__(self)
             
-        def __str__(self) :
-                """All fields and values as a readable string"""
-                return "TosMsg(am=%d) " % self.amType + nescStruct.__str__(self)
-                
-        def setBytes(self, bytes) :
-                """Extend this msg to be longer, if necessary to accomodate extra data.
-                This only happens if the last field is a nescArray of length 0.
-                Unlike nescStructs, TosMsg objects are not nested recursively, so it is
-                Ok to do this."""
-                if len(bytes) > self.size : #trueSize() :
-                        #print "there are more bytes than fit in this msg... trying to grow msg"
-                        lastField, parents,b = self._findLastNestedField()
-                        #see if it is an array of size 0
-                        if type(lastField) == nescArray and lastField.len == 0 :
-                                #make it bigger
-                                #print "last field is nescArray[0]... growing"
-                                lastFieldSize = lastField.elementType.size
-                                numExtraBytes = len(bytes) - self.size #trueSize()
-                                if numExtraBytes % lastFieldSize == 0:
-                                        requiredArraySize = int( numExtraBytes/lastFieldSize )
-                                        lastField = nescArray(requiredArraySize, lastField.elementType)
-                                #print "new size is %d" % numExtraBytes
-                                #and set it, changing the size of all parent structs
-                                parents.reverse()
-                                for parent in parents :
+    def setBytes(self, bytes) :
+        """Extend this msg to be longer, if necessary to accomodate extra data.
+        This only happens if the last field is a nescArray of length 0.
+        Unlike nescStructs, TosMsg objects are not nested recursively, so it is
+        Ok to do this."""
+        if len(bytes) > self.size: #trueSize() :
+            #print "there are more bytes than fit in this msg... trying to grow msg"
+            lastField, parents,b = self._findLastNestedField()
+            #see if it is an array of size 0
+            if type(lastField) == nescArray and lastField.len == 0:
+                #make it bigger
+                #print "last field is nescArray[0]... growing"
+                lastFieldSize = lastField.elementType.size
+                numExtraBytes = len(bytes) - self.size #trueSize()
+                if numExtraBytes % lastFieldSize == 0:
+                    requiredArraySize = int( numExtraBytes/lastFieldSize )
+                    lastField = nescArray(requiredArraySize, lastField.elementType)
+                #print "new size is %d" % numExtraBytes
+                #and set it, changing the size of all parent structs
+                parents.reverse()
+                for parent in parents :
 #                    trueSize = parent.trueSize()
-                                        parent.value[parent.fields[-1]["name"]] = lastField
-                                        parent.fields[-1]["bitSize"] = lastField.size*8
-                                        parent.size = self.packedSize()# + lastField.size
-                                        lastField = parent
-                        else:
-                                #print "last field is not nescArray[0]. Cannot grow. Ignoring extra data."
-                                pass
-                        
-                #make sure everything worked out correctly and call parent's function
-                if len(bytes) != self.size :#trueSize() :
-                    raise Exception("Incorrect number of bytes for TosMsg. Byte conversion error: %s %d bytes to %d" % ( self.nescType, len(bytes), self.size) )
-                #print "passing to child to set bytes."
-                nescStruct.setBytes(self, bytes)
+                    parent.value[parent.fields[-1]["name"]] = lastField
+                    parent.fields[-1]["bitSize"] = lastField.size*8
+                    parent.size = self.packedSize()# + lastField.size
+                    lastField = parent
+            else:
+                #print "last field is not nescArray[0]. Cannot grow. Ignoring extra data."
+                pass
+                
+        #make sure everything worked out correctly and call parent's function
+        if len(bytes) != self.size :#trueSize() :
+            raise Exception("Incorrect number of bytes for TosMsg. Byte conversion error: %s %d bytes to %d" % ( self.nescType, len(bytes), self.size) )
+        #print "passing to child to set bytes."
+        nescStruct.setBytes(self, bytes)
 
 
 
@@ -754,28 +752,29 @@ class TosMsg ( nescStruct ) :
 
 
 
-def getUniqueChild(xmlDefinition) :
+def getUniqueChild(xmlDefinition):
     child = None
-    for childNode in xmlDefinition.childNodes :
-        if childNode.nodeType == 1 :
+    for childNode in xmlDefinition.childNodes:
+        if childNode.nodeType == 1:
             child = childNode
             break
     return child
 
 def bin2hex(bits) :
     bytes = ""
-    for i in range(0, len(bits), 8 ):
-        bytes += pack('B',int(bits[i:i+8],2))
+    for i in range(0, len(bits), 8):
+        bytes += pack('B', int(bits[i:i+8], 2))
     return bytes
 
 def hex2bin(bytes):
     bits = ""
     for i in range(len(bytes)):
-        val, = unpack('B',bytes[i])
+        val, = unpack('B', bytes[i])
         for j in range(7,-1,-1):
-            if val >= pow(2, j):
+            twopowj = pow(2, j)
+            if val >= twopowj:
                 bits += "1"
-                val -= pow(2, j)
+                val -= twopowj
             else:
                 bits += "0"
     return bits

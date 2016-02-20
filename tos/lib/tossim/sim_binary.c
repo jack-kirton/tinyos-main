@@ -1,6 +1,6 @@
 #include <sim_binary.h>
 
-link_t* connectivity[TOSSIM_MAX_NODES];
+static link_t* connectivity[TOSSIM_MAX_NODES];
 
 link_t* allocate_link(int mote);
 void deallocate_link(link_t* link);
@@ -98,7 +98,7 @@ void sim_binary_remove(int src, int dest) __attribute__ ((C, spontaneous))  {
   sim_set_node(temp);
 }
 
- link_t* allocate_link(int mote) {
+static link_t* allocate_link(int mote) {
    link_t* link = (link_t*)malloc(sizeof(link_t));
    link->next = NULL;
    link->mote = mote;
@@ -106,6 +106,6 @@ void sim_binary_remove(int src, int dest) __attribute__ ((C, spontaneous))  {
    return link;
  }
 
- void deallocate_link(link_t* link) {
+static void deallocate_link(link_t* link) {
    free(link);
  }

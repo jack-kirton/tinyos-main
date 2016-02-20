@@ -41,18 +41,18 @@
 
 #include <sim_csma.h>
 
-int csmaInitHigh = SIM_CSMA_INIT_HIGH;
-int csmaInitLow = SIM_CSMA_INIT_LOW;
-int csmaHigh = SIM_CSMA_HIGH;
-int csmaLow = SIM_CSMA_LOW;
-int csmaSymbolsPerSec = SIM_CSMA_SYMBOLS_PER_SEC;
-int csmaBitsPerSymbol = SIM_CSMA_BITS_PER_SYMBOL;
-int csmaPreambleLength = SIM_CSMA_PREAMBLE_LENGTH;
-int csmaExponentBase = SIM_CSMA_EXPONENT_BASE;
-int csmaMaxIterations = SIM_CSMA_MAX_ITERATIONS;
-int csmaMinFreeSamples = SIM_CSMA_MIN_FREE_SAMPLES;
-int csmaRxTxDelay = SIM_CSMA_RXTX_DELAY;
-int csmaAckTime = SIM_CSMA_ACK_TIME;
+static int csmaInitHigh = SIM_CSMA_INIT_HIGH;
+static int csmaInitLow = SIM_CSMA_INIT_LOW;
+static int csmaHigh = SIM_CSMA_HIGH;
+static int csmaLow = SIM_CSMA_LOW;
+static int csmaSymbolsPerSec = SIM_CSMA_SYMBOLS_PER_SEC;
+static int csmaBitsPerSymbol = SIM_CSMA_BITS_PER_SYMBOL;
+static int csmaPreambleLength = SIM_CSMA_PREAMBLE_LENGTH;
+static int csmaExponentBase = SIM_CSMA_EXPONENT_BASE;
+static int csmaMaxIterations = SIM_CSMA_MAX_ITERATIONS;
+static int csmaMinFreeSamples = SIM_CSMA_MIN_FREE_SAMPLES;
+static int csmaRxTxDelay = SIM_CSMA_RXTX_DELAY;
+static int csmaAckTime = SIM_CSMA_ACK_TIME;
 
 int sim_csma_init_high(void) __attribute__ ((C, spontaneous)) {
   return csmaInitHigh;
