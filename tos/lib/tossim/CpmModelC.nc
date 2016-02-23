@@ -58,7 +58,7 @@ implementation {
   message_t* outgoing; // If I'm sending, this is my outgoing packet
   bool requestAck;
   bool receiving = 0;  // Whether or not I think I'm receiving a packet
-  bool transmitting = 0; // Whether or not I think I'm tranmitting a packet
+  bool transmitting = 0; // Whether or not I think I'm transmitting a packet
   sim_time_t transmissionEndTime; // to check pending transmission
   struct receive_message;
   typedef struct receive_message receive_message_t;
@@ -213,7 +213,7 @@ implementation {
   }
 
   void sim_gain_schedule_ack(int source, sim_time_t t, receive_message_t* r) {
-    sim_event_t* ackEvent = (sim_event_t*)malloc(sizeof(sim_event_t));
+    sim_event_t* ackEvent = sim_queue_allocate_raw_event();
     
     ackEvent->mote = source;
     ackEvent->force = 1;
@@ -464,7 +464,7 @@ implementation {
  default event void Model.receive(message_t* msg) {}
 
  sim_event_t* allocate_receive_event(sim_time_t endTime, receive_message_t* msg) {
-   sim_event_t* evt = (sim_event_t*)malloc(sizeof(sim_event_t));
+   sim_event_t* evt = sim_queue_allocate_raw_event();
    evt->mote = sim_node();
    evt->time = endTime;
    evt->handle = sim_gain_receive_handle;

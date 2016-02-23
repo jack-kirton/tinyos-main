@@ -122,11 +122,11 @@ implementation {
 	   the likelihood by delaying the interrupt...
 	*/
       if (t == 0 || t >= 0xfe)
-	t = 1;
+        t = 1;
       
       if (t != REG_ACCESS(valueRegister)) {
-	REG_ACCESS(valueRegister) = t;
-	schedule_new_compare();
+        REG_ACCESS(valueRegister) = t;
+        schedule_new_compare();
       }
     }
   }
@@ -203,17 +203,17 @@ implementation {
       dbg("HplAtm128CompareC", "%s Handling compare at 0x%p @ %s\n",__FUNCTION__,  evt, sim_time_string());
 	    
       if (READ_BIT(interruptRegister, interruptBit)) {
-	CLR_BIT(flagRegister, flagBit);
-	dbg("HplAtm128CompareC", "%s Compare interrupt @ %s\n", __FUNCTION__, sim_time_string());
-	SIG_OUTPUT_COMPARE0();
+        CLR_BIT(flagRegister, flagBit);
+        dbg("HplAtm128CompareC", "%s Compare interrupt @ %s\n", __FUNCTION__, sim_time_string());
+        SIG_OUTPUT_COMPARE0();
       }
       else {
-	SET_BIT(flagRegister, flagBit);
+        SET_BIT(flagRegister, flagBit);
       }
       // If we haven't been cancelled
       if (!evt->cancelled) {
-	configure_compare(evt);
-	sim_queue_insert(evt);
+        configure_compare(evt);
+        sim_queue_insert(evt);
       }
     }
   }

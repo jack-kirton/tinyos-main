@@ -69,7 +69,7 @@ implementation {
   /* Note: the call is inside the dbg, as it's typically a read of a volatile
      location, so can't be deadcode eliminated */
 #define DBGLED(n) \
-  dbg("LedsC", "LEDS: Led" #n " %s.\n", call Led ## n .get() ? "off" : "on");
+  simdbg("LedsC", "LEDS: Led" #n " %s.\n", call Led ## n .get() ? "off" : "on");
 
   async command void Leds.led0On() {
     call Led0.clr();
@@ -121,13 +121,13 @@ implementation {
     atomic {
       rval = 0;
       if (!call Led0.get()) {
-	rval |= LEDS_LED0;
+        rval |= LEDS_LED0;
       }
       if (!call Led1.get()) {
-	rval |= LEDS_LED1;
+        rval |= LEDS_LED1;
       }
       if (!call Led2.get()) {
-	rval |= LEDS_LED2;
+        rval |= LEDS_LED2;
       }
     }
     return rval;
@@ -136,22 +136,22 @@ implementation {
   async command void Leds.set(uint8_t val) {
     atomic {
       if (val & LEDS_LED0) {
-	call Leds.led0On();
+        call Leds.led0On();
       }
       else {
-	call Leds.led0Off();
+        call Leds.led0Off();
       }
       if (val & LEDS_LED1) {
-	call Leds.led1On();
+        call Leds.led1On();
       }
       else {
-	call Leds.led1Off();
+        call Leds.led1Off();
       }
       if (val & LEDS_LED2) {
-	call Leds.led2On();
+        call Leds.led2On();
       }
       else {
-	call Leds.led2Off();
+        call Leds.led2Off();
       }
     }
   }

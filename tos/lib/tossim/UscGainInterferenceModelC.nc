@@ -90,11 +90,15 @@ implementation {
     dbg("Gain", "Computing noise @ %s: %0.2f", sim_time_string(), localNoise);
     while (current != NULL) {
       sig += pow(10.0, current->power / 10.0);
+
+#ifdef DEBUG
       dbg_clear("Gain", " ");
       if (current->power >= 0.0) {
         dbg_clear("Gain", "+");
       }
       dbg_clear("Gain", "%0.2f ", current->power);
+#endif
+
       current = current->next;
     }
     dbg_clear("Gain", " = %0.2f\n", 10.0 * log(sig) / log(10.0));
@@ -116,8 +120,7 @@ implementation {
 
   command void Model.setClearValue(double value) {
     clearThreshold = value;
-    dbg("Gain", "Setting clear threshold to %f\n", clearThreshold);
-        
+    dbg("Gain", "Setting clear threshold to %f\n", clearThreshold);  
   }
   
   command bool Model.clearChannel() {
@@ -127,7 +130,7 @@ implementation {
   }
 
   void sim_gain_schedule_ack(int source, sim_time_t t) {
-    sim_event_t* ackEvent = (sim_event_t*)malloc(sizeof(sim_event_t));
+    sim_event_t* ackEvent = sim_queue_allocate_raw_event();
     ackEvent->mote = source;
     ackEvent->force = 1;
     ackEvent->cancelled = 0;
@@ -280,7 +283,7 @@ implementation {
  default event void Model.receive(message_t* msg) {}
 
  sim_event_t* allocate_receive_event(sim_time_t endTime, receive_message_t* msg) {
-   sim_event_t* evt = (sim_event_t*)malloc(sizeof(sim_event_t));
+   sim_event_t* evt = sim_queue_allocate_raw_event();
    evt->mote = sim_node();
    evt->time = endTime;
    evt->handle = sim_gain_receive_handle;

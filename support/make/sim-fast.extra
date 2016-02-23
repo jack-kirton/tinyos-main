@@ -1,13 +1,13 @@
 #-*-Makefile-*- vim:syntax=make
 #$Id: sim-fast.extra,v 1.8 2010-04-08 04:27:24 regehr Exp $
 
-GCC=gcc
+export GCC=gcc
 GPP=g++
-OPTFLAGS = -g -O3
+OPTFLAGS = -O3 -msse2 -flto
 LIBS = -lm -lstdc++ 
-PFLAGS += -tossim -fnesc-nido-tosnodes=1000 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -DTOSSIM_NO_DEBUG
+PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc=$(GCC) -DTOSSIM_NO_DEBUG
 WFLAGS = -Wno-nesc-data-race
-PYTHON_VERSION ?= $(shell python --version 2>&1 | sed 's/Python 2\.\([0-9]\)\.[0-9]+\{0,1\}/2.\1/')
+PYTHON_VERSION ?= $(shell python --version 2>&1 | sed 's/Python \([0-9]\)\.\([0-9]\)\.[0-9]+\{0,1\}/\1.\2/')
 
 BUILDDIR   = simbuild/$(PLATFORM)
 CFILE    = $(BUILDDIR)/sim.c
@@ -18,8 +18,8 @@ HASHFILE    = $(TOSDIR)/lib/tossim/hashtable.c
 HASHOBJFILE = $(BUILDDIR)/c-support.o
 PYFILE     = $(TOSDIR)/lib/tossim/tossim_wrap.cxx
 PYOBJFILE  = $(BUILDDIR)/pytossim.o
-PYDIR      =/usr/include/python$(PYTHON_VERSION)
-SIMDIR     =$(TOSDIR)/lib/tossim
+PYDIR      = $(shell python$(PYTHON_VERSION)-config --prefix)/include/python$(PYTHON_VERSION)
+SIMDIR     = $(TOSDIR)/lib/tossim
 XML        = app.xml
 DUMPTYPES = -fnesc-dump=components -fnesc-dump=variables -fnesc-dump=constants -fnesc-dump=typedefs -fnesc-dump=interfacedefs -fnesc-dump=tags
 
@@ -66,7 +66,7 @@ sim-exe: builddir $(BUILD_EXTRA_DEPS) FORCE
 	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(CXXOBJFILE) $(OPTFLAGS) $(CFLAGS) $(CXXFILE) -I$(PYDIR) -I$(SIMDIR)
 	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(HASHOBJFILE) $(OPTFLAGS) $(CFLAGS) $(HASHFILE) -I$(PYDIR) -I$(SIMDIR)
 	@echo "  linking into shared object ./$(SHARED_OBJECT)"
-	$(GPP) $(PLATFORM_BUILD_FLAGS) $(PLATFORM_CC_FLAGS) $(PYOBJFILE) $(OBJFILE) $(CXXOBJFILE) $(HASHOBJFILE) $(PLATFORM_LIB_FLAGS) -o $(SHARED_OBJECT)
+	$(GPP) $(PLATFORM_BUILD_FLAGS) $(PLATFORM_CC_FLAGS) $(PYOBJFILE) $(OBJFILE) $(CXXOBJFILE) $(HASHOBJFILE) $(PLATFORM_LIB_FLAGS) $(OPTFLAGS) -o $(SHARED_OBJECT)
 	@echo "  copying Python script interface TOSSIM.py from lib/tossim to local directory"
 	@cp $(TOSDIR)/lib/tossim/TOSSIM.py .
 	@echo " "

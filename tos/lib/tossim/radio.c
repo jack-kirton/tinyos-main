@@ -40,29 +40,26 @@
 #include <radio.h>
 #include <sim_gain.h>
 
-Radio::Radio() {}
-Radio::~Radio() {}
-
-void Radio::add(int src, int dest, double radio_gain) {
+void Radio::add(int src, int dest, double radio_gain) noexcept {
   sim_gain_add(src, dest, radio_gain);
 }
 
-double Radio::gain(int src, int dest) {
+double Radio::gain(int src, int dest) noexcept {
   return sim_gain_value(src, dest);
 }
 
-bool Radio::connected(int src, int dest) {
+bool Radio::connected(int src, int dest) noexcept {
   return sim_gain_connected(src, dest);
 }
 
-void Radio::remove(int src, int dest) {
+void Radio::remove(int src, int dest) noexcept {
   sim_gain_remove(src, dest);
 }
 
-void Radio::setNoise(int node, double mean, double range) {
+void Radio::setNoise(int node, double mean, double range) noexcept {
   sim_gain_set_noise_floor(node, mean, range);
 }
 
-void Radio::setSensitivity(double sensitivity) {
+void Radio::setSensitivity(double sensitivity) noexcept {
   sim_gain_set_sensitivity(sensitivity);
 }

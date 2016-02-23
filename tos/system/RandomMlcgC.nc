@@ -33,7 +33,7 @@
  *  Generator for pseudo-random numbers.  It uses the 32 bit multiplicative 
  *  linear congruential generator, 
  *
- *		S' = (A x S) mod (2^31 - 1) 
+ *              S' = (A x S) mod (2^31 - 1) 
  *
  *  for A = 16807.
  *
@@ -71,16 +71,16 @@ implementation
     uint64_t tmpseed;
     atomic
       {
-	tmpseed =  (uint64_t)33614U * (uint64_t)seed;
-	q = tmpseed; 	/* low */
-	q = q >> 1;
-	p = tmpseed >> 32 ;		/* hi */
-	mlcg = p + q;
+        tmpseed =  (uint64_t)33614U * (uint64_t)seed;
+        q = tmpseed;    /* low */
+        q = q >> 1;
+        p = tmpseed >> 32 ;             /* hi */
+        mlcg = p + q;
         if (mlcg & 0x80000000) { 
-	  mlcg = mlcg & 0x7FFFFFFF;
-	  mlcg++;
-	}
-	seed = mlcg;
+          mlcg = mlcg & 0x7FFFFFFF;
+          mlcg++;
+        }
+        seed = mlcg;
       }
     return mlcg; 
   }
@@ -90,10 +90,4 @@ implementation
     return (uint16_t)call Random.rand32();
   }
 
-#if 0
- /* Return high 16 bits of 32 bit number */
- inline uint16_t getHigh16(uint32_t num) {
-    return num >> 16;
- }
-#endif
 }

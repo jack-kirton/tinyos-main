@@ -66,10 +66,10 @@ void sim_set_node(unsigned long node);
 
 int sim_print_time(char* buf, int bufLen, sim_time_t time);
 int sim_print_now(char* buf, int bufLen);
-char* sim_time_string();
+const char* sim_time_string();
 
-void sim_add_channel(char* channel, FILE* file);
-bool sim_remove_channel(char* channel, FILE* file);
+void sim_add_channel(const char* channel, FILE* file);
+bool sim_remove_channel(const char* channel, FILE* file);
   
 bool sim_run_next_event();
 

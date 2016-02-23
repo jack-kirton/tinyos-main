@@ -75,7 +75,7 @@ implementation {
 					  uint8_t len) {
     error_t err;
     tossim_header_t* header = getHeader(amsg);
-    dbg("AM", "AM: Sending packet (id=%hhu, len=%hhu) to %hu\n", id, len, addr);
+    simdbg("AM", "AM: Sending packet (id=%hhu, len=%hhu) to %hu\n", id, len, addr);
     header->type = id;
     header->dest = addr;
     header->src = call AMPacket.address();
@@ -115,11 +115,11 @@ implementation {
     payload = call Packet.getPayload(bufferPointer, call Packet.maxPayloadLength());
 
     if (call AMPacket.isForMe(msg)) {
-      dbg("AM", "Received active message (%p) of type %hhu and length %hhu for me @ %s.\n", bufferPointer, call AMPacket.type(bufferPointer), len, sim_time_string());
+      simdbg("AM", "Received active message (%p) of type %hhu and length %hhu for me @ %s.\n", bufferPointer, call AMPacket.type(bufferPointer), len, sim_time_string());
       bufferPointer = signal Receive.receive[call AMPacket.type(bufferPointer)](bufferPointer, payload, len);
     }
     else {
-      dbg("AM", "Snooped on active message of type %hhu and length %hhu for %hu @ %s.\n", call AMPacket.type(bufferPointer), len, call AMPacket.destination(bufferPointer), sim_time_string());
+      simdbg("AM", "Snooped on active message of type %hhu and length %hhu for %hu @ %s.\n", call AMPacket.type(bufferPointer), len, call AMPacket.destination(bufferPointer), sim_time_string());
       bufferPointer = signal Snoop.receive[call AMPacket.type(bufferPointer)](bufferPointer, payload, len);
     }
   }
@@ -240,7 +240,7 @@ implementation {
  }
  
  sim_event_t* allocate_deliver_event(int node, message_t* msg, sim_time_t t) {
-   sim_event_t* evt = (sim_event_t*)malloc(sizeof(sim_event_t));
+   sim_event_t* evt = sim_queue_allocate_raw_event();
    evt->mote = node;
    evt->time = t;
    evt->handle = active_message_deliver_handle;

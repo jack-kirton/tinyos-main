@@ -64,8 +64,8 @@ enum {
   SIM_LOG_OUTPUT_COUNT = uniqueCount("TOSSIM.debug")
 };
 
-sim_log_output_t outputs[SIM_LOG_OUTPUT_COUNT];
-struct hashtable* channelTable = NULL;
+static sim_log_output_t outputs[SIM_LOG_OUTPUT_COUNT];
+static struct hashtable* channelTable = NULL;
 
 
 static unsigned int sim_log_hash(const void* key);
@@ -81,9 +81,9 @@ static int sim_log_eq(const void* key1, const void* key2);
 // to stdout. So when the channel's FILE*s are copied
 // into the debug point output array, this checks
 // for redundancies by checking file descriptors.
-static void fillInOutput(int id, char* name) {
-  char* termination = name;
-  char* namePos = name;
+static void fillInOutput(int id, const char* name) {
+  const char* termination = name;
+  const char* namePos = name;
   int count = 0;
   size_t nameLen = strlen(name);
   char* newName = (char*)calloc(nameLen + 1, sizeof(char));
@@ -100,7 +100,7 @@ static void fillInOutput(int id, char* name) {
     // Otherwise, memcpy over and null terminate
     else {
       memcpy(newName, namePos, (termination - namePos));
-      newName[termination - namePos] = 0;
+      newName[termination - namePos] = '\0';
     }
     
     channel = hashtable_search(channelTable, newName);
@@ -170,7 +170,7 @@ void sim_log_init(void) {
   }
 }
 
-void sim_log_add_channel(char* name, FILE* file) {
+void sim_log_add_channel(const char* name, FILE* file) {
   sim_log_channel_t* channel;
   channel = (sim_log_channel_t*)hashtable_search(channelTable, name);
   
@@ -199,7 +199,7 @@ void sim_log_add_channel(char* name, FILE* file) {
   sim_log_commit_change();
 }
 
-bool sim_log_remove_channel(char* output, FILE* file) {
+bool sim_log_remove_channel(const char* output, FILE* file) {
   sim_log_channel_t* channel;
   int i;
   channel = (sim_log_channel_t*)hashtable_search(channelTable, output);  
@@ -233,7 +233,7 @@ void sim_log_commit_change(void) {
 }
 
 
-void sim_log_debug(uint16_t id, char* string, const char* format, ...) {
+void sim_log_debug(uint16_t id, const char* string, const char* format, ...) {
   va_list args;
   int i;
   if (outputs[id].files == NULL) {
@@ -242,13 +242,13 @@ void sim_log_debug(uint16_t id, char* string, const char* format, ...) {
   for (i = 0; i < outputs[id].num; i++) {
     FILE* file = outputs[id].files[i];
     va_start(args, format);
-    fprintf(file, "DEBUG (%i): ", (int)sim_node());
+    fprintf(file, "DEBUG (%lu): ", sim_node());
     vfprintf(file, format, args); 
     fflush(file);
   }
 }
 
-void sim_log_error(uint16_t id, char* string, const char* format, ...) {
+void sim_log_error(uint16_t id, const char* string, const char* format, ...) {
   va_list args;
   int i;
   if (outputs[id].files == NULL) {
@@ -257,13 +257,13 @@ void sim_log_error(uint16_t id, char* string, const char* format, ...) {
   for (i = 0; i < outputs[id].num; i++) {
     FILE* file = outputs[id].files[i];
     va_start(args, format);
-    fprintf(file, "ERROR (%i): ", (int)sim_node());
+    fprintf(file, "ERROR (%lu): ", sim_node());
     vfprintf(file, format, args);
     fflush(file);
   }
 }
 
-void sim_log_debug_clear(uint16_t id, char* string, const char* format, ...) {
+void sim_log_debug_clear(uint16_t id, const char* string, const char* format, ...) {
   va_list args;
   int i;
   if (outputs[id].files == NULL) {
@@ -277,7 +277,7 @@ void sim_log_debug_clear(uint16_t id, char* string, const char* format, ...) {
   }
 }
 
-void sim_log_error_clear(uint16_t id, char* string, const char* format, ...) {
+void sim_log_error_clear(uint16_t id, const char* string, const char* format, ...) {
   va_list args;
   int i;
   if (outputs[id].files == NULL) {

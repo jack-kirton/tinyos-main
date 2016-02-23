@@ -69,7 +69,7 @@ implementation {
 
   
   void sim_schedule_ack(int source, sim_time_t time) {
-    sim_event_t* ackEvent = (sim_event_t*)malloc(sizeof(sim_event_t));
+    sim_event_t* ackEvent = sim_queue_allocate_raw_event();
     ackEvent->mote = source;
     ackEvent->force = 0;
     ackEvent->cancelled = 0;

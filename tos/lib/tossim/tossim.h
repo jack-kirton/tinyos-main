@@ -50,9 +50,11 @@
 #include <packet.h>
 #include <hashtable.h>
 
+ #include <functional>
+
 typedef struct variable_string {
   const char* type;
-  char* ptr;
+  void* ptr;
   int len;
   int isArray;
 } variable_string_t;
@@ -72,9 +74,9 @@ class Variable {
   
  private:
   char* realName;
-  const char* format;
+  char* format;
   void* ptr;
-  char* data;
+  uint8_t* data;
   size_t len;
   int mote;
   int isArray;
@@ -85,18 +87,18 @@ class Mote {
   Mote(nesc_app_t* app);
   ~Mote();
 
-  unsigned long id();
+  unsigned long id() noexcept;
   
-  long long int euid();
-  void setEuid(long long int id);
+  long long int euid() noexcept;
+  void setEuid(long long int id) noexcept;
 
-  long long int bootTime();
-  void bootAtTime(long long int time);
+  long long int bootTime() noexcept;
+  void bootAtTime(long long int time) noexcept;
 
-  bool isOn();
-  void turnOff();
-  void turnOn();
-  void setID(unsigned long id);  
+  bool isOn() noexcept;
+  void turnOff() noexcept;
+  void turnOn() noexcept;
+  void setID(unsigned long id) noexcept;  
 
   void addNoiseTraceReading(int val);
   void createNoiseModel();
@@ -117,20 +119,21 @@ class Tossim {
   
   void init();
   
-  long long int time();
-  long long int ticksPerSecond();
-  char* timeStr();
-  void setTime(long long int time);
+  long long int time() noexcept;
+  long long int ticksPerSecond() noexcept;
+  const char* timeStr() noexcept;
+  void setTime(long long int time) noexcept;
   
-  Mote* currentNode();
-  Mote* getNode(unsigned long nodeID);
-  void setCurrentNode(unsigned long nodeID);
+  Mote* currentNode() noexcept;
+  Mote* getNode(unsigned long nodeID) noexcept;
+  void setCurrentNode(unsigned long nodeID) noexcept;
 
-  void addChannel(char* channel, FILE* file);
-  bool removeChannel(char* channel, FILE* file);
+  void addChannel(const char* channel, FILE* file);
+  bool removeChannel(const char* channel, FILE* file);
   void randomSeed(int seed);
   
   bool runNextEvent();
+  unsigned int runAllEvents(std::function<bool()> continue_events, std::function<void (unsigned int)> callback);
 
   MAC* mac();
   Radio* radio();
@@ -142,7 +145,7 @@ private:
  private:
   nesc_app_t* app;
   Mote** motes;
-  char timeBuf[256];
+  char timeBuf[128];
 };
 
 #endif // TOSSIM_H_INCLUDED

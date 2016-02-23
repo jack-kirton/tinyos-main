@@ -63,8 +63,8 @@ enum {
   
 typedef struct sim_noise_hash_t {
   char key[NOISE_HISTORY];
-  int numElements;
-  int size;
+  unsigned int numElements;
+  unsigned int size;
   char flag;
   char *elements;
   float dist[NOISE_NUM_VALUES];

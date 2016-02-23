@@ -6,9 +6,9 @@ typedef struct sim_gain_noise {
 } sim_gain_noise_t;
 
 
-gain_entry_t* connectivity[TOSSIM_MAX_NODES + 1];
-sim_gain_noise_t localNoise[TOSSIM_MAX_NODES + 1];
-double sensitivity = 4.0;
+static gain_entry_t* connectivity[TOSSIM_MAX_NODES + 1];
+static sim_gain_noise_t localNoise[TOSSIM_MAX_NODES + 1];
+static double sensitivity = 4.0;
 
 gain_entry_t* sim_gain_allocate_link(int mote);
 void sim_gain_deallocate_link(gain_entry_t* linkToDelete);
