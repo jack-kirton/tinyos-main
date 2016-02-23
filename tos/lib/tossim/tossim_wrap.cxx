@@ -3688,74 +3688,74 @@ namespace swig {
 #define LENGTH_TYPE(NAME) \
 if (strcmp(type, #NAME) == 0) { \
     return sizeof(NAME); \
-  }
+}
 
 size_t lengthOfType(const char* type) {
-  LENGTH_TYPE(uint8_t)
-  LENGTH_TYPE(uint16_t)
-  LENGTH_TYPE(uint32_t)
-  LENGTH_TYPE(int8_t)
-  LENGTH_TYPE(int16_t)
-  LENGTH_TYPE(int32_t)
-  LENGTH_TYPE(char)
-  LENGTH_TYPE(short)
-  LENGTH_TYPE(int)
-  LENGTH_TYPE(long)
-  LENGTH_TYPE(signed char)
-  LENGTH_TYPE(unsigned char)
-  LENGTH_TYPE(unsigned short)
-  LENGTH_TYPE(unsigned int)
-  LENGTH_TYPE(unsigned long)
-  LENGTH_TYPE(float)
-  LENGTH_TYPE(double)
+    LENGTH_TYPE(uint8_t)
+    LENGTH_TYPE(uint16_t)
+    LENGTH_TYPE(uint32_t)
+    LENGTH_TYPE(int8_t)
+    LENGTH_TYPE(int16_t)
+    LENGTH_TYPE(int32_t)
+    LENGTH_TYPE(char)
+    LENGTH_TYPE(short)
+    LENGTH_TYPE(int)
+    LENGTH_TYPE(long)
+    LENGTH_TYPE(signed char)
+    LENGTH_TYPE(unsigned char)
+    LENGTH_TYPE(unsigned short)
+    LENGTH_TYPE(unsigned int)
+    LENGTH_TYPE(unsigned long)
+    LENGTH_TYPE(float)
+    LENGTH_TYPE(double)
 
-  printf("Unknown type (size) '%s'\n", type);
+    //printf("Unknown type (size) '%s'\n", type);
 
-  return 1;
+    return 1;
 }
 
 #define CONVERT_TYPE(NAME, CONVERT_FUNCTION) \
 if (strcmp(type, #NAME) == 0) { \
-  NAME val; \
-  memcpy(&val, ptr, sizeof(NAME)); \
-  return CONVERT_FUNCTION(val); \
+    NAME val; \
+    memcpy(&val, ptr, sizeof(NAME)); \
+    return CONVERT_FUNCTION(val); \
 }
 
 PyObject* valueFromScalar(const char* type, const void* ptr, size_t len) {
-  CONVERT_TYPE(uint8_t, PyLong_FromUnsignedLong)
-  CONVERT_TYPE(uint16_t, PyLong_FromUnsignedLong)
-  CONVERT_TYPE(uint32_t, PyLong_FromUnsignedLong)
-  CONVERT_TYPE(int8_t, PyLong_FromLong)
-  CONVERT_TYPE(int16_t, PyLong_FromLong)
-  CONVERT_TYPE(int32_t, PyLong_FromLong)
-  CONVERT_TYPE(char, PyLong_FromLong)
-  CONVERT_TYPE(short, PyLong_FromLong)
-  CONVERT_TYPE(int, PyLong_FromLong)
-  CONVERT_TYPE(long, PyLong_FromLong)
-  CONVERT_TYPE(unsigned char, PyLong_FromUnsignedLong)
-  CONVERT_TYPE(unsigned short, PyLong_FromUnsignedLong)
-  CONVERT_TYPE(unsigned int, PyLong_FromUnsignedLong)
-  CONVERT_TYPE(unsigned long, PyLong_FromUnsignedLong)
-  CONVERT_TYPE(float, PyFloat_FromDouble)
-  CONVERT_TYPE(double, PyFloat_FromDouble)
+    CONVERT_TYPE(uint8_t, PyLong_FromUnsignedLong)
+    CONVERT_TYPE(uint16_t, PyLong_FromUnsignedLong)
+    CONVERT_TYPE(uint32_t, PyLong_FromUnsignedLong)
+    CONVERT_TYPE(int8_t, PyLong_FromLong)
+    CONVERT_TYPE(int16_t, PyLong_FromLong)
+    CONVERT_TYPE(int32_t, PyLong_FromLong)
+    CONVERT_TYPE(char, PyLong_FromLong)
+    CONVERT_TYPE(short, PyLong_FromLong)
+    CONVERT_TYPE(int, PyLong_FromLong)
+    CONVERT_TYPE(long, PyLong_FromLong)
+    CONVERT_TYPE(unsigned char, PyLong_FromUnsignedLong)
+    CONVERT_TYPE(unsigned short, PyLong_FromUnsignedLong)
+    CONVERT_TYPE(unsigned int, PyLong_FromUnsignedLong)
+    CONVERT_TYPE(unsigned long, PyLong_FromUnsignedLong)
+    CONVERT_TYPE(float, PyFloat_FromDouble)
+    CONVERT_TYPE(double, PyFloat_FromDouble)
 
-  //printf("Unknown type (value) '%s'\n", type);
+    //printf("Unknown type (value) '%s'\n", type);
 
 #if PY_VERSION_HEX < 0x03000000
-  return PyString_FromStringAndSize((const char*)ptr, len);
+    return PyString_FromStringAndSize((const char*)ptr, len);
 #else
-  return PyUnicode_DecodeASCII((const char*)ptr, len, "strict");
+    return PyUnicode_DecodeASCII((const char*)ptr, len, "strict");
 #endif
 }
 
 PyObject* listFromArray(const char* type, const void* ptr, int len) {
-  size_t elementLen = lengthOfType(type);
-  PyObject* list = PyList_New(0);
-  //printf("Generating list of %s\n", type);
-  for (const uint8_t* tmpPtr = (const uint8_t*)ptr; tmpPtr < (const uint8_t*)ptr + len; tmpPtr += elementLen) {
-    PyList_Append(list, valueFromScalar(type, tmpPtr, elementLen));    
-  }
-  return list;
+    size_t elementLen = lengthOfType(type);
+    PyObject* list = PyList_New(0);
+    //printf("Generating list of %s\n", type);
+    for (const uint8_t* tmpPtr = (const uint8_t*)ptr; tmpPtr < (const uint8_t*)ptr + len; tmpPtr += elementLen) {
+        PyList_Append(list, valueFromScalar(type, tmpPtr, elementLen));    
+    }
+    return list;
 }
 
 // From: https://stackoverflow.com/questions/11516809/c-back-end-call-the-python-level-defined-callbacks-with-swig-wrapper#new-answer
@@ -3766,111 +3766,111 @@ private:
     PyCallback& operator=(const PyCallback&) = delete; // Not allowed
 public:
     PyCallback(PyCallback&& o) : func(o.func) {
-      o.func = NULL;
+        o.func = NULL;
     }
     PyCallback(const PyCallback& o) : func(o.func) {
-      Py_XINCREF(func);
+        Py_XINCREF(func);
     }
     PyCallback(PyObject *pfunc) {
-      if (!pfunc || Py_None == pfunc || !PyCallable_Check(pfunc))
-      {
-        PyErr_SetString(PyExc_TypeError, "Requires a callable as a parameter.");
-        throw std::runtime_error("Python exception occurred");
-      }
-      func = pfunc;
-      Py_XINCREF(func);
+        if (!pfunc || Py_None == pfunc || !PyCallable_Check(pfunc))
+        {
+            PyErr_SetString(PyExc_TypeError, "Requires a callable as a parameter.");
+            throw std::runtime_error("Python exception occurred");
+        }
+        func = pfunc;
+        Py_XINCREF(func);
     }
     ~PyCallback() {
-      Py_XDECREF(func);
+        Py_XDECREF(func);
     }
 
     bool operator()() const {
-      PyObject *args = PyTuple_New(0);
+        PyObject *args = PyTuple_New(0);
 
-      PyObject *result = PyObject_Call(func, args, NULL);
+        PyObject *result = PyObject_Call(func, args, NULL);
 
-      bool bool_result = result != NULL && PyObject_IsTrue(result);
+        bool bool_result = result != NULL && PyObject_IsTrue(result);
 
-      Py_DECREF(args);
-      Py_XDECREF(result);
+        Py_DECREF(args);
+        Py_XDECREF(result);
 
-      if (PyErr_Occurred() != NULL)
-      {
-        throw std::runtime_error("Python exception occurred");
-      }
+        if (PyErr_Occurred() != NULL)
+        {
+            throw std::runtime_error("Python exception occurred");
+        }
 
-      return bool_result;
+        return bool_result;
     }
 
     void operator()(unsigned int i) const {
-      PyObject *args = PyTuple_New(1);
-      PyTuple_SetItem(args, 0, PyLong_FromUnsignedLong(i));
+        PyObject *args = PyTuple_New(1);
+        PyTuple_SetItem(args, 0, PyLong_FromUnsignedLong(i));
 
-      PyObject *result = PyObject_Call(func, args, NULL);
+        PyObject *result = PyObject_Call(func, args, NULL);
 
-      Py_DECREF(args);
-      Py_XDECREF(result);
+        Py_DECREF(args);
+        Py_XDECREF(result);
 
-      if (PyErr_Occurred() != NULL)
-      {
-        throw std::runtime_error("Python exception occurred");
-      }
+        if (PyErr_Occurred() != NULL)
+        {
+            throw std::runtime_error("Python exception occurred");
+        }
     }
 };
 
 FILE* object_to_file(PyObject* o)
 {
 #if PY_VERSION_HEX < 0x03000000
-  if (!PyFile_Check(o)) {
-    PyErr_SetString(PyExc_TypeError, "Requires a file as a parameter.");
-    return NULL;
-  }
-  return PyFile_AsFile(o);
+    if (!PyFile_Check(o)) {
+        PyErr_SetString(PyExc_TypeError, "Requires a file as a parameter.");
+        return NULL;
+    }
+    return PyFile_AsFile(o);
 #else
-  long fileno = -1;
-  if (PyLong_Check(o))
-  {
-    fileno = PyLong_AsLong(o);
-  }
-  else if (PyObject_HasAttrString(o, "fileno"))
-  {
-    PyObject* fileno_obj = PyObject_CallMethod(o, "fileno", NULL);
-    if (fileno_obj == NULL)
+    long fileno = -1;
+    if (PyLong_Check(o))
     {
-      PyErr_SetString(PyExc_TypeError, "Calling fileno failed.");
-      return NULL;
+        fileno = PyLong_AsLong(o);
+    }
+    else if (PyObject_HasAttrString(o, "fileno"))
+    {
+        PyObject* fileno_obj = PyObject_CallMethod(o, "fileno", NULL);
+        if (fileno_obj == NULL)
+        {
+            PyErr_SetString(PyExc_TypeError, "Calling fileno failed.");
+            return NULL;
+        }
+
+        fileno = PyLong_AsLong(fileno_obj);
+        Py_DECREF(fileno_obj);
+
+        if (fileno == -1 && PyErr_Occurred())
+        {
+            PyErr_SetString(PyExc_TypeError, "The result of fileno was incorrect.");
+            return NULL;
+        }
+    }
+    else
+    {
+        PyErr_SetString(PyExc_TypeError, "Requires an object with a fileno function or a fileno.");
+        return NULL;
     }
 
-    fileno = PyLong_AsLong(fileno_obj);
-    Py_DECREF(fileno_obj);
-
-    if (fileno == -1 && PyErr_Occurred())
+    long fileno_dup = dup(fileno);
+    if (fileno_dup == -1)
     {
-      PyErr_SetString(PyExc_TypeError, "The result of fileno was incorrect.");
-      return NULL;
+        PyErr_Format(PyExc_TypeError, "Failed to duplicate fileno with error %d.", errno);
+        return NULL;
     }
-  }
-  else
-  {
-    PyErr_SetString(PyExc_TypeError, "Requires an object with a fileno function or a fileno.");
-    return NULL;
-  }
 
-  long fileno_dup = dup(fileno);
-  if (fileno_dup == -1)
-  {
-    PyErr_Format(PyExc_TypeError, "Failed to duplicate fileno with error %d.", errno);
-    return NULL;
-  }
+    FILE* result = fdopen(fileno_dup, "w");
+    if (result == NULL)
+    {
+        PyErr_SetString(PyExc_TypeError, "Failed to fdopen file.");
+        return NULL;
+    }
 
-  FILE* result = fdopen(fileno_dup, "w");
-  if (result == NULL)
-  {
-    PyErr_SetString(PyExc_TypeError, "Failed to fdopen file.");
-    return NULL;
-  }
-
-  return result;
+    return result;
 #endif
 }
 
@@ -4242,44 +4242,44 @@ SWIG_AsVal_long_SS_long (PyObject *obj, long long *val)
 bool fill_nesc_app(nesc_app_t* app, int i, PyObject* name, PyObject* array, PyObject* format)
 {
 #if PY_VERSION_HEX < 0x03000000
-  if (PyString_Check(name) && PyString_Check(format)) {
-    app->variableNames[i] = PyString_AsString(name); // TODO: Should this be strdup'ed?
-    app->variableTypes[i] = PyString_AsString(format); // TODO: Should this be strdup'ed?
-    app->variableArray[i] = (strcmp(PyString_AsString(array), "array") == 0);
+    if (PyString_Check(name) && PyString_Check(format)) {
+        app->variableNames[i] = PyString_AsString(name); // TODO: Should this be strdup'ed?
+        app->variableTypes[i] = PyString_AsString(format); // TODO: Should this be strdup'ed?
+        app->variableArray[i] = (strcmp(PyString_AsString(array), "array") == 0);
 
-    return true;
-  }
-  else {
-    free(app->variableNames);
-    free(app->variableTypes);
-    free(app->variableArray);
-    free(app);
-    PyErr_SetString(PyExc_RuntimeError, "bad string");
-    return false;
-  }
+        return true;
+    }
+    else {
+        free(app->variableNames);
+        free(app->variableTypes);
+        free(app->variableArray);
+        free(app);
+        PyErr_SetString(PyExc_RuntimeError, "bad string");
+        return false;
+    }
 #else
-  if (PyUnicode_Check(name) && PyUnicode_Check(format)) {
+    if (PyUnicode_Check(name) && PyUnicode_Check(format)) {
 
-    PyObject* name_ascii = PyUnicode_AsASCIIString(name);
-    PyObject* format_ascii = PyUnicode_AsASCIIString(format);
+        PyObject* name_ascii = PyUnicode_AsASCIIString(name);
+        PyObject* format_ascii = PyUnicode_AsASCIIString(format);
 
-    app->variableNames[i] = strdup(PyBytes_AsString(name_ascii));
-    app->variableTypes[i] = strdup(PyBytes_AsString(format_ascii));
+        app->variableNames[i] = strdup(PyBytes_AsString(name_ascii));
+        app->variableTypes[i] = strdup(PyBytes_AsString(format_ascii));
 
-    Py_DECREF(name_ascii);
-    Py_DECREF(format_ascii);
+        Py_DECREF(name_ascii);
+        Py_DECREF(format_ascii);
 
-    PyObject* array_ascii = PyUnicode_AsASCIIString(array);
-    
-    app->variableArray[i] = (strcmp(PyBytes_AsString(array_ascii), "array") == 0);
+        PyObject* array_ascii = PyUnicode_AsASCIIString(array);
+        
+        app->variableArray[i] = (strcmp(PyBytes_AsString(array_ascii), "array") == 0);
 
-    Py_DECREF(array_ascii);
-    return true;
-  }
-  else {
-    PyErr_SetString(PyExc_RuntimeError, "bad string");
-    return false;
-  }
+        Py_DECREF(array_ascii);
+        return true;
+    }
+    else {
+        PyErr_SetString(PyExc_RuntimeError, "bad string");
+        return false;
+    }
 #endif
 }
 
@@ -4359,16 +4359,16 @@ SWIGINTERNINLINE PyObject*
 }
 
 SWIGINTERN PyObject *Tossim_runAllEvents__SWIG_1(Tossim *self,PyObject *continue_events,PyObject *callback){
-    try
-    {
-      unsigned int result = self->runAllEvents(PyCallback(continue_events), PyCallback(callback));
-      return PyLong_FromUnsignedLong(result);
+        try
+        {
+            unsigned int result = self->runAllEvents(PyCallback(continue_events), PyCallback(callback));
+            return PyLong_FromUnsignedLong(result);
+        }
+        catch (std::runtime_error ex)
+        {
+            return NULL;
+        }
     }
-    catch (std::runtime_error ex)
-    {
-      return NULL;
-    }
-  }
 #ifdef __cplusplus
 extern "C" {
 #endif
