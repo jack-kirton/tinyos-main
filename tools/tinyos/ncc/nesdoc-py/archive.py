@@ -106,7 +106,7 @@ def canonicalisedir(dirname):
 # option processing. See usage string for details.
 def process_opts(argv):
   options = {
-    "topdir":	 (True,  lambda (x): topdir + [canonicalisedir(x)]),
+    "topdir":	 (True,  lambda x: topdir + [canonicalisedir(x)]),
     "preserve":	 (False, lambda x: True),
     "app":	 (False, lambda x: True),
     "quiet":	 (False, lambda x: True),
