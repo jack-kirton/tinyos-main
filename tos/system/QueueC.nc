@@ -68,13 +68,13 @@ implementation {
 
   void printQueue() {
 #ifdef TOSSIM
-    int i, j;
+    unsigned int i, j;
     dbg("QueueC", "head <-");
     for (i = head; i < head + size; i++) {
       dbg_clear("QueueC", "[");
       for (j = 0; j < sizeof(queue_t); j++) {
-	uint8_t v = ((uint8_t*)&queue[i % QUEUE_SIZE])[j];
-	dbg_clear("QueueC", "%0.2hhx", v);
+        uint8_t v = ((uint8_t*)&queue[i % QUEUE_SIZE])[j];
+        dbg_clear("QueueC", "%0.2hhx", v);
       }
       dbg_clear("QueueC", "] ");
     }
