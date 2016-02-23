@@ -7,7 +7,7 @@ GPP=g++ -std=gnu++11
 OPTFLAGS = -O2 -msse4.2 -maes -mpclmul -flto
 #-march=westmere
 LIBS = -lm -lstdc++ 
-PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc=$(GCC)
+PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc=$(GCC) -DTOSSIM_NO_DEBUG
 WFLAGS = -Wno-nesc-data-race
 PYTHON_VERSION ?= $(shell python --version 2>&1 | sed 's/Python \([0-9]\)\.\([0-9]\).*/\1.\2/')
 

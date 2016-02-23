@@ -72,12 +72,12 @@ implementation {
   }
 
   async command void Leds.led0On() {
-    dbg("LedsC", "LEDS: Led 1 on.\n");
+    simdbg("LedsC", "LEDS: Led 1 on.\n");
     call Led0.clr();
   }
 
   async command void Leds.led0Off() {
-    dbg("LedsC", "LEDS: Led 1 off.\n");
+    simdbg("LedsC", "LEDS: Led 1 off.\n");
     call Led0.set();
   }
 
@@ -86,63 +86,63 @@ implementation {
     // this should be removed by dead code elimination when compiled for
     // the physical motes
     if (call Led0.get())
-      dbg("LedsC", "LEDS: Led 1 off.\n");
+      simdbg("LedsC", "LEDS: Led 1 off.\n");
     else
-      dbg("LedsC", "LEDS: Led 1 on.\n");
+      simdbg("LedsC", "LEDS: Led 1 on.\n");
   }
 
   async command void Leds.led1On() {
-    dbg("LedsC", "LEDS: Led 2 on.\n");
+    simdbg("LedsC", "LEDS: Led 2 on.\n");
     call Led1.clr();
   }
 
   async command void Leds.led1Off() {
-    dbg("LedsC", "LEDS: Led 2 off.\n");
+    simdbg("LedsC", "LEDS: Led 2 off.\n");
     call Led1.set();
   }
 
   async command void Leds.led1Toggle() {
     call Led1.toggle();
     if (call Led1.get())
-      dbg("LedsC", "LEDS: Led 2 off.\n");
+      simdbg("LedsC", "LEDS: Led 2 off.\n");
     else
-      dbg("LedsC", "LEDS: Led 2 on.\n");
+      simdbg("LedsC", "LEDS: Led 2 on.\n");
   }
 
   async command void Leds.led2On() {
-    dbg("LedsC", "LEDS: Led 3 on.\n");
+    simdbg("LedsC", "LEDS: Led 3 on.\n");
     call Led2.clr();
   }
 
   async command void Leds.led2Off() {
-    dbg("LedsC", "LEDS: Led 3 off.\n");
+    simdbg("LedsC", "LEDS: Led 3 off.\n");
     call Led2.set();
   }
 
   async command void Leds.led2Toggle() {
     call Led2.toggle();
     if (call Led2.get())
-      dbg("LedsC", "LEDS: Led 3 off.\n");
+      simdbg("LedsC", "LEDS: Led 3 off.\n");
     else
-      dbg("LedsC", "LEDS: Led 3 on.\n");
+      simdbg("LedsC", "LEDS: Led 3 on.\n");
   }
 
   async command void Leds.led3On() {
-    dbg("LedsC", "LEDS: Led 4 on.\n");
+    simdbg("LedsC", "LEDS: Led 4 on.\n");
     call Led3.clr();
   }
 
   async command void Leds.led3Off() {
-    dbg("LedsC", "LEDS: Led 4 off.\n");
+    simdbg("LedsC", "LEDS: Led 4 off.\n");
     call Led3.set();
   }
 
   async command void Leds.led3Toggle() {
     call Led3.toggle();
     if (call Led3.get())
-      dbg("LedsC", "LEDS: Led 4 off.\n");
+      simdbg("LedsC", "LEDS: Led 4 off.\n");
     else
-      dbg("LedsC", "LEDS: Led 4 on.\n");
+      simdbg("LedsC", "LEDS: Led 4 on.\n");
   }
 
   async command uint8_t Leds.get() {
