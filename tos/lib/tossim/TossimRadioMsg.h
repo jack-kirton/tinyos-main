@@ -19,11 +19,59 @@ typedef nx_struct tossim_metadata {
   nx_int8_t strength;
   nx_uint8_t ack;
   nx_uint16_t time;
-
-#ifdef PACKET_LINK
-  nx_uint16_t maxRetries;
-  nx_uint16_t retryDelay;
-#endif
 } tossim_metadata_t;
+
+typedef nx_struct SYN_packet {
+  nx_uint16_t packet_type;
+  nx_int16_t node_id;
+  nx_uint16_t next_sleep_time;
+  nx_uint16_t sleep_period;
+} SYN_packet_t;
+
+
+typedef nx_struct RTS_packet {
+  nx_uint16_t packet_type;
+  nx_int16_t src_id;  
+  nx_int16_t dest_id;  
+  nx_uint16_t duration;
+} RTS_packet_t;
+
+
+typedef nx_struct CTS_packet {
+  nx_uint16_t packet_type;
+  nx_int16_t src_id;  
+  nx_int16_t dest_id;
+  nx_uint16_t duration;
+} CTS_packet_t;
+
+
+typedef nx_struct data_packet {
+  nx_uint16_t packet_type;
+  nx_uint8_t payload[16];
+} data_packet_t;
+
+typedef nx_struct FRTS_packet {
+  nx_uint16_t packet_type;
+  nx_int16_t src_id;  
+  nx_int16_t dest_id;  
+  nx_uint16_t duration;
+} FRTS_packet_t;
+
+
+typedef nx_struct DS_packet {
+  nx_uint16_t packet_type;
+  nx_int16_t src_id;  
+  nx_int16_t dest_id;  
+  nx_uint16_t duration;
+} DS_packet_t;
+
+
+
+typedef nx_struct preamble_packet { 
+  nx_uint16_t packet_type;
+  nx_uint16_t dest_id;
+  nx_uint8_t seq_no;
+} preamble_packet_t;
+
 
 #endif

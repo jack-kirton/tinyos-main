@@ -61,9 +61,10 @@ implementation {
   components MainC;
 
 // MAC Protocols
-#if defined(_MAC_CSMA_)
-  components MAC_CSMA as Network;
-#elif defined(_MAC_TOSSIM_)
+#if defined(_MAC_TDMA_)
+  components MAC_TDMA as Network;
+  components new TimerMilliC() as SlotTimer;
+#elif defined(_MAC_TOSSIM_) || defined(_MAC_CSMA_)
   components TossimPacketModelC as Network;
 #else
   components TossimPacketModelC as Network;
@@ -85,5 +86,8 @@ implementation {
   Network.GainRadioModel -> Model;
 
   //TODO Define MAC connections here
+#if defined(_MAC_TDMA_)
+  Network.SlotTimer -> SlotTimer;
+#endif
 }
 
