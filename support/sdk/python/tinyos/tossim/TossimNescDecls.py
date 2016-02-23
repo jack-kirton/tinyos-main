@@ -42,7 +42,7 @@ from copy import deepcopy
 # 
 ###########
 
-def findBuildFile(givenString, desiredFilename) :
+def findBuildFile(givenString, desiredFilename):
     """This function will find a desiredFilename (eg. nescDecls.xml) the build directory
     from a givenString (e.g 'build/pc').  Legal givenStrings are:
     1.  Full path,     eg: /home/kamin/tinyos-1.x/...
@@ -51,7 +51,7 @@ def findBuildFile(givenString, desiredFilename) :
     """
 
     #check to see if the given string contains the desiredFilename
-    if givenString.find(desiredFilename) >= 0 :
+    if givenString.find(desiredFilename) >= 0:
         filename = givenString
 
     #then check to see if it is an absolute or relative path
@@ -67,12 +67,13 @@ def findBuildFile(givenString, desiredFilename) :
         filename = os.path.join('build', os.environ["TINYOS_DEFAULT_PLATFORM"], desiredFilename)
 
     #otherwise, assume the file is in './'
-    else :
+    else:
         filename = desiredFilename
         
     #check to see if the file was successfully found
     if not os.path.isfile(filename):
         raise IOError("File %s not found" % filename)
+
     return filename
 
     
@@ -111,8 +112,8 @@ class nescType(object):
     #   this func could be used for type checking 
     def __setattr__(self, name, value) :
         if "value" in self.__dict__ and name == "value":
-                #use the type conversions built into pack
-                pack(self._conversionString, value)
+            #use the type conversions built into pack
+            pack(self._conversionString, value)
         self.__dict__[name] = value
 
     def oneLineStr(self):
@@ -190,7 +191,7 @@ class nescArray(object):
         """initialize all elements to 0"""
         if len(varargs) == 0 :
             return
-        elif len(varargs) == 2 and type(varargs[0]) == int :
+        elif len(varargs) == 2 and type(varargs[0]) == int:
             (self.len,self.elementType) = varargs[:]
             bracketStr = "[" + str(self.len) + "]"
         elif len(varargs) == 2 :
@@ -270,7 +271,7 @@ class nescArray(object):
             return self.nescType
         else :
             i = 0; string = "["
-            while len(string) < 40 and i < self.len :
+            while len(string) < 40 and i < self.len:
                 string += str(self.value[i]) + ", "
                 i += 1
             if i < self.len :

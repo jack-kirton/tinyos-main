@@ -68,7 +68,7 @@ implementation {
   /* Note: the call is inside the dbg, as it's typically a read of a volatile
      location, so can't be deadcode eliminated */
 #define DBGLED(n) \
-  dbg("LedsC", "LEDS: Led" #n " %s.\n", call Led ## n .get() ? "off" : "on");
+  simdbg("LedsC", "LEDS: Led" #n " %s.\n", call Led ## n .get() ? "off" : "on");
 
   async command void Leds.led0On() {
     call Led0.clr();
