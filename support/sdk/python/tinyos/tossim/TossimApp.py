@@ -36,21 +36,17 @@ from __future__ import print_function
 
 from tinyos.tossim.TossimNescDecls import *
 
-class NescVariables(object) :
+class NescVariables(object):
     def __init__(self, applicationName="Unknown App", xmlFilename=None):
         self.applicationName = applicationName
         self._varNames = []
         self._vars = []
 
         dom = minidom.parse(xmlFilename)
-        variableList = [node for node in dom.getElementsByTagName("variables")]
-        while len(variableList) > 0:
-            variables = variableList.pop(0).getElementsByTagName("variable")
-            while len(variables) > 0:
+        for variables_node in dom.getElementsByTagName("variables"):
+            for variable in variables_node.getElementsByTagName("variable"):
                 cVariable = False
-                isArray = False
 
-                variable = variables.pop(0)
                 name = variable.getAttribute("name")
                 component = variable.getElementsByTagName("component-ref")
 
@@ -77,8 +73,7 @@ class NescVariables(object) :
                 if len(varTypes) == 0:
                     varTypes = variable.getElementsByTagName("type-int")
 
-                if len(variable.getElementsByTagName("type-array")) > 0:
-                    isArray = True
+                isArray = (len(variable.getElementsByTagName("type-array")) > 0)
                     
                 if len(varTypes) > 0:
                     varTypeEntry = varTypes[0]
@@ -97,7 +92,7 @@ class NescVariables(object) :
         """ Print all available variables."""
         string = "\n"
         name = True
-        for val in self._varNames :
+        for val in self._varNames:
             if name:
                 string += "\t" + val
                 name = False
@@ -122,7 +117,7 @@ class NescTypes(object):
 
     typeRE = re.compile('cname=\"([\w\s]+?)\" size=\"I:(\d+?)\"')
 
-    def __init__( self, applicationName="Unknown App", xmlFilename = None):
+    def __init__( self, applicationName="Unknown App", xmlFilename=None):
         self.applicationName = applicationName
         self._typeNames = []
         self._types = {}
@@ -133,7 +128,8 @@ class NescTypes(object):
             for line in infile :
                 match = self.typeRE.search(line)
                 if match != None:
-                    platformTypes[match.groups()[0]] = int(match.groups()[1])      
+                    platformTypes[match.groups()[0]] = int(match.groups()[1])
+
         #define all the basic types
         self.addType(nescType("uint8_t", "unsigned char", "int", "type-int", "B", 1, 0))
         self.addType(nescType("int8_t", "signed char", "int", "type-int", "b", 1, 0))
@@ -279,7 +275,7 @@ class NescTypes(object):
         if len(err) > 0:
             print(err)
         
-    def getTypeFromXML(self, xmlDefinition) :
+    def getTypeFromXML(self, xmlDefinition):
         """Find the type name value given an xml definition.
         If it is an array or pointer, define the new type here."""
 
@@ -411,12 +407,12 @@ class NescMsgs(object):
         name = re.compile("^AM_(\w+)$")
         self._msgNames = []
         self._msgs = {}
-        for msgType in msgTypes :
+        for msgType in msgTypes:
             if type(enums[msgType]) == int:
                 msgName = name.match(msgType)
-                if msgName != None :
+                if msgName != None:
                     msgName = msgName.groups()[0]
-                for key in types._typeNames :
+                for key in types._typeNames:
                     if key.lower() == msgName.lower():
                         msg = TosMsg(enums[msgType], types[key])
                         self._msgs[key] = msg
