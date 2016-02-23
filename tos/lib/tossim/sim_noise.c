@@ -62,9 +62,9 @@ static sim_noise_node_t noiseData[TOSSIM_MAX_NODES];
 static unsigned int sim_noise_hash(const void *key);
 static int sim_noise_eq(const void *key1, const void *key2);
 
-void makeNoiseModel(uint16_t node_id);
-void makePmfDistr(uint16_t node_id);
-uint8_t search_bin_num(char noise);
+static void makeNoiseModel(uint16_t node_id);
+static void makePmfDistr(uint16_t node_id);
+static uint8_t search_bin_num(char noise);
 
 void sim_noise_init()__attribute__ ((C, spontaneous))
 {
@@ -78,7 +78,6 @@ void sim_noise_init()__attribute__ ((C, spontaneous))
     noiseData[j].noiseTrace = (char*)malloc(sizeof(char) * NOISE_MIN_TRACE);
     noiseData[j].noiseTraceLen = NOISE_MIN_TRACE;
     noiseData[j].noiseTraceIndex = 0;
-
   }
   //printf("Done with sim_noise_init()\n");
 }
@@ -90,7 +89,7 @@ void sim_noise_create_model(uint16_t node_id)__attribute__ ((C, spontaneous)) {
 
 char sim_real_noise(uint16_t node_id, uint32_t cur_t) {
   if (cur_t > noiseData[node_id].noiseTraceLen) {
-    dbg("Noise", "Asked for noise element %u when there are only %u.\n", cur_t, noiseData[node_id].noiseTraceIndex);
+    dbgerror("Noise", "Asked for noise element %u when there are only %u.\n", cur_t, noiseData[node_id].noiseTraceIndex);
     return 0;
   }
   return noiseData[node_id].noiseTrace[cur_t];
@@ -330,7 +329,7 @@ char sim_noise_gen(uint16_t node_id)__attribute__ ((C, spontaneous))
   
 #ifdef DEBUG
   dbg_clear("HASH", "Key = ");
-  for (i=0; i< NOISE_HISTORY ; i++) {
+  for (i = 0; i < NOISE_HISTORY; i++) {
     dbg_clear("HASH", "%d,", pKey[i]);
   }
   dbg_clear("HASH", "\n");

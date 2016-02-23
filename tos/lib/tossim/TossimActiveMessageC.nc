@@ -240,7 +240,7 @@ implementation {
  }
  
  sim_event_t* allocate_deliver_event(int node, message_t* msg, sim_time_t t) {
-   sim_event_t* evt = (sim_event_t*)malloc(sizeof(sim_event_t));
+   sim_event_t* evt = sim_queue_allocate_raw_event();
    evt->mote = node;
    evt->time = t;
    evt->handle = active_message_deliver_handle;

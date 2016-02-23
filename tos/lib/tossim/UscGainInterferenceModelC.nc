@@ -130,7 +130,7 @@ implementation {
   }
 
   void sim_gain_schedule_ack(int source, sim_time_t t) {
-    sim_event_t* ackEvent = (sim_event_t*)malloc(sizeof(sim_event_t));
+    sim_event_t* ackEvent = sim_queue_allocate_raw_event();
     ackEvent->mote = source;
     ackEvent->force = 1;
     ackEvent->cancelled = 0;
@@ -283,7 +283,7 @@ implementation {
  default event void Model.receive(message_t* msg) {}
 
  sim_event_t* allocate_receive_event(sim_time_t endTime, receive_message_t* msg) {
-   sim_event_t* evt = (sim_event_t*)malloc(sizeof(sim_event_t));
+   sim_event_t* evt = sim_queue_allocate_raw_event();
    evt->mote = sim_node();
    evt->time = endTime;
    evt->handle = sim_gain_receive_handle;

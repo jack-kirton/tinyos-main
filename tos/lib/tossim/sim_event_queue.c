@@ -82,7 +82,7 @@ void sim_queue_cleanup_none(sim_event_t* event) __attribute__ ((C, spontaneous))
 
 void sim_queue_cleanup_event(sim_event_t* event) __attribute__ ((C, spontaneous)) {
   //dbg("Queue", "cleanup_event: 0x%p\n", event);
-  free(event);
+  sim_queue_free_event(event);
 }
 
 void sim_queue_cleanup_data(sim_event_t* event) __attribute__ ((C, spontaneous)) {
@@ -95,11 +95,19 @@ void sim_queue_cleanup_total(sim_event_t* event) __attribute__ ((C, spontaneous)
   //dbg("Queue", "cleanup_total: 0x%p\n", event);
   free(event->data);
   event->data = NULL;
-  free(event);
+  sim_queue_free_event(event);
+}
+
+sim_event_t* sim_queue_allocate_raw_event(void) {
+  return (sim_event_t*)malloc(sizeof(sim_event_t));
 }
 
 sim_event_t* sim_queue_allocate_event(void) {
   sim_event_t* evt = (sim_event_t*)calloc(1, sizeof(sim_event_t));
   evt->mote = sim_node();
   return evt;
+}
+
+void sim_queue_free_event(sim_event_t* event) {
+  free(event);
 }

@@ -63,6 +63,9 @@ struct sim_event {
 };
 
 sim_event_t* sim_queue_allocate_event(void);
+sim_event_t* sim_queue_allocate_raw_event(void);
+
+void sim_queue_free_event(sim_event_t* event);
 
 void sim_queue_init(void);
 void sim_queue_free(void);
