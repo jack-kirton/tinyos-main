@@ -92,7 +92,7 @@ class Mote {
   long long int euid() noexcept;
   void setEuid(long long int id) noexcept;
 
-  long long int bootTime() noexcept;
+  long long int bootTime() const noexcept;
   void bootAtTime(long long int time) noexcept;
 
   bool isOn() noexcept;
@@ -119,8 +119,9 @@ class Tossim {
   
   void init();
   
-  long long int time() noexcept;
-  long long int ticksPerSecond() noexcept;
+  long long int time() const noexcept;
+  double timeInSeconds() const noexcept;
+  static long long int ticksPerSecond() noexcept;
   const char* timeStr() noexcept;
   void setTime(long long int time) noexcept;
   
@@ -133,7 +134,7 @@ class Tossim {
   void randomSeed(int seed);
   
   bool runNextEvent();
-  unsigned int runAllEvents(std::function<bool()> continue_events, std::function<void (unsigned int)> callback);
+  unsigned int runAllEvents(std::function<bool(double)> continue_events, std::function<void (unsigned int)> callback);
 
   MAC* mac();
   Radio* radio();

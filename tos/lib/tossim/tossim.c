@@ -152,7 +152,7 @@ void Mote::setEuid(long long int val) noexcept {
   sim_mote_set_euid(nodeID, val);
 }
 
-long long int Mote::bootTime() noexcept {
+long long int Mote::bootTime() const noexcept {
   return sim_mote_start_time(nodeID);
 }
 
@@ -246,8 +246,12 @@ void Tossim::init() {
   motes = (Mote**)calloc(TOSSIM_MAX_NODES + 1, sizeof(Mote*));
 }
 
-long long int Tossim::time() noexcept {
+long long int Tossim::time() const noexcept {
   return sim_time();
+}
+
+double Tossim::timeInSeconds() const noexcept {
+  return time() / static_cast<double>(ticksPerSecond());
 }
 
 long long int Tossim::ticksPerSecond() noexcept {
@@ -307,9 +311,9 @@ bool Tossim::runNextEvent() {
   return sim_run_next_event();
 }
 
-unsigned int Tossim::runAllEvents(std::function<bool()> continue_events, std::function<void (unsigned int)> callback) {
+unsigned int Tossim::runAllEvents(std::function<bool(double)> continue_events, std::function<void (unsigned int)> callback) {
   int event_count = 0;
-  while (continue_events())
+  while (continue_events(timeInSeconds()))
   {
     if (!runNextEvent())
     {

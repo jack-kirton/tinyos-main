@@ -3554,7 +3554,7 @@ SwigPyBuiltin_SetMetaType (PyTypeObject *type, PyTypeObject *metatype)
 #define SWIGTYPE_p_int swig_types[9]
 #define SWIGTYPE_p_nesc_app swig_types[10]
 #define SWIGTYPE_p_p_char swig_types[11]
-#define SWIGTYPE_p_std__functionT_bool_fF_t swig_types[12]
+#define SWIGTYPE_p_std__functionT_bool_fdoubleF_t swig_types[12]
 #define SWIGTYPE_p_std__functionT_void_funsigned_intF_t swig_types[13]
 #define SWIGTYPE_p_variable_string swig_types[14]
 #define SWIGTYPE_p_void swig_types[15]
@@ -3784,8 +3784,9 @@ public:
         Py_XDECREF(func);
     }
 
-    bool operator()() const {
-        PyObject *args = PyTuple_New(0);
+    bool operator()(double t) const {
+        PyObject *args = PyTuple_New(1);
+        PyTuple_SetItem(args, 0, PyFloat_FromDouble(t));
 
         PyObject *result = PyObject_Call(func, args, NULL);
 
@@ -6471,10 +6472,10 @@ SWIGINTERN PyObject *_wrap_Mote_bootTime(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"Mote_bootTime",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_bootTime" "', argument " "1"" of type '" "Mote *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_bootTime" "', argument " "1"" of type '" "Mote const *""'"); 
   }
   arg1 = reinterpret_cast< Mote * >(argp1);
-  result = (long long)(arg1)->bootTime();
+  result = (long long)((Mote const *)arg1)->bootTime();
   resultobj = SWIG_From_long_SS_long(static_cast< long long >(result));
   return resultobj;
 fail:
@@ -6799,11 +6800,33 @@ SWIGINTERN PyObject *_wrap_Tossim_time(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"Tossim_time",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_time" "', argument " "1"" of type '" "Tossim *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_time" "', argument " "1"" of type '" "Tossim const *""'"); 
   }
   arg1 = reinterpret_cast< Tossim * >(argp1);
-  result = (long long)(arg1)->time();
+  result = (long long)((Tossim const *)arg1)->time();
   resultobj = SWIG_From_long_SS_long(static_cast< long long >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Tossim_timeInSeconds(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Tossim *arg1 = (Tossim *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  double result;
+  
+  if (!SWIG_Python_UnpackTuple(args,"Tossim_timeInSeconds",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_timeInSeconds" "', argument " "1"" of type '" "Tossim const *""'"); 
+  }
+  arg1 = reinterpret_cast< Tossim * >(argp1);
+  result = (double)((Tossim const *)arg1)->timeInSeconds();
+  resultobj = SWIG_From_double(static_cast< double >(result));
   return resultobj;
 fail:
   return NULL;
@@ -6812,19 +6835,10 @@ fail:
 
 SWIGINTERN PyObject *_wrap_Tossim_ticksPerSecond(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
-  Tossim *arg1 = (Tossim *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
   long long result;
   
   if (!SWIG_Python_UnpackTuple(args,"Tossim_ticksPerSecond",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_ticksPerSecond" "', argument " "1"" of type '" "Tossim *""'"); 
-  }
-  arg1 = reinterpret_cast< Tossim * >(argp1);
-  result = (long long)(arg1)->ticksPerSecond();
+  result = (long long)Tossim::ticksPerSecond();
   resultobj = SWIG_From_long_SS_long(static_cast< long long >(result));
   return resultobj;
 fail:
@@ -7103,7 +7117,7 @@ fail:
 SWIGINTERN PyObject *_wrap_Tossim_runAllEvents__SWIG_0(PyObject *self, int nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
-  std::function< bool () > arg2 ;
+  std::function< bool (double) > arg2 ;
   std::function< void (unsigned int) > arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -7120,14 +7134,14 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEvents__SWIG_0(PyObject *self, int nobjs
   }
   arg1 = reinterpret_cast< Tossim * >(argp1);
   {
-    res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_std__functionT_bool_fF_t,  0  | 0);
+    res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_std__functionT_bool_fdoubleF_t,  0  | 0);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Tossim_runAllEvents" "', argument " "2"" of type '" "std::function< bool () >""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Tossim_runAllEvents" "', argument " "2"" of type '" "std::function< bool (double) >""'"); 
     }  
     if (!argp2) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Tossim_runAllEvents" "', argument " "2"" of type '" "std::function< bool () >""'");
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Tossim_runAllEvents" "', argument " "2"" of type '" "std::function< bool (double) >""'");
     } else {
-      std::function< bool () > * temp = reinterpret_cast< std::function< bool () > * >(argp2);
+      std::function< bool (double) > * temp = reinterpret_cast< std::function< bool (double) > * >(argp2);
       arg2 = *temp;
       if (SWIG_IsNewObj(res2)) delete temp;
     }
@@ -7255,7 +7269,7 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEvents(PyObject *self, PyObject *args) {
   if (argc == 3) {
     int _v = 0;
     {
-      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std__functionT_bool_fF_t, 0);
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std__functionT_bool_fdoubleF_t, 0);
       _v = SWIG_CheckState(res);
     }
     if (!_v) goto check_1;
@@ -7275,7 +7289,7 @@ check_1:
 fail:
   SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Tossim_runAllEvents'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    Tossim::runAllEvents(std::function< bool () >,std::function< void (unsigned int) >)\n"
+    "    Tossim::runAllEvents(std::function< bool (double) >,std::function< void (unsigned int) >)\n"
     "    Tossim::runAllEvents(PyObject *,PyObject *)\n");
   return 0;
 }
@@ -7283,6 +7297,7 @@ fail:
 
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
+	 { (char *)"Tossim_ticksPerSecond", (PyCFunction)_wrap_Tossim_ticksPerSecond, METH_NOARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
 
@@ -8904,7 +8919,8 @@ SwigPyBuiltin__Tossim_richcompare(PyObject *self, PyObject *other, int op) {
 SWIGINTERN PyMethodDef SwigPyBuiltin__Tossim_methods[] = {
   { "init", (PyCFunction) _wrap_Tossim_init, METH_NOARGS, (char*) "" },
   { "time", (PyCFunction) _wrap_Tossim_time, METH_NOARGS, (char*) "" },
-  { "ticksPerSecond", (PyCFunction) _wrap_Tossim_ticksPerSecond, METH_NOARGS, (char*) "" },
+  { "timeInSeconds", (PyCFunction) _wrap_Tossim_timeInSeconds, METH_NOARGS, (char*) "" },
+  { "ticksPerSecond", (PyCFunction) _wrap_Tossim_ticksPerSecond, METH_STATIC|METH_NOARGS, "" },
   { "setTime", (PyCFunction) _wrap_Tossim_setTime, METH_O, (char*) "" },
   { "timeStr", (PyCFunction) _wrap_Tossim_timeStr, METH_NOARGS, (char*) "" },
   { "currentNode", (PyCFunction) _wrap_Tossim_currentNode, METH_NOARGS, (char*) "" },
@@ -9126,7 +9142,7 @@ static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_int = {"_p_int", "int *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_nesc_app = {"_p_nesc_app", "nesc_app *|nesc_app_t *", 0, 0, (void*)&SwigPyBuiltin__nesc_app_clientdata, 0};
 static swig_type_info _swigt__p_p_char = {"_p_p_char", "char **", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__functionT_bool_fF_t = {"_p_std__functionT_bool_fF_t", "std::function< bool () > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__functionT_bool_fdoubleF_t = {"_p_std__functionT_bool_fdoubleF_t", "std::function< bool (double) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_void_funsigned_intF_t = {"_p_std__functionT_void_funsigned_intF_t", "std::function< void (unsigned int) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_variable_string = {"_p_variable_string", "variable_string *|variable_string_t *", 0, 0, (void*)&SwigPyBuiltin__variable_string_clientdata, 0};
 static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
@@ -9144,7 +9160,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_int,
   &_swigt__p_nesc_app,
   &_swigt__p_p_char,
-  &_swigt__p_std__functionT_bool_fF_t,
+  &_swigt__p_std__functionT_bool_fdoubleF_t,
   &_swigt__p_std__functionT_void_funsigned_intF_t,
   &_swigt__p_variable_string,
   &_swigt__p_void,
@@ -9162,7 +9178,7 @@ static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0,
 static swig_cast_info _swigc__p_int[] = {  {&_swigt__p_int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_nesc_app[] = {  {&_swigt__p_nesc_app, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_char[] = {  {&_swigt__p_p_char, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__functionT_bool_fF_t[] = {  {&_swigt__p_std__functionT_bool_fF_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__functionT_bool_fdoubleF_t[] = {  {&_swigt__p_std__functionT_bool_fdoubleF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_void_funsigned_intF_t[] = {  {&_swigt__p_std__functionT_void_funsigned_intF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_variable_string[] = {  {&_swigt__p_variable_string, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0, 0}};
@@ -9180,7 +9196,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_int,
   _swigc__p_nesc_app,
   _swigc__p_p_char,
-  _swigc__p_std__functionT_bool_fF_t,
+  _swigc__p_std__functionT_bool_fdoubleF_t,
   _swigc__p_std__functionT_void_funsigned_intF_t,
   _swigc__p_variable_string,
   _swigc__p_void,
