@@ -320,7 +320,10 @@ unsigned int Tossim::runAllEvents(std::function<bool(double)> continue_events, s
       break;
     }
 
-    callback(event_count);
+    // Only call the callback if there is something for it to process
+    if (sim_log_test_flag()) {
+      callback(event_count);
+    }
 
     event_count += 1;
   }
