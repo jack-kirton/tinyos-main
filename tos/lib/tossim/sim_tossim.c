@@ -115,7 +115,7 @@ void sim_set_time(sim_time_t t) __attribute__ ((C, spontaneous)) {
 }
 
 sim_time_t sim_ticks_per_sec() __attribute__ ((C, spontaneous)) {
-  return 10000000000ULL;
+  return 10000000000LL;
 }
 
 unsigned long sim_node() __attribute__ ((C, spontaneous)) {
@@ -160,11 +160,11 @@ int sim_print_time(char* buf, int len, sim_time_t ftime) __attribute__ ((C, spon
   sim_time_t secondBillionths;
 
   secondBillionths = (ftime % sim_ticks_per_sec());
-  if (sim_ticks_per_sec() > (sim_time_t)1000000000) {
-    secondBillionths /= (sim_ticks_per_sec() / (sim_time_t)1000000000);
+  if (sim_ticks_per_sec() > (sim_time_t)1000000000LL) {
+    secondBillionths /= (sim_ticks_per_sec() / (sim_time_t)1000000000LL);
   }
   else {
-    secondBillionths *= ((sim_time_t)1000000000 / sim_ticks_per_sec());
+    secondBillionths *= ((sim_time_t)1000000000LL / sim_ticks_per_sec());
   }
 
   seconds = (int)(ftime / sim_ticks_per_sec());
@@ -180,9 +180,9 @@ int sim_print_now(char* buf, int len) __attribute__ ((C, spontaneous)) {
   return sim_print_time(buf, len, sim_time());
 }
 
-char simTimeBuf[128];
 const char* sim_time_string() __attribute__ ((C, spontaneous)) {
-  sim_print_now(simTimeBuf, 128);
+  static char simTimeBuf[128];
+  sim_print_now(simTimeBuf, sizeof(simTimeBuf));
   return simTimeBuf;
 }
 

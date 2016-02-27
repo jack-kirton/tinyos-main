@@ -101,8 +101,8 @@ implementation {
 
       current = current->next;
     }
-    dbg_clear("Gain", " = %0.2f\n", 10.0 * log(sig) / log(10.0));
-    return 10.0 * log(sig) / log(10.0);
+    dbg_clear("Gain", " = %0.2f\n", 10.0 * log10(sig);
+    return 10.0 * log10(sig);
   }
   
   void sim_gain_ack_handle(sim_event_t* evt)  {

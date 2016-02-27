@@ -157,11 +157,8 @@ implementation {
   }
 
   void sim_mote_boot_handle(sim_event_t* e) {
-    char buf[128];
-    sim_print_now(buf, 128);
-           
     bootEvent = (sim_event_t*)NULL;
-    dbg("SimMoteP", "Turning on mote %i at time %s.\n", (int)sim_node(), buf);
+    dbg("SimMoteP", "Turning on mote %i at time %s.\n", (int)sim_node(), sim_time_string());
     call SimMote.turnOn();
   }
   
@@ -180,7 +177,7 @@ implementation {
       }
     }
     
-    bootEvent = (sim_event_t*) malloc(sizeof(sim_event_t));
+    bootEvent = sim_queue_allocate_raw_event();
     bootEvent->time = startTime;
     bootEvent->mote = mote;
     bootEvent->force = TRUE;
