@@ -149,4 +149,24 @@ private:
   char timeBuf[128];
 };
 
+class JavaRandom
+{
+public:
+  JavaRandom(long long int seed) noexcept;
+  ~JavaRandom() = default;
+
+  void setSeed(long long int seed) noexcept;
+  long long int getSeed() const noexcept;
+
+  long long int next(int bits) noexcept;
+
+  double nextDouble() noexcept;
+  double nextGaussian() noexcept;
+
+private:
+  long long int _seed;
+  double _next_gaussian;
+  bool _has_next_gaussian;
+};
+
 #endif // TOSSIM_H_INCLUDED
