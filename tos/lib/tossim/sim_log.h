@@ -84,6 +84,9 @@ void sim_log_error(uint16_t id, const char* string, const char* format, ...);
 void sim_log_debug_clear(uint16_t id, const char* string, const char* format, ...);
 void sim_log_error_clear(uint16_t id, const char* string, const char* format, ...);
 
+void sim_log_reset_flag(void);
+bool sim_log_test_flag(void);
+
 #ifdef __cplusplus
 }
 #endif

@@ -68,6 +68,19 @@ static sim_log_output_t outputs[SIM_LOG_OUTPUT_COUNT];
 static struct hashtable* channelTable = NULL;
 
 
+static bool write_performed = FALSE;
+
+void sim_log_reset_flag(void) __attribute__ ((C, spontaneous))
+{
+  write_performed = FALSE;
+}
+
+bool sim_log_test_flag(void) __attribute__ ((C, spontaneous))
+{
+  return write_performed;
+}
+
+
 static unsigned int sim_log_hash(const void* key);
 static int sim_log_eq(const void* key1, const void* key2);
 
@@ -168,6 +181,8 @@ void sim_log_init(void) {
     outputs[i].files = (FILE**)malloc(sizeof(FILE*) * 1);
     outputs[i].files[0] = fdopen(1, "w"); // STDOUT
   }
+
+  write_performed = FALSE;
 }
 
 void sim_log_add_channel(const char* name, FILE* file) {
@@ -246,6 +261,7 @@ void sim_log_debug(uint16_t id, const char* string, const char* format, ...) {
     vfprintf(file, format, args); 
     fflush(file);
   }
+  write_performed = TRUE;
 }
 
 void sim_log_error(uint16_t id, const char* string, const char* format, ...) {
@@ -261,6 +277,7 @@ void sim_log_error(uint16_t id, const char* string, const char* format, ...) {
     vfprintf(file, format, args);
     fflush(file);
   }
+  write_performed = TRUE;
 }
 
 void sim_log_debug_clear(uint16_t id, const char* string, const char* format, ...) {
@@ -275,6 +292,7 @@ void sim_log_debug_clear(uint16_t id, const char* string, const char* format, ..
     vfprintf(file, format, args);
     fflush(file);
   }
+  write_performed = TRUE;
 }
 
 void sim_log_error_clear(uint16_t id, const char* string, const char* format, ...) {
@@ -289,6 +307,7 @@ void sim_log_error_clear(uint16_t id, const char* string, const char* format, ..
     vfprintf(file, format, args);
     fflush(file);
   }
+  write_performed = TRUE;
 }
 
 /* This is the sdbm algorithm, taken from

@@ -152,7 +152,7 @@ void Mote::setEuid(long long int val) noexcept {
   sim_mote_set_euid(nodeID, val);
 }
 
-long long int Mote::bootTime() noexcept {
+long long int Mote::bootTime() const noexcept {
   return sim_mote_start_time(nodeID);
 }
 
@@ -246,8 +246,12 @@ void Tossim::init() {
   motes = (Mote**)calloc(TOSSIM_MAX_NODES + 1, sizeof(Mote*));
 }
 
-long long int Tossim::time() noexcept {
+long long int Tossim::time() const noexcept {
   return sim_time();
+}
+
+double Tossim::timeInSeconds() const noexcept {
+  return time() / static_cast<double>(ticksPerSecond());
 }
 
 long long int Tossim::ticksPerSecond() noexcept {
@@ -307,16 +311,19 @@ bool Tossim::runNextEvent() {
   return sim_run_next_event();
 }
 
-unsigned int Tossim::runAllEvents(std::function<bool()> continue_events, std::function<void (unsigned int)> callback) {
+unsigned int Tossim::runAllEvents(std::function<bool(double)> continue_events, std::function<void (unsigned int)> callback) {
   int event_count = 0;
-  while (continue_events())
+  while (continue_events(timeInSeconds()))
   {
     if (!runNextEvent())
     {
       break;
     }
 
-    callback(event_count);
+    // Only call the callback if there is something for it to process
+    if (sim_log_test_flag()) {
+      callback(event_count);
+    }
 
     event_count += 1;
   }
@@ -334,4 +341,54 @@ Radio* Tossim::radio() {
 
 Packet* Tossim::newPacket() {
   return new Packet();
+}
+
+
+JavaRandom::JavaRandom(long long int seed) noexcept : _has_next_gaussian(false) {
+  setSeed(seed);
+}
+
+void JavaRandom::setSeed(long long int seed) noexcept {
+  _seed = (seed ^ 0x5DEECE66DLL) & ((1LL << 48) - 1);
+  _has_next_gaussian = false;
+}
+long long int JavaRandom::getSeed() const noexcept {
+  return _seed;
+}
+
+long long int JavaRandom::next(int bits) noexcept {
+  if (bits < 1) {
+    bits = 1;
+  }
+  if (bits > 32) {
+    bits = 32;
+  }
+
+  _seed = (_seed * 0x5deece66dLL + 0xbLL) & ((1LL << 48) - 1);
+
+  long long int retval = _seed >> (48 - bits);
+
+  return retval;
+}
+
+double JavaRandom::nextDouble() noexcept {
+  return ((next(26) << 27) + next(27)) / (double)(1LL << 53);
+}
+double JavaRandom::nextGaussian() noexcept {
+  if (!_has_next_gaussian) {
+    double v1, v2, s;
+    do {
+      v1 = 2 * nextDouble() - 1;
+      v2 = 2 * nextDouble() - 1;
+      s = v1 * v1 + v2 * v2;
+    } while (s >= 1 || s == 0);
+    double multiplier = sqrt(-2 * log(s) / s);
+    _next_gaussian = v2 * multiplier;
+    _has_next_gaussian = true;
+    return v1 * multiplier;
+  }
+  else {
+    _has_next_gaussian = false;
+    return _next_gaussian;
+  }
 }

@@ -147,8 +147,9 @@ public:
         Py_XDECREF(func);
     }
 
-    bool operator()() const {
-        PyObject *args = PyTuple_New(0);
+    bool operator()(double t) const {
+        PyObject *args = PyTuple_New(1);
+        PyTuple_SetItem(args, 0, PyFloat_FromDouble(t));
 
         PyObject *result = PyObject_Call(func, args, NULL);
 
@@ -387,7 +388,7 @@ class Mote {
     void setEuid(long long int id);
 
     
-    long long int bootTime();
+    long long int bootTime() const noexcept;
     void bootAtTime(long long int time);
 
     bool isOn();
@@ -421,23 +422,39 @@ class Tossim {
     
     void init();
     
-    long long int time();
-    long long int ticksPerSecond(); 
-    void setTime(long long int time);
-    const char* timeStr();
+    long long int time() const noexcept;
+    double timeInSeconds() const noexcept;
+    static long long int ticksPerSecond() noexcept;
+    void setTime(long long int time) noexcept;
+    const char* timeStr() noexcept;
 
-    Mote* currentNode();
-    Mote* getNode(unsigned long nodeID);
-    void setCurrentNode(unsigned long nodeID);
+    Mote* currentNode() noexcept;
+    Mote* getNode(unsigned long nodeID) noexcept;
+    void setCurrentNode(unsigned long nodeID) noexcept;
 
     void addChannel(const char* channel, FILE* file);
     bool removeChannel(const char* channel, FILE* file);
     void randomSeed(int seed);
 
     bool runNextEvent();
-    unsigned int runAllEvents(std::function<bool()> continue_events, std::function<void (unsigned int)> callback);
+    unsigned int runAllEvents(std::function<bool(double)> continue_events, std::function<void (unsigned int)> callback);
 
     MAC* mac();
     Radio* radio();
     Packet* newPacket();
+};
+
+class JavaRandom
+{
+public:
+  JavaRandom(long long int seed) noexcept;
+  ~JavaRandom() = default;
+
+  void setSeed(long long int seed) noexcept;
+  long long int getSeed() const noexcept;
+
+  long long int next(int bits) noexcept;
+
+  double nextDouble() noexcept;
+  double nextGaussian() noexcept;
 };

@@ -298,8 +298,8 @@ implementation {
       tossim_metadata_t* metadata = getMetadata(sending);
       metadata->ack = 1;
       if (msg != sending) {
-	error = 1;
-	dbg("TossimPacketModelC", "Requested ack for 0x%x, but outgoing packet is 0x%x.\n", msg, sending);
+        error = 1;
+        dbg("TossimPacketModelC", "Requested ack for 0x%x, but outgoing packet is 0x%x.\n", msg, sending);
       }
     }
   }

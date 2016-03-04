@@ -43,6 +43,7 @@
 #include <sim_tossim.h>
 #include <sim_event_queue.h>
 #include <sim_mote.h>
+#include <sim_log.h>
 #include <stdlib.h>
 #include <sys/time.h>
 
@@ -54,7 +55,7 @@ static int sim_seed;
 
 static int __nesc_nido_resolve(int mote, char* varname, uintptr_t* addr, size_t* size);
 
-void sim_init() __attribute__ ((C, spontaneous)) {
+void sim_init(void) __attribute__ ((C, spontaneous)) {
   sim_queue_init();
   sim_log_init();
   sim_log_commit_change();
@@ -77,13 +78,13 @@ void sim_init() __attribute__ ((C, spontaneous)) {
   } 
 }
 
-void sim_end() __attribute__ ((C, spontaneous)) {
+void sim_end(void) __attribute__ ((C, spontaneous)) {
   sim_queue_free();
 }
 
 
 
-int sim_random() __attribute__ ((C, spontaneous)) {
+int sim_random(void) __attribute__ ((C, spontaneous)) {
   uint32_t mlcg,p,q;
   uint64_t tmpseed;
   tmpseed =  (uint64_t)33614U * (uint64_t)sim_seed;
@@ -107,18 +108,18 @@ void sim_random_seed(int seed) __attribute__ ((C, spontaneous)) {
   sim_seed = seed;
 }
 
-sim_time_t sim_time() __attribute__ ((C, spontaneous)) {
+sim_time_t sim_time(void) __attribute__ ((C, spontaneous)) {
   return sim_ticks;
 }
 void sim_set_time(sim_time_t t) __attribute__ ((C, spontaneous)) {
   sim_ticks = t;
 }
 
-sim_time_t sim_ticks_per_sec() __attribute__ ((C, spontaneous)) {
-  return 10000000000ULL;
+sim_time_t sim_ticks_per_sec(void) __attribute__ ((C, spontaneous)) {
+  return 10000000000LL;
 }
 
-unsigned long sim_node() __attribute__ ((C, spontaneous)) {
+unsigned long sim_node(void) __attribute__ ((C, spontaneous)) {
   return current_node;
 }
 void sim_set_node(unsigned long node) __attribute__ ((C, spontaneous)) {
@@ -126,12 +127,14 @@ void sim_set_node(unsigned long node) __attribute__ ((C, spontaneous)) {
   TOS_NODE_ID = node;
 }
 
-bool sim_run_next_event() __attribute__ ((C, spontaneous)) {
+bool sim_run_next_event(void) __attribute__ ((C, spontaneous)) {
   bool result = FALSE;
   if (!sim_queue_is_empty()) {
     sim_event_t* event = sim_queue_pop();
     sim_set_time(event->time);
     sim_set_node(event->mote);
+
+    sim_log_reset_flag();
 
     // Need to test whether function pointers are for statically
     // allocted events that are zeroed out on reboot
@@ -160,11 +163,11 @@ int sim_print_time(char* buf, int len, sim_time_t ftime) __attribute__ ((C, spon
   sim_time_t secondBillionths;
 
   secondBillionths = (ftime % sim_ticks_per_sec());
-  if (sim_ticks_per_sec() > (sim_time_t)1000000000) {
-    secondBillionths /= (sim_ticks_per_sec() / (sim_time_t)1000000000);
+  if (sim_ticks_per_sec() > (sim_time_t)1000000000LL) {
+    secondBillionths /= (sim_ticks_per_sec() / (sim_time_t)1000000000LL);
   }
   else {
-    secondBillionths *= ((sim_time_t)1000000000 / sim_ticks_per_sec());
+    secondBillionths *= ((sim_time_t)1000000000LL / sim_ticks_per_sec());
   }
 
   seconds = (int)(ftime / sim_ticks_per_sec());
@@ -180,9 +183,9 @@ int sim_print_now(char* buf, int len) __attribute__ ((C, spontaneous)) {
   return sim_print_time(buf, len, sim_time());
 }
 
-char simTimeBuf[128];
-const char* sim_time_string() __attribute__ ((C, spontaneous)) {
-  sim_print_now(simTimeBuf, 128);
+const char* sim_time_string(void) __attribute__ ((C, spontaneous)) {
+  static char simTimeBuf[128];
+  sim_print_now(simTimeBuf, sizeof(simTimeBuf));
   return simTimeBuf;
 }
 

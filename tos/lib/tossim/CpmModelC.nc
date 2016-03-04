@@ -95,11 +95,11 @@ implementation {
     double ms_time;
 
     secondBillionths = (ftime % sim_ticks_per_sec());
-    if (sim_ticks_per_sec() > (sim_time_t)1000000000) {
-      secondBillionths /= (sim_ticks_per_sec() / (sim_time_t)1000000000);
+    if (sim_ticks_per_sec() > (sim_time_t)1000000000LL) {
+      secondBillionths /= (sim_ticks_per_sec() / (sim_time_t)1000000000LL);
     }
     else {
-      secondBillionths *= ((sim_time_t)1000000000 / sim_ticks_per_sec());
+      secondBillionths *= ((sim_time_t)1000000000LL / sim_ticks_per_sec());
     }
     temp_time = (int)(secondBillionths/10000);
     
@@ -266,7 +266,7 @@ implementation {
       }
       list = list->next;
     }
-    noise = 10.0 * log(noise) / log(10.0);
+    noise = 10.0 * log10(noise);
     return shouldReceive(msg->power - noise);
   }
   
@@ -280,7 +280,7 @@ implementation {
       }
       list = list->next;
     }
-    noise = 10.0 * log(noise) / log(10.0);
+    noise = 10.0 * log10(noise);
     return noise;
   }
 
@@ -379,7 +379,7 @@ implementation {
     // the signal. By sampling this here, it assumes that the packet RSSI is sampled at
     // the beginning of the packet. This is true for the CC2420, but is not true for all
     // radios. But generalizing seems like complexity for minimal gain at this point.
-    rcv->strength = (int8_t)(floor(10.0 * log(pow(10.0, power/10.0) + pow(10.0, noiseStr/10.0)) / log(10.0)));
+    rcv->strength = (int8_t)floor(10.0 * log10(pow(10.0, power/10.0) + pow(10.0, noiseStr/10.0)));
     rcv->msg = msg;
     rcv->lost = 0;
     rcv->ack = receive;
@@ -421,7 +421,6 @@ implementation {
     outstandingReceptionHead = rcv;
     evt = allocate_receive_event(endTime, rcv);
     sim_queue_insert(evt);
-
   }
   
   void sim_gain_put(int dest, message_t* msg, sim_time_t endTime, bool receive, double power, double reversePower) {
