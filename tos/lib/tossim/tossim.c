@@ -331,6 +331,29 @@ unsigned int Tossim::runAllEvents(std::function<bool(double)> continue_events, s
   return event_count;
 }
 
+unsigned int Tossim::runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events, std::function<void (unsigned int)> callback) {
+  int event_count = 0;
+  bool process_callback = true;
+  while (timeInSeconds() < end_time && (!process_callback || continue_events()))
+  {
+    if (!runNextEvent())
+    {
+      break;
+    }
+
+    process_callback = sim_log_test_flag();
+
+    // Only call the callback if there is something for it to process
+    if (process_callback) {
+      callback(event_count);
+    }
+
+    event_count += 1;
+  }
+
+  return event_count;
+}
+
 MAC* Tossim::mac() {
   return new MAC();
 }

@@ -147,6 +147,24 @@ public:
         Py_XDECREF(func);
     }
 
+    bool operator()() const {
+        PyObject *args = PyTuple_New(0);
+
+        PyObject *result = PyObject_Call(func, args, NULL);
+
+        bool bool_result = result != NULL && PyObject_IsTrue(result);
+
+        Py_DECREF(args);
+        Py_XDECREF(result);
+
+        if (PyErr_Occurred() != NULL)
+        {
+            throw std::runtime_error("Python exception occurred");
+        }
+
+        return bool_result;
+    }
+
     bool operator()(double t) const {
         PyObject *args = PyTuple_New(1);
         PyTuple_SetItem(args, 0, PyFloat_FromDouble(t));
@@ -191,36 +209,13 @@ FILE* object_to_file(PyObject* o)
     }
     return PyFile_AsFile(o);
 #else
-    long fileno = -1;
-    if (PyLong_Check(o))
+    int fileno = PyObject_AsFileDescriptor(o);
+    if (fileno == -1)
     {
-        fileno = PyLong_AsLong(o);
-    }
-    else if (PyObject_HasAttrString(o, "fileno"))
-    {
-        PyObject* fileno_obj = PyObject_CallMethod(o, "fileno", NULL);
-        if (fileno_obj == NULL)
-        {
-            PyErr_SetString(PyExc_TypeError, "Calling fileno failed.");
-            return NULL;
-        }
-
-        fileno = PyLong_AsLong(fileno_obj);
-        Py_DECREF(fileno_obj);
-
-        if (fileno == -1 && PyErr_Occurred())
-        {
-            PyErr_SetString(PyExc_TypeError, "The result of fileno was incorrect.");
-            return NULL;
-        }
-    }
-    else
-    {
-        PyErr_SetString(PyExc_TypeError, "Requires an object with a fileno function or a fileno.");
         return NULL;
     }
 
-    long fileno_dup = dup(fileno);
+    int fileno_dup = dup(fileno);
     if (fileno_dup == -1)
     {
         PyErr_Format(PyExc_TypeError, "Failed to duplicate fileno with error %d.", errno);
@@ -413,6 +408,18 @@ class Mote {
             return NULL;
         }
     }
+
+    PyObject* runAllEventsWithMaxTime(double end_time, PyObject *continue_events, PyObject *callback) {
+        try
+        {
+            unsigned int result = $self->runAllEventsWithMaxTime(end_time, PyCallback(continue_events), PyCallback(callback));
+            return PyLong_FromUnsignedLong(result);
+        }
+        catch (std::runtime_error ex)
+        {
+            return NULL;
+        }
+    }
 }
 
 class Tossim {
@@ -438,6 +445,7 @@ class Tossim {
 
     bool runNextEvent();
     unsigned int runAllEvents(std::function<bool(double)> continue_events, std::function<void (unsigned int)> callback);
+    unsigned int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events, std::function<void (unsigned int)> callback);
 
     MAC* mac();
     Radio* radio();
