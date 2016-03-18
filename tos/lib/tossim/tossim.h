@@ -132,6 +132,8 @@ class Tossim {
   void addChannel(const char* channel, FILE* file);
   bool removeChannel(const char* channel, FILE* file);
   void randomSeed(int seed);
+
+  void register_event_callback(std::function<bool(double)> callback, double time);
   
   bool runNextEvent();
   unsigned int runAllEvents(std::function<bool(double)> continue_events, std::function<void (unsigned int)> callback);

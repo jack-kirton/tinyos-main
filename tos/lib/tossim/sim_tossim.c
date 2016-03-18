@@ -193,6 +193,21 @@ void sim_add_channel(const char* channel, FILE* file) __attribute__ ((C, spontan
   sim_log_add_channel(channel, file);
 }
 
-bool sim_remove_channel(const char* channel, FILE* file)  __attribute__ ((C, spontaneous)) {
+bool sim_remove_channel(const char* channel, FILE* file) __attribute__ ((C, spontaneous)) {
   return sim_log_remove_channel(channel, file);
+}
+
+void sim_register_event(sim_time_t execution_time, void (*handle)(void*), void* data) __attribute__ ((C, spontaneous)) {
+  sim_event_t* event = sim_queue_allocate_event();
+
+  event->time = execution_time;
+
+  event->handle = (void (*)(sim_event_t*))handle;
+  event->cleanup = &sim_queue_cleanup_event;
+
+  event->force = 1; // Make sure the event occurs even if the mote is off
+
+  event->data = data;
+
+  sim_queue_insert(event);
 }

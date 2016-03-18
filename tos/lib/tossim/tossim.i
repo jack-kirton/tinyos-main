@@ -169,7 +169,7 @@ public:
         PyObject *args = PyTuple_New(1);
         PyTuple_SetItem(args, 0, PyFloat_FromDouble(t));
 
-        PyObject *result = PyObject_Call(func, args, NULL);
+        PyObject *result = PyObject_CallObject(func, args);
 
         bool bool_result = result != NULL && PyObject_IsTrue(result);
 
@@ -188,7 +188,7 @@ public:
         PyObject *args = PyTuple_New(1);
         PyTuple_SetItem(args, 0, PyLong_FromUnsignedLong(i));
 
-        PyObject *result = PyObject_Call(func, args, NULL);
+        PyObject *result = PyObject_CallObject(func, args);
 
         Py_DECREF(args);
         Py_XDECREF(result);
@@ -397,6 +397,18 @@ class Mote {
 };
 
 %extend Tossim {
+    PyObject* register_event_callback(PyObject *callback, double time) {
+        try
+        {
+            $self->register_event_callback(PyCallback(callback), time);
+            Py_RETURN_NONE;
+        }
+        catch (std::runtime_error ex)
+        {
+            return NULL;
+        }
+    }
+
     PyObject* runAllEvents(PyObject *continue_events, PyObject *callback) {
         try
         {
@@ -442,6 +454,8 @@ class Tossim {
     void addChannel(const char* channel, FILE* file);
     bool removeChannel(const char* channel, FILE* file);
     void randomSeed(int seed);
+
+    void register_event_callback(std::function<bool(double)> callback, double time);
 
     bool runNextEvent();
     unsigned int runAllEvents(std::function<bool(double)> continue_events, std::function<void (unsigned int)> callback);
