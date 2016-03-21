@@ -3780,7 +3780,7 @@ public:
             throw std::runtime_error("Python exception occurred");
         }
         func = pfunc;
-        Py_XINCREF(func);
+        Py_INCREF(func);
     }
     ~PyCallback() {
         Py_XDECREF(func);
