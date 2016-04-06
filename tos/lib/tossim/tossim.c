@@ -325,15 +325,20 @@ static void handle_python_event(void* void_event)
   sim_event_t* event = static_cast<sim_event_t*>(void_event);
 
   handle_python_event_data_t* data = static_cast<handle_python_event_data_t*>(event->data);
+
   data->event_callback(data->self->timeInSeconds());
+
   delete data;
+
+  // Set to NULL to avoid a double free from TOSSIM trying to clean up the sim event
+  event->data = NULL;
 }
 
 void Tossim::register_event_callback(std::function<bool(double)> callback, double event_time) {
   sim_register_event(
     static_cast<sim_time_t>(event_time * ticksPerSecond()),
     &handle_python_event,
-    new handle_python_event_data_t(this, callback)
+    new handle_python_event_data_t(this, std::move(callback))
   );
 }
 
