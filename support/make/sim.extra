@@ -3,13 +3,11 @@
 
 export GCC=gcc
 GPP=g++ -std=gnu++11
-#OPTFLAGS = -g -O0
-OPTFLAGS = -O2 -msse4.2 -maes -mpclmul -flto
-#-march=westmere
+OPTFLAGS = -g -O0
 LIBS = -lm -lstdc++
-PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc=$(GCC) -DTOSSIM_NO_DEBUG
+PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc=$(GCC)
 WFLAGS = -Wno-nesc-data-race
-PYTHON_VERSION ?= $(shell python --version 2>&1 | sed 's/Python \([0-9]\)\.\([0-9]\).*/\1.\2/')
+PYTHON_VERSION ?= $(shell python --version 2>&1 | sed 's/Python \([0-9]\)\.\([0-9]\)\.[0-9]+\{0,1\}/\1.\2/')
 
 BUILDDIR   = simbuild/$(PLATFORM)
 CFILE    = $(BUILDDIR)/sim.c
@@ -21,7 +19,6 @@ HASHOBJFILE = $(BUILDDIR)/c-support.o
 PYFILE     = $(TOSDIR)/lib/tossim/tossim_wrap.cxx
 PYOBJFILE  = $(BUILDDIR)/pytossim.o
 PYDIR      = $(shell python$(PYTHON_VERSION)-config --includes)
-#PYLIBS     = $(shell python$(PYTHON_VERSION)-config --libs)
 SIMDIR     = $(TOSDIR)/lib/tossim
 XML        = app.xml
 DUMPTYPES = -fnesc-dump=components -fnesc-dump=variables -fnesc-dump=constants -fnesc-dump=typedefs -fnesc-dump=interfacedefs -fnesc-dump=tags
@@ -36,7 +33,7 @@ ifeq ($(OS), Windows_NT) # Some TinyOS installs are like this
   PLATFORM_FLAGS=-DUSE_DL_IMPORT -fpic 
   SHARED_OBJECT=_TOSSIM.dll
   PLATFORM_BUILD_FLAGS= -fpic -W1,--enabled-auto-image-base 
-  PLATFORM_LIB_FLAGS =-shared -L/usr/lib/python$(PYTHON_VERSION)/config -L/$(PYDIR)/config -lstdc++ -lpython$(PYTHON_VERSION)
+  PLATFORM_LIB_FLAGS = -shared -L/usr/lib/python$(PYTHON_VERSION)/config -L/$(PYDIR)/config -lstdc++ -lpython$(PYTHON_VERSION)
 else 
 ifeq ($(findstring darwin, $(OSTYPE)), darwin) 
   SIM_DARWIN=TRUE

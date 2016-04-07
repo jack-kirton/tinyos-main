@@ -2,8 +2,9 @@
 #$Id: sim-fast.extra,v 1.8 2010-04-08 04:27:24 regehr Exp $
 
 export GCC=gcc
-GPP=g++
-OPTFLAGS = -O3 -msse2 -flto
+GPP=g++ -std=gnu++11
+OPTFLAGS = -O2 -msse4.2 -maes -mpclmul -flto
+#-march=westmere
 LIBS = -lm -lstdc++ 
 PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc=$(GCC) -DTOSSIM_NO_DEBUG
 WFLAGS = -Wno-nesc-data-race
@@ -18,7 +19,7 @@ HASHFILE    = $(TOSDIR)/lib/tossim/hashtable.c
 HASHOBJFILE = $(BUILDDIR)/c-support.o
 PYFILE     = $(TOSDIR)/lib/tossim/tossim_wrap.cxx
 PYOBJFILE  = $(BUILDDIR)/pytossim.o
-PYDIR      = $(shell python$(PYTHON_VERSION)-config --prefix)/include/python$(PYTHON_VERSION)
+PYDIR      = $(shell python$(PYTHON_VERSION)-config --includes)
 SIMDIR     = $(TOSDIR)/lib/tossim
 XML        = app.xml
 DUMPTYPES = -fnesc-dump=components -fnesc-dump=variables -fnesc-dump=constants -fnesc-dump=typedefs -fnesc-dump=interfacedefs -fnesc-dump=tags
@@ -33,17 +34,17 @@ ifeq ($(OS),Windows_NT) # Some TinyOS installs are like this
   PLATFORM_FLAGS=-DUSE_DL_IMPORT -fpic
   SHARED_OBJECT=_TOSSIM.dll
   PLATFORM_BUILD_FLAGS= -fpic -W1,--enabled-auto-image-base 
-  PLATFORM_LIB_FLAGS = -L/usr/lib/python$(PYTHON_VERSION)/config -L/$(PYDIR)/config -lstdc++ -lpython$(PYTHON_VERSION)
+  PLATFORM_LIB_FLAGS = -shared -L/usr/lib/python$(PYTHON_VERSION)/config -L/$(PYDIR)/config -lstdc++ -lpython$(PYTHON_VERSION)
 else 
 ifeq ($(findstring darwin, $(OSTYPE)), darwin)
   PLATFORM_FLAGS=-fPIC
   PLATFORM_CC_FLAGS=-bundle
-  SHARED_OBJECT=_TOSSIMmodule.so
+  SHARED_OBJECT=_TOSSIM.so
   PLATFORM_BUILD_FLAGS=-flat_namespace -undefined suppress 
   PLATFORM_LIB_FLAGS = -lstdc++ 
 else # linux
   PLATFORM_FLAGS=-shared -fPIC
-  SHARED_OBJECT=_TOSSIMmodule.so
+  SHARED_OBJECT=_TOSSIM.so
   PLATFORM_LIB_FLAGS = -lstdc++ 
   PLATFORM_BUILD_FLAGS= -shared -fPIC
 endif
@@ -62,9 +63,9 @@ sim-exe: builddir $(BUILD_EXTRA_DEPS) FORCE
 	$(NCC) -c $(PLATFORM_FLAGS) -o $(OBJFILE) $(OPTFLAGS) $(PFLAGS) $(CFLAGS) $(WFLAGS) $(COMPONENT).nc $(LDFLAGS)  $(DUMPTYPES) -fnesc-dumpfile=$(XML)
 
 	@echo "  compiling Python support and C libraries into pytossim.o, tossim.o, and c-support.o"
-	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(PYOBJFILE) $(OPTFLAGS) $(CFLAGS) $(PYFILE) -I$(PYDIR) -I$(SIMDIR) -DHAVE_CONFIG_H 
-	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(CXXOBJFILE) $(OPTFLAGS) $(CFLAGS) $(CXXFILE) -I$(PYDIR) -I$(SIMDIR)
-	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(HASHOBJFILE) $(OPTFLAGS) $(CFLAGS) $(HASHFILE) -I$(PYDIR) -I$(SIMDIR)
+	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(PYOBJFILE) $(OPTFLAGS) $(CFLAGS) $(PYFILE) $(PYDIR) -I$(SIMDIR) -DHAVE_CONFIG_H 
+	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(CXXOBJFILE) $(OPTFLAGS) $(CFLAGS) $(CXXFILE) $(PYDIR) -I$(SIMDIR)
+	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(HASHOBJFILE) $(OPTFLAGS) $(CFLAGS) $(HASHFILE) $(PYDIR) -I$(SIMDIR)
 	@echo "  linking into shared object ./$(SHARED_OBJECT)"
 	$(GPP) $(PLATFORM_BUILD_FLAGS) $(PLATFORM_CC_FLAGS) $(PYOBJFILE) $(OBJFILE) $(CXXOBJFILE) $(HASHOBJFILE) $(PLATFORM_LIB_FLAGS) $(OPTFLAGS) -o $(SHARED_OBJECT)
 	@echo "  copying Python script interface TOSSIM.py from lib/tossim to local directory"
