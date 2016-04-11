@@ -5,7 +5,7 @@ export GCC=gcc
 GPP=g++ -std=gnu++11
 OPTFLAGS = -O2 -msse4.2 -maes -mpclmul -flto
 #-march=westmere
-LIBS = -lm -lstdc++ 
+LIBS = -lm
 PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc=$(GCC) -DTOSSIM_NO_DEBUG
 WFLAGS = -Wno-nesc-data-race
 PYTHON_VERSION ?= $(shell python --version 2>&1 | sed 's/Python \([0-9]\)\.\([0-9]\)\.[0-9]+\{0,1\}/\1.\2/')
@@ -45,7 +45,7 @@ ifeq ($(findstring darwin, $(OSTYPE)), darwin)
 else # linux
   PLATFORM_FLAGS=-shared -fPIC
   SHARED_OBJECT=_TOSSIM.so
-  PLATFORM_LIB_FLAGS = -lstdc++ 
+  PLATFORM_LIB_FLAGS = -static-libstdc++ -static-libgcc
   PLATFORM_BUILD_FLAGS= -shared -fPIC
 endif
 endif
