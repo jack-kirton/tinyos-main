@@ -268,8 +268,8 @@ bool fill_nesc_app(nesc_app_t* app, int i, PyObject* name, PyObject* array, PyOb
 {
 #if PY_VERSION_HEX < 0x03000000
     if (PyString_Check(name) && PyString_Check(format)) {
-        app->variableNames[i] = PyString_AsString(name); // TODO: Should this be strdup'ed?
-        app->variableTypes[i] = PyString_AsString(format); // TODO: Should this be strdup'ed?
+        app->variableNames[i] = strdup(PyString_AsString(name));
+        app->variableTypes[i] = strdup(PyString_AsString(format));
         app->variableArray[i] = (strcmp(PyString_AsString(array), "array") == 0);
 
         return true;
@@ -316,21 +316,21 @@ bool fill_nesc_app(nesc_app_t* app, int i, PyObject* name, PyObject* array, PyOb
         return NULL;
     }
     else {
-        int size = PyList_Size($input);
-        int i = 0;
+        Py_ssize_t size = PyList_Size($input);
+        unsigned int i = 0;
         nesc_app_t* app;
 
-        if (size % 3 != 0) {
+        if (size < 0 || size % 3 != 0) {
             PyErr_SetString(PyExc_RuntimeError, "List must have 2*N elements.");
             return NULL;
         }
 
         app = (nesc_app_t*)malloc(sizeof(nesc_app_t));
 
-        app->numVariables = size / 3;
+        app->numVariables = static_cast<unsigned int>(size) / 3;
         app->variableNames = (const char**)malloc(app->numVariables * sizeof(char*));
         app->variableTypes = (const char**)malloc(app->numVariables * sizeof(char*));
-        app->variableArray = (int*)malloc(app->numVariables * sizeof(int));
+        app->variableArray = (bool*)malloc(app->numVariables * sizeof(bool));
 
         for (i = 0; i < app->numVariables; i++) {
             PyObject* name = PyList_GetItem($input, 3 * i);
@@ -355,14 +355,14 @@ typedef struct variable_string {
     const char* type;
     void* ptr;
     int len;
-    int isArray;
+    bool isArray;
 } variable_string_t;
 
 typedef struct nesc_app {
-    int numVariables;
+    unsigned int numVariables;
     const char** variableNames;
     const char** variableTypes;
-    int* variableArray;
+    bool* variableArray;
 } nesc_app_t;
 
 class Variable {

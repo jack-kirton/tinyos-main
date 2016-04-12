@@ -59,7 +59,7 @@
 
 uint16_t TOS_NODE_ID = 1;
 
-Variable::Variable(const char* name, const char* formatStr, int array, int which) {
+Variable::Variable(const char* name, const char* formatStr, bool array, int which) {
   format = strdup(formatStr);
   isArray = array;
   mote = which;
@@ -180,16 +180,16 @@ void Mote::setID(unsigned long val) noexcept {
 
 Variable* Mote::getVariable(const char* name) {
   const char* typeStr = "";
-  int isArray = 0;
+  bool isArray = false;
   Variable* var;
-  
+
   var = (Variable*)hashtable_search(varTable, name);
   if (var == NULL) {
     // Could hash this for greater efficiency,
     // but that would either require transformation
     // in Tossim class or a more complex typemap.
     if (app != NULL) {
-      for (int i = 0; i < app->numVariables; i++) {
+      for (unsigned int i = 0; i < app->numVariables; i++) {
         if (strcmp(name, app->variableNames[i]) == 0) {
           typeStr = app->variableTypes[i];
           isArray = app->variableArray[i];
