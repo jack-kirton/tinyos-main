@@ -44,7 +44,7 @@ ifeq ($(findstring Darwin, $(shell uname)), Darwin)
 else # linux
   PLATFORM_FLAGS=-shared -fPIC
   SHARED_OBJECT=_TOSSIM.so
-  PLATFORM_LIB_FLAGS = -lstdc++ -lm
+  PLATFORM_LIB_FLAGS = -static-libstdc++ -static-libgcc
   PLATFORM_BUILD_FLAGS= -shared -fPIC
 endif
 endif
