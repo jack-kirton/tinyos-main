@@ -30,18 +30,17 @@ ifeq ($(findstring cygwin, $(OSTYPE)),cygwin)
   PLATFORM_BUILD_FLAGS= -fpic -W1,--enabled-auto-image-base 
   PLATFORM_LIB_FLAGS = -L/usr/lib/python$(PYTHON_VERSION)/config -L/$(PYDIR)/config -lstdc++ -lpython$(PYTHON_VERSION)
 else 
-ifeq ($(OS),Windows_NT) # Some TinyOS installs are like this
+ifeq ($(OS), Windows_NT) # Some TinyOS installs are like this
   PLATFORM_FLAGS=-DUSE_DL_IMPORT -fpic
   SHARED_OBJECT=_TOSSIM.dll
   PLATFORM_BUILD_FLAGS= -fpic -W1,--enabled-auto-image-base 
   PLATFORM_LIB_FLAGS = -shared -L/usr/lib/python$(PYTHON_VERSION)/config -L/$(PYDIR)/config -lstdc++ -lpython$(PYTHON_VERSION)
 else 
-ifeq ($(findstring darwin, $(OSTYPE)), darwin)
-  PLATFORM_FLAGS=-fPIC
-  PLATFORM_CC_FLAGS=-bundle
-  SHARED_OBJECT=_TOSSIM.so
-  PLATFORM_BUILD_FLAGS=-flat_namespace -undefined suppress 
-  PLATFORM_LIB_FLAGS = -lstdc++ 
+ifeq ($(findstring darwin, $(OSTYPE)), darwin) 
+  SIM_DARWIN=TRUE
+else
+ifeq ($(findstring Darwin, $(shell uname)), Darwin)
+  SIM_DARWIN = TRUE  
 else # linux
   PLATFORM_FLAGS=-shared -fPIC
   SHARED_OBJECT=_TOSSIM.so
@@ -50,7 +49,15 @@ else # linux
 endif
 endif
 endif
- 
+endif
+ifdef SIM_DARWIN
+  PLATFORM_FLAGS=-fPIC -D_FORTIFY_SOURCE=0
+  PLATFORM_CC_FLAGS=-bundle
+  SHARED_OBJECT=_TOSSIM.so
+  PLATFORM_BUILD_FLAGS=-flat_namespace -undefined suppress 
+  PLATFORM_LIB_FLAGS = -lstdc++
+endif 
+
 BUILD_DEPS = sim-exe
 
 # lib/tossim has to come at the end in order to ensure basic TOSSIM
@@ -63,7 +70,7 @@ sim-exe: builddir $(BUILD_EXTRA_DEPS) FORCE
 	$(NCC) -c $(PLATFORM_FLAGS) -o $(OBJFILE) $(OPTFLAGS) $(PFLAGS) $(CFLAGS) $(WFLAGS) $(COMPONENT).nc $(LDFLAGS)  $(DUMPTYPES) -fnesc-dumpfile=$(XML)
 
 	@echo "  compiling Python support and C libraries into pytossim.o, tossim.o, and c-support.o"
-	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(PYOBJFILE) $(OPTFLAGS) $(CFLAGS) $(PYFILE) $(PYDIR) -I$(SIMDIR) -DHAVE_CONFIG_H 
+	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(PYOBJFILE) $(OPTFLAGS) $(CFLAGS) $(PYFILE) $(PYDIR) -I$(SIMDIR) -DHAVE_CONFIG_H
 	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(CXXOBJFILE) $(OPTFLAGS) $(CFLAGS) $(CXXFILE) $(PYDIR) -I$(SIMDIR)
 	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(HASHOBJFILE) $(OPTFLAGS) $(CFLAGS) $(HASHFILE) $(PYDIR) -I$(SIMDIR)
 	@echo "  linking into shared object ./$(SHARED_OBJECT)"

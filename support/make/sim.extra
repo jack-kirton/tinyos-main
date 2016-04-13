@@ -3,9 +3,10 @@
 
 export GCC=gcc
 GPP=g++ -std=gnu++11
-OPTFLAGS = -g -O0
-LIBS = -lm -lstdc++
-PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc=$(GCC)
+OPTFLAGS = -O2 -msse4.2 -maes -mpclmul -flto
+#-march=westmere
+LIBS = -lm
+PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc=$(GCC) -DTOSSIM_NO_DEBUG
 WFLAGS = -Wno-nesc-data-race
 PYTHON_VERSION ?= $(shell python --version 2>&1 | sed 's/Python \([0-9]\)\.\([0-9]\)\.[0-9]+\{0,1\}/\1.\2/')
 
@@ -30,7 +31,7 @@ ifeq ($(findstring cygwin, $(OSTYPE)),cygwin)
   PLATFORM_LIB_FLAGS = -L/usr/lib/python$(PYTHON_VERSION)/config -L/$(PYDIR)/config -lstdc++ -lpython$(PYTHON_VERSION)
 else 
 ifeq ($(OS), Windows_NT) # Some TinyOS installs are like this
-  PLATFORM_FLAGS=-DUSE_DL_IMPORT -fpic 
+  PLATFORM_FLAGS=-DUSE_DL_IMPORT -fpic
   SHARED_OBJECT=_TOSSIM.dll
   PLATFORM_BUILD_FLAGS= -fpic -W1,--enabled-auto-image-base 
   PLATFORM_LIB_FLAGS = -shared -L/usr/lib/python$(PYTHON_VERSION)/config -L/$(PYDIR)/config -lstdc++ -lpython$(PYTHON_VERSION)
@@ -48,7 +49,7 @@ else # linux
 endif
 endif
 endif
-endif 
+endif
 ifdef SIM_DARWIN
   PLATFORM_FLAGS=-fPIC -D_FORTIFY_SOURCE=0
   PLATFORM_CC_FLAGS=-bundle
