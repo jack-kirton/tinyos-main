@@ -56,19 +56,19 @@ typedef struct variable_string {
   const char* type;
   void* ptr;
   int len;
-  int isArray;
+  bool isArray;
 } variable_string_t;
 
 typedef struct nesc_app {
-  int numVariables;
+  unsigned int numVariables;
   const char** variableNames;
   const char** variableTypes;
-  int* variableArray;
+  bool* variableArray;
 } nesc_app_t;
 
 class Variable {
  public:
-  Variable(const char* name, const char* format, int array, int mote);
+  Variable(const char* name, const char* format, bool array, int mote);
   ~Variable();
   variable_string_t getData();
   
@@ -79,7 +79,7 @@ class Variable {
   uint8_t* data;
   size_t len;
   int mote;
-  int isArray;
+  bool isArray;
 };
 
 class Mote {
@@ -132,9 +132,12 @@ class Tossim {
   void addChannel(const char* channel, FILE* file);
   bool removeChannel(const char* channel, FILE* file);
   void randomSeed(int seed);
+
+  void register_event_callback(std::function<bool(double)> callback, double time);
   
   bool runNextEvent();
   unsigned int runAllEvents(std::function<bool(double)> continue_events, std::function<void (unsigned int)> callback);
+  unsigned int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events, std::function<void (unsigned int)> callback);
 
   MAC* mac();
   Radio* radio();

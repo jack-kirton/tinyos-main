@@ -79,7 +79,7 @@ implementation {
 
   /***************** Init Commands ****************/
   command error_t Init.init() {
-    int i;
+    unsigned int i;
     for(i = 0; i < uniqueCount(UQ_STATE); i++) {
       state[i] = S_IDLE;
     }

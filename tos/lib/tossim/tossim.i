@@ -141,17 +141,35 @@ public:
             throw std::runtime_error("Python exception occurred");
         }
         func = pfunc;
-        Py_XINCREF(func);
+        Py_INCREF(func);
     }
     ~PyCallback() {
         Py_XDECREF(func);
+    }
+
+    bool operator()() const {
+        PyObject *args = PyTuple_New(0);
+
+        PyObject *result = PyObject_Call(func, args, NULL);
+
+        bool bool_result = result != NULL && PyObject_IsTrue(result);
+
+        Py_DECREF(args);
+        Py_XDECREF(result);
+
+        if (PyErr_Occurred() != NULL)
+        {
+            throw std::runtime_error("Python exception occurred");
+        }
+
+        return bool_result;
     }
 
     bool operator()(double t) const {
         PyObject *args = PyTuple_New(1);
         PyTuple_SetItem(args, 0, PyFloat_FromDouble(t));
 
-        PyObject *result = PyObject_Call(func, args, NULL);
+        PyObject *result = PyObject_CallObject(func, args);
 
         bool bool_result = result != NULL && PyObject_IsTrue(result);
 
@@ -170,7 +188,7 @@ public:
         PyObject *args = PyTuple_New(1);
         PyTuple_SetItem(args, 0, PyLong_FromUnsignedLong(i));
 
-        PyObject *result = PyObject_Call(func, args, NULL);
+        PyObject *result = PyObject_CallObject(func, args);
 
         Py_DECREF(args);
         Py_XDECREF(result);
@@ -191,36 +209,13 @@ FILE* object_to_file(PyObject* o)
     }
     return PyFile_AsFile(o);
 #else
-    long fileno = -1;
-    if (PyLong_Check(o))
+    int fileno = PyObject_AsFileDescriptor(o);
+    if (fileno == -1)
     {
-        fileno = PyLong_AsLong(o);
-    }
-    else if (PyObject_HasAttrString(o, "fileno"))
-    {
-        PyObject* fileno_obj = PyObject_CallMethod(o, "fileno", NULL);
-        if (fileno_obj == NULL)
-        {
-            PyErr_SetString(PyExc_TypeError, "Calling fileno failed.");
-            return NULL;
-        }
-
-        fileno = PyLong_AsLong(fileno_obj);
-        Py_DECREF(fileno_obj);
-
-        if (fileno == -1 && PyErr_Occurred())
-        {
-            PyErr_SetString(PyExc_TypeError, "The result of fileno was incorrect.");
-            return NULL;
-        }
-    }
-    else
-    {
-        PyErr_SetString(PyExc_TypeError, "Requires an object with a fileno function or a fileno.");
         return NULL;
     }
 
-    long fileno_dup = dup(fileno);
+    int fileno_dup = dup(fileno);
     if (fileno_dup == -1)
     {
         PyErr_Format(PyExc_TypeError, "Failed to duplicate fileno with error %d.", errno);
@@ -273,8 +268,8 @@ bool fill_nesc_app(nesc_app_t* app, int i, PyObject* name, PyObject* array, PyOb
 {
 #if PY_VERSION_HEX < 0x03000000
     if (PyString_Check(name) && PyString_Check(format)) {
-        app->variableNames[i] = PyString_AsString(name); // TODO: Should this be strdup'ed?
-        app->variableTypes[i] = PyString_AsString(format); // TODO: Should this be strdup'ed?
+        app->variableNames[i] = strdup(PyString_AsString(name));
+        app->variableTypes[i] = strdup(PyString_AsString(format));
         app->variableArray[i] = (strcmp(PyString_AsString(array), "array") == 0);
 
         return true;
@@ -321,21 +316,21 @@ bool fill_nesc_app(nesc_app_t* app, int i, PyObject* name, PyObject* array, PyOb
         return NULL;
     }
     else {
-        int size = PyList_Size($input);
-        int i = 0;
+        Py_ssize_t size = PyList_Size($input);
+        unsigned int i = 0;
         nesc_app_t* app;
 
-        if (size % 3 != 0) {
+        if (size < 0 || size % 3 != 0) {
             PyErr_SetString(PyExc_RuntimeError, "List must have 2*N elements.");
             return NULL;
         }
 
         app = (nesc_app_t*)malloc(sizeof(nesc_app_t));
 
-        app->numVariables = size / 3;
+        app->numVariables = static_cast<unsigned int>(size) / 3;
         app->variableNames = (const char**)malloc(app->numVariables * sizeof(char*));
         app->variableTypes = (const char**)malloc(app->numVariables * sizeof(char*));
-        app->variableArray = (int*)malloc(app->numVariables * sizeof(int));
+        app->variableArray = (bool*)malloc(app->numVariables * sizeof(bool));
 
         for (i = 0; i < app->numVariables; i++) {
             PyObject* name = PyList_GetItem($input, 3 * i);
@@ -360,14 +355,14 @@ typedef struct variable_string {
     const char* type;
     void* ptr;
     int len;
-    int isArray;
+    bool isArray;
 } variable_string_t;
 
 typedef struct nesc_app {
-    int numVariables;
+    unsigned int numVariables;
     const char** variableNames;
     const char** variableTypes;
-    int* variableArray;
+    bool* variableArray;
 } nesc_app_t;
 
 class Variable {
@@ -402,10 +397,34 @@ class Mote {
 };
 
 %extend Tossim {
+    PyObject* register_event_callback(PyObject *callback, double time) {
+        try
+        {
+            $self->register_event_callback(PyCallback(callback), time);
+            Py_RETURN_NONE;
+        }
+        catch (std::runtime_error ex)
+        {
+            return NULL;
+        }
+    }
+
     PyObject* runAllEvents(PyObject *continue_events, PyObject *callback) {
         try
         {
             unsigned int result = $self->runAllEvents(PyCallback(continue_events), PyCallback(callback));
+            return PyLong_FromUnsignedLong(result);
+        }
+        catch (std::runtime_error ex)
+        {
+            return NULL;
+        }
+    }
+
+    PyObject* runAllEventsWithMaxTime(double end_time, PyObject *continue_events, PyObject *callback) {
+        try
+        {
+            unsigned int result = $self->runAllEventsWithMaxTime(end_time, PyCallback(continue_events), PyCallback(callback));
             return PyLong_FromUnsignedLong(result);
         }
         catch (std::runtime_error ex)
@@ -436,8 +455,11 @@ class Tossim {
     bool removeChannel(const char* channel, FILE* file);
     void randomSeed(int seed);
 
+    void register_event_callback(std::function<bool(double)> callback, double time);
+
     bool runNextEvent();
     unsigned int runAllEvents(std::function<bool(double)> continue_events, std::function<void (unsigned int)> callback);
+    unsigned int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events, std::function<void (unsigned int)> callback);
 
     MAC* mac();
     Radio* radio();

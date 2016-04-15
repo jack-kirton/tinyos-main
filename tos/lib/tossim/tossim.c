@@ -39,26 +39,27 @@
 
 // $Id: tossim.c,v 1.7 2010-06-29 22:07:51 scipio Exp $
 
-
-#include <stdint.h>
-#include <tossim.h>
-#include <sim_tossim.h>
-#include <sim_mote.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <hashtable.h>
+#include <stdint.h>
 
 #include <algorithm>
+
+#include <tossim.h>
+#include <sim_tossim.h>
+#include <sim_mote.h>
+#include <sim_event_queue.h>
+#include <sim_noise.h>
 
 #include <mac.c>
 #include <radio.c>
 #include <packet.c>
-#include <sim_noise.h>
+
 
 uint16_t TOS_NODE_ID = 1;
 
-Variable::Variable(const char* name, const char* formatStr, int array, int which) {
+Variable::Variable(const char* name, const char* formatStr, bool array, int which) {
   format = strdup(formatStr);
   isArray = array;
   mote = which;
@@ -179,16 +180,16 @@ void Mote::setID(unsigned long val) noexcept {
 
 Variable* Mote::getVariable(const char* name) {
   const char* typeStr = "";
-  int isArray = 0;
+  bool isArray = false;
   Variable* var;
-  
+
   var = (Variable*)hashtable_search(varTable, name);
   if (var == NULL) {
     // Could hash this for greater efficiency,
     // but that would either require transformation
     // in Tossim class or a more complex typemap.
     if (app != NULL) {
-      for (int i = 0; i < app->numVariables; i++) {
+      for (unsigned int i = 0; i < app->numVariables; i++) {
         if (strcmp(name, app->variableNames[i]) == 0) {
           typeStr = app->variableTypes[i];
           isArray = app->variableArray[i];
@@ -307,6 +308,40 @@ void Tossim::randomSeed(int seed) {
   return sim_random_seed(seed);
 }
 
+typedef struct handle_python_event_data {
+  handle_python_event_data(Tossim* tossim, std::function<bool(double)> provided_event_callback)
+    : self(tossim)
+    , event_callback(std::move(provided_event_callback))
+  {
+  }
+
+  Tossim* const self;
+
+  const std::function<bool(double)> event_callback;
+} handle_python_event_data_t;
+
+static void handle_python_event(void* void_event)
+{
+  sim_event_t* event = static_cast<sim_event_t*>(void_event);
+
+  handle_python_event_data_t* data = static_cast<handle_python_event_data_t*>(event->data);
+
+  data->event_callback(data->self->timeInSeconds());
+
+  delete data;
+
+  // Set to NULL to avoid a double free from TOSSIM trying to clean up the sim event
+  event->data = NULL;
+}
+
+void Tossim::register_event_callback(std::function<bool(double)> callback, double event_time) {
+  sim_register_event(
+    static_cast<sim_time_t>(event_time * ticksPerSecond()),
+    &handle_python_event,
+    new handle_python_event_data_t(this, std::move(callback))
+  );
+}
+
 bool Tossim::runNextEvent() {
   return sim_run_next_event();
 }
@@ -322,6 +357,29 @@ unsigned int Tossim::runAllEvents(std::function<bool(double)> continue_events, s
 
     // Only call the callback if there is something for it to process
     if (sim_log_test_flag()) {
+      callback(event_count);
+    }
+
+    event_count += 1;
+  }
+
+  return event_count;
+}
+
+unsigned int Tossim::runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events, std::function<void (unsigned int)> callback) {
+  int event_count = 0;
+  bool process_callback = true;
+  while (timeInSeconds() < end_time && (!process_callback || continue_events()))
+  {
+    if (!runNextEvent())
+    {
+      break;
+    }
+
+    process_callback = sim_log_test_flag();
+
+    // Only call the callback if there is something for it to process
+    if (process_callback) {
       callback(event_count);
     }
 
