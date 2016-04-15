@@ -3,13 +3,12 @@
 
 export GCC=gcc
 GPP=g++ -std=gnu++11
-#OPTFLAGS = -g -O0
 OPTFLAGS = -O2 -msse4.2 -maes -mpclmul -flto
 #-march=westmere
-LIBS = -lm -lstdc++ 
+LIBS = -lm
 PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc=$(GCC) -DTOSSIM_NO_DEBUG
 WFLAGS = -Wno-nesc-data-race
-PYTHON_VERSION ?= $(shell python --version 2>&1 | sed 's/Python \([0-9]\)\.\([0-9]\).*/\1.\2/')
+PYTHON_VERSION ?= $(shell python --version 2>&1 | sed 's/Python \([0-9]\)\.\([0-9]\)\.[0-9]+\{0,1\}/\1.\2/')
 
 BUILDDIR   = simbuild/$(PLATFORM)
 CFILE    = $(BUILDDIR)/sim.c
@@ -32,10 +31,10 @@ ifeq ($(findstring cygwin, $(OSTYPE)),cygwin)
   PLATFORM_LIB_FLAGS = -L/usr/lib/python$(PYTHON_VERSION)/config -L/$(PYDIR)/config -lstdc++ -lpython$(PYTHON_VERSION)
 else 
 ifeq ($(OS), Windows_NT) # Some TinyOS installs are like this
-  PLATFORM_FLAGS=-DUSE_DL_IMPORT -fpic 
+  PLATFORM_FLAGS=-DUSE_DL_IMPORT -fpic
   SHARED_OBJECT=_TOSSIM.dll
   PLATFORM_BUILD_FLAGS= -fpic -W1,--enabled-auto-image-base 
-  PLATFORM_LIB_FLAGS =-shared -L/usr/lib/python$(PYTHON_VERSION)/config -L/$(PYDIR)/config -lstdc++ -lpython$(PYTHON_VERSION)
+  PLATFORM_LIB_FLAGS = -shared -L/usr/lib/python$(PYTHON_VERSION)/config -L/$(PYDIR)/config -lstdc++ -lpython$(PYTHON_VERSION)
 else 
 ifeq ($(findstring darwin, $(OSTYPE)), darwin) 
   SIM_DARWIN=TRUE
@@ -45,18 +44,18 @@ ifeq ($(findstring Darwin, $(shell uname)), Darwin)
 else # linux
   PLATFORM_FLAGS=-shared -fPIC
   SHARED_OBJECT=_TOSSIM.so
-  PLATFORM_LIB_FLAGS = -lstdc++ 
+  PLATFORM_LIB_FLAGS = -static-libstdc++ -static-libgcc
   PLATFORM_BUILD_FLAGS= -shared -fPIC
 endif
 endif
 endif
-endif 
+endif
 ifdef SIM_DARWIN
   PLATFORM_FLAGS=-fPIC -D_FORTIFY_SOURCE=0
   PLATFORM_CC_FLAGS=-bundle
   SHARED_OBJECT=_TOSSIM.so
   PLATFORM_BUILD_FLAGS=-flat_namespace -undefined suppress 
-  PLATFORM_LIB_FLAGS = -lstdc++ 
+  PLATFORM_LIB_FLAGS = -lstdc++
 endif 
 
 BUILD_DEPS = sim-exe
