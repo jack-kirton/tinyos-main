@@ -82,7 +82,8 @@ typedef struct sim_noise_node_t {
   uint32_t noiseTraceIndex;
 } sim_noise_node_t;
 
-void sim_noise_init();
+void sim_noise_init(void);
+void sim_noise_free(void);
 char sim_real_noise(uint16_t node_id, uint32_t cur_t);
 char sim_noise_generate(uint16_t node_id, uint32_t cur_t);
 void sim_noise_trace_add(uint16_t node_id, char val);

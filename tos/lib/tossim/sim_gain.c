@@ -10,6 +10,23 @@ static gain_entry_t* connectivity[TOSSIM_MAX_NODES + 1];
 static sim_gain_noise_t localNoise[TOSSIM_MAX_NODES + 1];
 static double sensitivity = 4.0;
 
+void sim_gain_init(void) __attribute__ ((C, spontaneous)) {
+  size_t i;
+
+  for (i = 0; i != TOSSIM_MAX_NODES + 1; ++i)
+  {
+    if (connectivity[i] != NULL) {
+      sim_gain_deallocate_link(connectivity[i]);
+      connectivity[i] = NULL;
+    }
+
+    localNoise[i].mean = 0.0;
+    localNoise[i].range = 0.0;
+  }
+
+  sensitivity = 4.0;
+}
+
 gain_entry_t* sim_gain_allocate_link(int mote);
 void sim_gain_deallocate_link(gain_entry_t* linkToDelete);
 

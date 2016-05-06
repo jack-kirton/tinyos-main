@@ -67,7 +67,6 @@ enum {
 static sim_log_output_t outputs[SIM_LOG_OUTPUT_COUNT];
 static struct hashtable* channelTable = NULL;
 
-
 static bool write_performed = FALSE;
 
 void sim_log_reset_flag(void) __attribute__ ((C, spontaneous))
@@ -98,7 +97,7 @@ static void fillInOutput(int id, const char* name) {
   const char* termination = name;
   const char* namePos = name;
   int count = 0;
-  size_t nameLen = strlen(name);
+  const size_t nameLen = strlen(name);
   char* newName = (char*)calloc(nameLen + 1, sizeof(char));
 
   // Count the outputs
@@ -179,10 +178,25 @@ void sim_log_init(void) {
   for (i = 0; i < SIM_LOG_OUTPUT_COUNT; i++) {
     outputs[i].num = 1;
     outputs[i].files = (FILE**)malloc(sizeof(FILE*) * 1);
-    outputs[i].files[0] = fdopen(1, "w"); // STDOUT
+    outputs[i].files[0] = stdout;
   }
 
   write_performed = FALSE;
+}
+
+void sim_log_free(void) {
+  int i;
+
+  write_performed = FALSE;
+
+  for (i = 0; i < SIM_LOG_OUTPUT_COUNT; i++) {
+    free(outputs[i].files);
+    outputs[i].files = NULL;
+    outputs[i].num = 0;
+  }
+
+  hashtable_destroy(channelTable, &free);
+  channelTable = NULL;
 }
 
 void sim_log_add_channel(const char* name, FILE* file) {

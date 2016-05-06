@@ -41,8 +41,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <sys/time.h>
-#include <time.h>
 #include "randomlib.h"
 #include "hashtable.h"
 #include "sim_noise.h"
@@ -66,13 +64,15 @@ static void makeNoiseModel(uint16_t node_id);
 static void makePmfDistr(uint16_t node_id);
 static uint8_t search_bin_num(char noise);
 
-void sim_noise_init()__attribute__ ((C, spontaneous))
+void sim_noise_init(void) __attribute__ ((C, spontaneous))
 {
   int j;
   
   //printf("Starting\n");
+
+  FreqKeyNum = 0;
   
-  for (j=0; j< TOSSIM_MAX_NODES; j++) {
+  for (j = 0; j < TOSSIM_MAX_NODES; j++) {
     noiseData[j].noiseTable = create_hashtable(NOISE_HASHTABLE_SIZE, sim_noise_hash, sim_noise_eq);
     noiseData[j].noiseGenTime = 0;
     noiseData[j].noiseTrace = (char*)malloc(sizeof(char) * NOISE_MIN_TRACE);
@@ -80,6 +80,24 @@ void sim_noise_init()__attribute__ ((C, spontaneous))
     noiseData[j].noiseTraceIndex = 0;
   }
   //printf("Done with sim_noise_init()\n");
+}
+
+void sim_noise_free(void) __attribute__ ((C, spontaneous)) {
+  int j;
+  for (j = 0; j < TOSSIM_MAX_NODES; j++) {
+    //hashtable_destroy(noiseData[j].noiseTable, NULL);
+    noiseData[j].noiseTable = NULL;
+
+    noiseData[j].noiseGenTime = 0;
+
+    free(noiseData[j].noiseTrace);
+    noiseData[j].noiseTrace = NULL;
+
+    noiseData[j].noiseTraceLen = NOISE_MIN_TRACE;
+    noiseData[j].noiseTraceIndex = 0;
+  }
+
+  FreqKeyNum = 0;
 }
 
 void sim_noise_create_model(uint16_t node_id)__attribute__ ((C, spontaneous)) {

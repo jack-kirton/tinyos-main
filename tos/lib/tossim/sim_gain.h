@@ -55,6 +55,8 @@ typedef struct gain_entry {
   double gain;
   struct gain_entry* next;  
 } gain_entry_t;
+
+void sim_gain_init(void);
   
 void sim_gain_add(int src, int dest, double gain);
 double sim_gain_value(int src, int dest);
