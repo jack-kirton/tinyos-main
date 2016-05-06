@@ -168,7 +168,7 @@ class NescTypes(object):
         self._typeNames.sort()
         #self.printSkippedTypes()
     
-    def addType(self, value) :
+    def addType(self, value):
         if not value.nescType in self._typeNames:
             self._typeNames.append(value.nescType)
         self._types[value.nescType] = value #XXX: why does this have to be unconditional??
@@ -177,29 +177,29 @@ class NescTypes(object):
             self._types[value.cType] = value
             self._typeNames.append(value.cType)
         
-    def __getattr__(self, name) :
-        if name in self._typeNames :
+    def __getattr__(self, name):
+        if name in self._typeNames:
             return deepcopy(self._types[name])
         else:
             raise AttributeError("No type \"%s\" defined" % name)
     
-    def __getitem__(self, key) :
-        if key in self._typeNames :
+    def __getitem__(self, key):
+        if key in self._typeNames:
             return deepcopy(self._types[key])
         else:
             raise AttributeError("No type \"%s\" defined" % key)
 
-    def __repr__(self) :
+    def __repr__(self):
         return "%s object at %s:\n\n\t%s" % (self.__class__, hex(id(self)), str(self))
         
-    def __str__(self) :
+    def __str__(self):
         """ Print all available types."""
         string = "\n"
         for t in self._typeNames:
             string += "\t%s\n" % t
         return string
         
-    def createTypesFromXml(self, xmlFilename) :
+    def createTypesFromXml(self, xmlFilename):
         """Go through the struct and typedef elements in the nescDecls.xml file"""
         
         dom = minidom.parse(xmlFilename)
@@ -338,7 +338,7 @@ class NescEnums(object):
     var = myEnums.enumName
     """
 
-    def __init__(self, applicationName="Unknown App", xmlFilename = None):
+    def __init__(self, applicationName="Unknown App", xmlFilename=None):
         self.applicationName = applicationName
         self._enums = []
         if type(xmlFilename) == str:
@@ -365,26 +365,26 @@ class NescEnums(object):
                 continue
             value = enumDef.getAttribute("value")
             match = integer.match(value)
-            if match != None :
+            if match != None:
                 self.__dict__[name] = int(match.groups()[0])
-            else :
+            else:
                 match = hexidecimal.match(value)
-                if match != None :
+                if match != None:
                     self.__dict__[name] = int(match.groups()[0], 16)
-                else :
+                else:
                     self.__dict__[name] = value
             self._enums.append(name)
             
         namedEnums = [node for node in dom.getElementsByTagName("namedEnum")]
-        for namedEnum in namedEnums :
+        for namedEnum in namedEnums:
             name = namedEnum.getAttribute("name")
             self.__dict__[name] = NescEnums(namedEnum,name)
             self._enums.append(name)
         
-    def __repr__(self) :
+    def __repr__(self):
         return "%s object at %s:\n\n\t%s" % (self.__class__, hex(id(self)), str(self))
     
-    def __str__(self) :
+    def __str__(self):
         """ Print all available enums."""
         string = "\n"
         for key in self._enums :
