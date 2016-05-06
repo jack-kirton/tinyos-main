@@ -55,13 +55,13 @@
  *  different.</p>
  *
  *  <p>If ForwardingEngine is on top of a link layer that supports
- *  synchronous acknowledgments, it enables them and retransmits packets
+ *  synchronous acknowledgements, it enables them and retransmits packets
  *  when they are not acked. It transmits a packet up to MAX_RETRIES times
  *  before giving up and dropping the packet. MAX_RETRIES is typically a
  *  large number (e.g., >20), as this implementation assumes there is
  *  link layer feedback on failed packets, such that link costs will go
  *  up and cause the routing layer to pick a next hop. If the underlying
- *  link layer does not support acknowledgments, ForwardingEngine sends
+ *  link layer does not support acknowledgements, ForwardingEngine sends
  *  a packet only once.</p> 
  *
  *  <p>The ForwardingEngine detects routing loops and tries to correct
@@ -240,7 +240,7 @@ implementation {
     if (err == SUCCESS) {
       setState(RADIO_ON);
       if (!call SendQueue.empty()) {
-	dbg("FHangBug", "%s posted sendTask.\n", __FUNCTION__);
+        dbg("FHangBug", "%s posted sendTask.\n", __FUNCTION__);
         post sendTask();
       }
     }
@@ -301,7 +301,7 @@ implementation {
     call Packet.setPayloadLength(msg, len);
     hdr = getHeader(msg);
     hdr->origin = TOS_NODE_ID;
-    hdr->originSeqNo  = seqno++;
+    hdr->originSeqNo = seqno++;
     hdr->type = call CollectionId.fetch[client]();
     hdr->thl = 0;
 
@@ -317,7 +317,7 @@ implementation {
     dbg("Forwarder", "%s: queue entry for %hhu is %hhu deep\n", __FUNCTION__, client, call SendQueue.size());
     if (call SendQueue.enqueue(qe) == SUCCESS) {
       if (hasState(RADIO_ON) && !hasState(SENDING)) {
-	dbg("FHangBug", "%s posted sendTask.\n", __FUNCTION__);
+        dbg("FHangBug", "%s posted sendTask.\n", __FUNCTION__);
         post sendTask();
       }
       clientPtrs[client] = NULL;
@@ -375,9 +375,8 @@ implementation {
       call CollectionDebug.logEvent(NET_C_FE_SENDQUEUE_EMPTY);
       return;
     }
-    else if ((!call RootControl.isRoot() && 
-	      !call UnicastNameFreeRouting.hasRoute()) ||
-	     (call CtpInfo.getEtx(&gradient) != SUCCESS)) {
+    else if ((!call RootControl.isRoot() && !call UnicastNameFreeRouting.hasRoute()) ||
+             (call CtpInfo.getEtx(&gradient) != SUCCESS)) {
       /* This code path is for when we don't have a valid next
        * hop. We set a retry timer.
        *
@@ -393,25 +392,25 @@ implementation {
     }
     else {
       /* We can send a packet.
-	 First check if it's a duplicate;
-	 if not, try to send/forward. */
+         First check if it's a duplicate;
+         if not, try to send/forward. */
       error_t subsendResult;
       fe_queue_entry_t* qe = call SendQueue.head();
       uint8_t payloadLen = call SubPacket.payloadLength(qe->msg);
       am_addr_t dest = call UnicastNameFreeRouting.nextHop();
 
       if (call SentCache.lookup(qe->msg)) {
-	/* This packet is a duplicate, so suppress it: free memory and
-	 * send next packet.  Duplicates are only possible for
-	 * forwarded packets, so we can circumvent the client or
-	 * forwarded branch for freeing the buffer. */
+        /* This packet is a duplicate, so suppress it: free memory and
+         * send next packet.  Duplicates are only possible for
+         * forwarded packets, so we can circumvent the client or
+         * forwarded branch for freeing the buffer. */
         call CollectionDebug.logEvent(NET_C_FE_DUPLICATE_CACHE_AT_SEND);
         call SendQueue.dequeue();
-	if (call MessagePool.put(qe->msg) != SUCCESS) 
-	  call CollectionDebug.logEvent(NET_C_FE_PUT_MSGPOOL_ERR); 
-	if (call QEntryPool.put(qe) != SUCCESS) 
-	  call CollectionDebug.logEvent(NET_C_FE_PUT_QEPOOL_ERR); 
-	  
+        if (call MessagePool.put(qe->msg) != SUCCESS) 
+          call CollectionDebug.logEvent(NET_C_FE_PUT_MSGPOOL_ERR); 
+        if (call QEntryPool.put(qe) != SUCCESS) 
+          call CollectionDebug.logEvent(NET_C_FE_PUT_QEPOOL_ERR); 
+          
         post sendTask();
         return;
       }
@@ -420,50 +419,50 @@ implementation {
       dbg("Forwarder", "Sending queue entry %p\n", qe);
 
       if (call RootControl.isRoot()) {
-	/* Code path for roots: copy the packet and signal receive. */
+        /* Code path for roots: copy the packet and signal receive. */
         collection_id_t collectid = getHeader(qe->msg)->type;
-	uint8_t* payload;
-	uint8_t payloadLength;
+        uint8_t* payload;
+        uint8_t payloadLength;
 
         memcpy(loopbackMsgPtr, qe->msg, sizeof(message_t));
 
-	payload = call Packet.getPayload(loopbackMsgPtr, call Packet.payloadLength(loopbackMsgPtr));
-	payloadLength =  call Packet.payloadLength(loopbackMsgPtr);
+        payload = call Packet.getPayload(loopbackMsgPtr, call Packet.payloadLength(loopbackMsgPtr));
+        payloadLength =  call Packet.payloadLength(loopbackMsgPtr);
         dbg("Forwarder", "%s: I'm a root, so loopback and signal receive.\n", __FUNCTION__);
         loopbackMsgPtr = signal Receive.receive[collectid](loopbackMsgPtr,
-							   payload,
-							   payloadLength);
+                                                           payload,
+                                                           payloadLength);
         signal SubSend.sendDone(qe->msg, SUCCESS);
       }
       else {
-	/* The basic forwarding/sending case. */
-	call CtpPacket.setEtx(qe->msg, gradient);
-	call CtpPacket.clearOption(qe->msg, CTP_OPT_ECN | CTP_OPT_PULL);
-	if (call PacketAcknowledgements.requestAck(qe->msg) == SUCCESS) {
-	  setState(ACK_PENDING);
-	}
-	if (hasState(QUEUE_CONGESTED)) {
-	  call CtpPacket.setOption(qe->msg, CTP_OPT_ECN); 
-	  clearState(QUEUE_CONGESTED);
-	}
-	
-	subsendResult = call SubSend.send(dest, qe->msg, payloadLen);
-	if (subsendResult == SUCCESS) {
-	  // Successfully submitted to the data-link layer.
-	  setState(SENDING);
-	  dbg("Forwarder", "%s: subsend succeeded with %p.\n", __FUNCTION__, qe->msg);
-	  return;
-	}
-	// The packet is too big: truncate it and retry.
-	else if (subsendResult == ESIZE) {
-	  dbg("Forwarder", "%s: subsend failed from ESIZE: truncate packet.\n", __FUNCTION__);
-	  call Packet.setPayloadLength(qe->msg, call Packet.maxPayloadLength());
-	  post sendTask();
-	  call CollectionDebug.logEvent(NET_C_FE_SUBSEND_SIZE);
-	}
-	else {
-	  dbg("Forwarder", "%s: subsend failed from %i\n", __FUNCTION__, (int)subsendResult);
-	}
+        /* The basic forwarding/sending case. */
+        call CtpPacket.setEtx(qe->msg, gradient);
+        call CtpPacket.clearOption(qe->msg, CTP_OPT_ECN | CTP_OPT_PULL);
+        if (call PacketAcknowledgements.requestAck(qe->msg) == SUCCESS) {
+          setState(ACK_PENDING);
+        }
+        if (hasState(QUEUE_CONGESTED)) {
+          call CtpPacket.setOption(qe->msg, CTP_OPT_ECN); 
+          clearState(QUEUE_CONGESTED);
+        }
+        
+        subsendResult = call SubSend.send(dest, qe->msg, payloadLen);
+        if (subsendResult == SUCCESS) {
+          // Successfully submitted to the data-link layer.
+          setState(SENDING);
+          dbg("Forwarder", "%s: subsend succeeded with %p.\n", __FUNCTION__, qe->msg);
+          return;
+        }
+        // The packet is too big: truncate it and retry.
+        else if (subsendResult == ESIZE) {
+          dbg("Forwarder", "%s: subsend failed from ESIZE: truncate packet.\n", __FUNCTION__);
+          call Packet.setPayloadLength(qe->msg, call Packet.maxPayloadLength());
+          post sendTask();
+          call CollectionDebug.logEvent(NET_C_FE_SUBSEND_SIZE);
+        }
+        else {
+          dbg("Forwarder", "%s: subsend failed from %i\n", __FUNCTION__, (int)subsendResult);
+        }
       }
     }
   }
@@ -472,7 +471,7 @@ implementation {
   /*
    * The second phase of a send operation; based on whether the transmission was
    * successful, the ForwardingEngine either stops sending or starts the
-   * RetxmitTimer with an interval based on what has occured. If the send was
+   * RetxmitTimer with an interval based on what has occurred. If the send was
    * successful or the maximum number of retransmissions has been reached, then
    * the ForwardingEngine dequeues the current packet. If the packet is from a
    * client it signals Send.sendDone(); if it is a forwarded packet it returns
@@ -488,39 +487,39 @@ implementation {
       clientPtrs[qe->client] = qe;
       signal Send.sendDone[qe->client](msg, SUCCESS);
       if (success) {
-	dbg("CtpForwarder", "%s: packet %hu.%hhu for client %hhu acknowledged.\n", __FUNCTION__, call CollectionPacket.getOrigin(msg), call CollectionPacket.getSequenceNumber(msg), qe->client);
-	call CollectionDebug.logEventMsg(NET_C_FE_SENT_MSG, 
-					 call CollectionPacket.getSequenceNumber(msg), 
-					 call CollectionPacket.getOrigin(msg), 
+        dbg("CtpForwarder", "%s: packet %hu.%hhu for client %hhu acknowledged.\n", __FUNCTION__, call CollectionPacket.getOrigin(msg), call CollectionPacket.getSequenceNumber(msg), qe->client);
+        call CollectionDebug.logEventMsg(NET_C_FE_SENT_MSG, 
+                                         call CollectionPacket.getSequenceNumber(msg), 
+                                         call CollectionPacket.getOrigin(msg), 
                                          call AMPacket.destination(msg));
       } else {
-	dbg("CtpForwarder", "%s: packet %hu.%hhu for client %hhu dropped.\n", __FUNCTION__, call CollectionPacket.getOrigin(msg), call CollectionPacket.getSequenceNumber(msg), qe->client);
-	call CollectionDebug.logEventMsg(NET_C_FE_SENDDONE_FAIL_ACK_SEND, 
-					 call CollectionPacket.getSequenceNumber(msg), 
-					 call CollectionPacket.getOrigin(msg), 
-					 call AMPacket.destination(msg));
+        dbg("CtpForwarder", "%s: packet %hu.%hhu for client %hhu dropped.\n", __FUNCTION__, call CollectionPacket.getOrigin(msg), call CollectionPacket.getSequenceNumber(msg), qe->client);
+        call CollectionDebug.logEventMsg(NET_C_FE_SENDDONE_FAIL_ACK_SEND, 
+                                         call CollectionPacket.getSequenceNumber(msg), 
+                                         call CollectionPacket.getOrigin(msg), 
+                                         call AMPacket.destination(msg));
       }
     }
     else { 
       if (success) {
-	call SentCache.insert(qe->msg);
-	dbg("CtpForwarder", "%s: forwarded packet %hu.%hhu acknowledged: insert in transmit queue.\n", __FUNCTION__, call CollectionPacket.getOrigin(msg), call CollectionPacket.getSequenceNumber(msg));
-	call CollectionDebug.logEventMsg(NET_C_FE_FWD_MSG, 
-					 call CollectionPacket.getSequenceNumber(msg), 
-					 call CollectionPacket.getOrigin(msg), 
+        call SentCache.insert(qe->msg);
+        dbg("CtpForwarder", "%s: forwarded packet %hu.%hhu acknowledged: insert in transmit queue.\n", __FUNCTION__, call CollectionPacket.getOrigin(msg), call CollectionPacket.getSequenceNumber(msg));
+        call CollectionDebug.logEventMsg(NET_C_FE_FWD_MSG, 
+                                         call CollectionPacket.getSequenceNumber(msg), 
+                                         call CollectionPacket.getOrigin(msg), 
                                          call AMPacket.destination(msg));
       }
       else {
-	dbg("CtpForwarder", "%s: forwarded packet %hu.%hhu dropped.\n", __FUNCTION__, call CollectionPacket.getOrigin(msg), call CollectionPacket.getSequenceNumber(msg));
-	call CollectionDebug.logEventMsg(NET_C_FE_SENDDONE_FAIL_ACK_FWD, 
-					 call CollectionPacket.getSequenceNumber(msg), 
-					 call CollectionPacket.getOrigin(msg), 
-					 call AMPacket.destination(msg));
+        dbg("CtpForwarder", "%s: forwarded packet %hu.%hhu dropped.\n", __FUNCTION__, call CollectionPacket.getOrigin(msg), call CollectionPacket.getSequenceNumber(msg));
+        call CollectionDebug.logEventMsg(NET_C_FE_SENDDONE_FAIL_ACK_FWD, 
+                                         call CollectionPacket.getSequenceNumber(msg), 
+                                         call CollectionPacket.getOrigin(msg), 
+                                         call AMPacket.destination(msg));
       }
       if (call MessagePool.put(qe->msg) != SUCCESS)
-	call CollectionDebug.logEvent(NET_C_FE_PUT_MSGPOOL_ERR);
+        call CollectionDebug.logEvent(NET_C_FE_PUT_MSGPOOL_ERR);
       if (call QEntryPool.put(qe) != SUCCESS)
-	call CollectionDebug.logEvent(NET_C_FE_PUT_QEPOOL_ERR);
+        call CollectionDebug.logEvent(NET_C_FE_PUT_QEPOOL_ERR);
     }
   }
   
@@ -532,9 +531,9 @@ implementation {
       /* The radio wasn't able to send the packet: retransmit it. */
       dbg("Forwarder", "%s: send failed\n", __FUNCTION__);
       call CollectionDebug.logEventMsg(NET_C_FE_SENDDONE_FAIL, 
-				       call CollectionPacket.getSequenceNumber(msg), 
-				       call CollectionPacket.getOrigin(msg), 
-				       call AMPacket.destination(msg));
+                                       call CollectionPacket.getSequenceNumber(msg), 
+                                       call CollectionPacket.getOrigin(msg), 
+                                       call AMPacket.destination(msg));
       startRetxmitTimer(SENDDONE_FAIL_WINDOW, SENDDONE_FAIL_OFFSET);
     }
     else if (hasState(ACK_PENDING) && !call PacketAcknowledgements.wasAcked(msg)) {
@@ -544,23 +543,23 @@ implementation {
       if (--qe->retries) { 
         dbg("Forwarder", "%s: not acked, retransmit\n", __FUNCTION__);
         call CollectionDebug.logEventMsg(NET_C_FE_SENDDONE_WAITACK, 
-					 call CollectionPacket.getSequenceNumber(msg), 
-					 call CollectionPacket.getOrigin(msg), 
+                                         call CollectionPacket.getSequenceNumber(msg), 
+                                         call CollectionPacket.getOrigin(msg), 
                                          call AMPacket.destination(msg));
         startRetxmitTimer(SENDDONE_NOACK_WINDOW, SENDDONE_NOACK_OFFSET);
       } else {
-	/* Hit max retransmit threshold: drop the packet. */
-	call SendQueue.dequeue();
+        /* Hit max retransmit threshold: drop the packet. */
+        call SendQueue.dequeue();
         clearState(SENDING);
         startRetxmitTimer(SENDDONE_OK_WINDOW, SENDDONE_OK_OFFSET);
-	
-	packetComplete(qe, msg, FALSE);
+        
+        packetComplete(qe, msg, FALSE);
       }
     }
     else {
       /* Packet was acknowledged. Updated the link estimator,
-	 free the buffer (pool or sendDone), start timer to
-	 send next packet. */
+         free the buffer (pool or sendDone), start timer to
+         send next packet. */
       call SendQueue.dequeue();
       clearState(SENDING);
       startRetxmitTimer(SENDDONE_OK_WINDOW, SENDDONE_OK_OFFSET);
@@ -619,14 +618,14 @@ implementation {
           // We only check for loops if we know our own metric
           if (call CtpPacket.getEtx(m) <= gradient) {
             // If our etx metric is less than or equal to the etx value
-	    // on the packet (etx of the previous hop node), then we believe
-	    // we are in a loop.
-	    // Trigger a route update and backoff.
+            // on the packet (etx of the previous hop node), then we believe
+            // we are in a loop.
+            // Trigger a route update and backoff.
             call CtpInfo.triggerImmediateRouteUpdate();
             startRetxmitTimer(LOOPY_WINDOW, LOOPY_OFFSET);
             call CollectionDebug.logEventMsg(NET_C_FE_LOOP_DETECTED,
-					 call CollectionPacket.getSequenceNumber(m), 
-					 call CollectionPacket.getOrigin(m), 
+                                         call CollectionPacket.getSequenceNumber(m), 
+                                         call CollectionPacket.getOrigin(m), 
                                          call AMPacket.destination(m));
           }
         }
@@ -634,7 +633,7 @@ implementation {
         if (!call RetxmitTimer.isRunning()) {
           // sendTask is only immediately posted if we don't detect a
           // loop.
-	  dbg("FHangBug", "%s: posted sendTask.\n", __FUNCTION__);
+          dbg("FHangBug", "%s: posted sendTask.\n", __FUNCTION__);
           post sendTask();
         }
         
@@ -649,7 +648,7 @@ implementation {
       }
     }
 
-    // NB: at this point, we have a resource acquistion problem.
+    // NB: at this point, we have a resource acquisition problem.
     // Log the event, and drop the
     // packet on the floor.
 
@@ -682,9 +681,9 @@ implementation {
     call CtpPacket.setThl(msg, thl);
 
     call CollectionDebug.logEventMsg(NET_C_FE_RCV_MSG,
-					 call CollectionPacket.getSequenceNumber(msg), 
-					 call CollectionPacket.getOrigin(msg), 
-				     thl--);
+                                         call CollectionPacket.getSequenceNumber(msg), 
+                                         call CollectionPacket.getOrigin(msg), 
+                                     thl--);
     if (len > call SubSend.maxPayloadLength()) {
       return msg;
     }
@@ -698,11 +697,11 @@ implementation {
     //... and in the queue for duplicates
     if (call SendQueue.size() > 0) {
       for (i = call SendQueue.size(); i >0; i--) {
-	qe = call SendQueue.element(i-1);
-	if (call CtpPacket.matchInstance(qe->msg, msg)) {
-	  duplicate = TRUE;
-	  break;
-	}
+        qe = call SendQueue.element(i-1);
+        if (call CtpPacket.matchInstance(qe->msg, msg)) {
+          duplicate = TRUE;
+          break;
+        }
       }
     }
     
@@ -714,13 +713,13 @@ implementation {
     // If I'm the root, signal receive. 
     else if (call RootControl.isRoot())
       return signal Receive.receive[collectid](msg, 
-					       call Packet.getPayload(msg, call Packet.payloadLength(msg)), 
-					       call Packet.payloadLength(msg));
+                                               call Packet.getPayload(msg, call Packet.payloadLength(msg)), 
+                                               call Packet.payloadLength(msg));
     // I'm on the routing path and Intercept indicates that I
     // should not forward the packet.
     else if (!signal Intercept.forward[collectid](msg, 
-						  call Packet.getPayload(msg, call Packet.payloadLength(msg)), 
-						  call Packet.payloadLength(msg)))
+                                                  call Packet.getPayload(msg, call Packet.payloadLength(msg)), 
+                                                  call Packet.payloadLength(msg)))
       return msg;
     else {
       dbg("Route", "Forwarding packet from %hu.\n", getHeader(msg)->origin);
@@ -730,6 +729,8 @@ implementation {
 
   event message_t* 
   SubSnoop.receive(message_t* msg, void *payload, uint8_t len) {
+    void* adjusted_payload = (char*)payload + sizeof(ctp_data_header_t);
+
     // Check for the pull bit (P) [TEP123] and act accordingly.  This
     // check is made for all packets, not just ones addressed to us.
     if (call CtpPacket.option(msg, CTP_OPT_PULL)) {
@@ -737,8 +738,7 @@ implementation {
     }
 
     return signal Snoop.receive[call CtpPacket.getType(msg)] 
-      (msg, payload + sizeof(ctp_data_header_t), 
-       len - sizeof(ctp_data_header_t));
+      (msg, adjusted_payload, len - sizeof(ctp_data_header_t));
   }
   
   event void RetxmitTimer.fired() {
@@ -818,15 +818,15 @@ implementation {
   // implement duplicate suppression as described in TEP 123.
   command bool CtpPacket.matchInstance(message_t* m1, message_t* m2) {
     return (call CtpPacket.getOrigin(m1) == call CtpPacket.getOrigin(m2) &&
-	    call CtpPacket.getSequenceNumber(m1) == call CtpPacket.getSequenceNumber(m2) &&
-	    call CtpPacket.getThl(m1) == call CtpPacket.getThl(m2) &&
-	    call CtpPacket.getType(m1) == call CtpPacket.getType(m2));
+            call CtpPacket.getSequenceNumber(m1) == call CtpPacket.getSequenceNumber(m2) &&
+            call CtpPacket.getThl(m1) == call CtpPacket.getThl(m2) &&
+            call CtpPacket.getType(m1) == call CtpPacket.getType(m2));
   }
 
   command bool CtpPacket.matchPacket(message_t* m1, message_t* m2) {
     return (call CtpPacket.getOrigin(m1) == call CtpPacket.getOrigin(m2) &&
-	    call CtpPacket.getSequenceNumber(m1) == call CtpPacket.getSequenceNumber(m2) &&
-	    call CtpPacket.getType(m1) == call CtpPacket.getType(m2));
+            call CtpPacket.getSequenceNumber(m1) == call CtpPacket.getSequenceNumber(m2) &&
+            call CtpPacket.getType(m1) == call CtpPacket.getType(m2));
   }
 
 

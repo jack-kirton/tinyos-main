@@ -125,7 +125,7 @@ implementation {
     footer = getFooter(msg, len);
 
     maxEntries = ((call SubPacket.maxPayloadLength() - len - sizeof(linkest_header_t))
-		  / sizeof(linkest_footer_t));
+                  / sizeof(linkest_footer_t));
 
     // Depending on the number of bits used to store the number
     // of entries, we can encode up to NUM_ENTRIES_FLAG using those bits
@@ -137,23 +137,19 @@ implementation {
     j = 0;
     newPrevSentIdx = 0;
     for (i = 0; i < NEIGHBOR_TABLE_SIZE && j < maxEntries; i++) {
-      uint8_t neighborCount;
+      const uint8_t neighborCount = (maxEntries <= NEIGHBOR_TABLE_SIZE) ? maxEntries : NEIGHBOR_TABLE_SIZE;
       neighbor_stat_entry_t * COUNT(neighborCount) neighborLists;
-      if(maxEntries <= NEIGHBOR_TABLE_SIZE)
-        neighborCount = maxEntries;
-      else
-        neighborCount = NEIGHBOR_TABLE_SIZE;
       
       neighborLists = TCAST(neighbor_stat_entry_t * COUNT(neighborCount), footer->neighborList);
       k = (prevSentIdx + i + 1) % NEIGHBOR_TABLE_SIZE;
       if ((NeighborTable[k].flags & VALID_ENTRY) &&
-	  (NeighborTable[k].flags & MATURE_ENTRY)) {
-	neighborLists[j].ll_addr = NeighborTable[k].ll_addr;
-	neighborLists[j].inquality = NeighborTable[k].inquality;
-	newPrevSentIdx = k;
-	dbg("LI", "Loaded on footer: %d %d %d\n", j, neighborLists[j].ll_addr,
-	    neighborLists[j].inquality);
-	j++;
+          (NeighborTable[k].flags & MATURE_ENTRY)) {
+        neighborLists[j].ll_addr = NeighborTable[k].ll_addr;
+        neighborLists[j].inquality = NeighborTable[k].inquality;
+        newPrevSentIdx = k;
+        dbg("LI", "Loaded on footer: %d %d %d\n", j, neighborLists[j].ll_addr,
+            neighborLists[j].inquality);
+        j++;
       }
     }
     prevSentIdx = newPrevSentIdx;
@@ -185,9 +181,9 @@ implementation {
     uint8_t i;
     for (i = 0; i < NEIGHBOR_TABLE_SIZE; i++) {
       if (NeighborTable[i].flags & VALID_ENTRY) {
-	if (NeighborTable[i].ll_addr == ll_addr) {
-	  return i;
-	}
+        if (NeighborTable[i].ll_addr == ll_addr) {
+          return i;
+        }
       }
     }
     return INVALID_RVAL;
@@ -199,7 +195,7 @@ implementation {
     for (i = 0; i < NEIGHBOR_TABLE_SIZE; i++) {
       if (NeighborTable[i].flags & VALID_ENTRY) {
       } else {
-	return i;
+        return i;
       }
     }
       return INVALID_RVAL;
@@ -215,21 +211,21 @@ implementation {
     worstETX = 0;
     for (i = 0; i < NEIGHBOR_TABLE_SIZE; i++) {
       if (!(NeighborTable[i].flags & VALID_ENTRY)) {
-	dbg("LI", "Invalid so continuing\n");
-	continue;
+        dbg("LI", "Invalid so continuing\n");
+        continue;
       }
       if (!(NeighborTable[i].flags & MATURE_ENTRY)) {
-	dbg("LI", "Not mature, so continuing\n");
-	continue;
+        dbg("LI", "Not mature, so continuing\n");
+        continue;
       }
       if (NeighborTable[i].flags & PINNED_ENTRY) {
-	dbg("LI", "Pinned entry, so continuing\n");
-	continue;
+        dbg("LI", "Pinned entry, so continuing\n");
+        continue;
       }
       thisETX = NeighborTable[i].etx;
       if (thisETX >= worstETX) {
-	worstNeighborIdx = i;
-	worstETX = thisETX;
+        worstNeighborIdx = i;
+        worstETX = thisETX;
       }
     }
     if (worstETX >= thresholdETX) {
@@ -310,7 +306,7 @@ implementation {
     if (q1 > 0) {
       q =  2500 / q1;
       if (q > 250) {
-	q = VERY_LARGE_ETX_VALUE;
+        q = VERY_LARGE_ETX_VALUE;
       }
       return q;
     } else {
@@ -324,35 +320,34 @@ implementation {
     uint8_t i, totalPkt;
     neighbor_table_entry_t *ne;
     uint8_t newEst;
-    uint8_t minPkt;
+    const uint8_t minPkt = BLQ_PKT_WINDOW;
 
-    minPkt = BLQ_PKT_WINDOW;
     dbg("LI", "%s\n", __FUNCTION__);
     for (i = 0; i < NEIGHBOR_TABLE_SIZE; i++) {
       ne = &NeighborTable[i];
       if (ne->ll_addr == n) {
-	if (ne->flags & VALID_ENTRY) {
-	  dbg("LI", "Making link: %d mature\n", i);
-	  totalPkt = ne->rcvcnt + ne->failcnt;
+        if (ne->flags & VALID_ENTRY) {
+          dbg("LI", "Making link: %d mature\n", i);
+          totalPkt = ne->rcvcnt + ne->failcnt;
 
-	  if (!(ne->flags & MATURE_ENTRY)) {
-	    newEst = (250UL * ne->rcvcnt) / totalPkt;
-	    ne->inquality = newEst;
-	    ne->etx =
-	      computeETX(ne->inquality);
-	  }
+          if (!(ne->flags & MATURE_ENTRY)) {
+            newEst = (250UL * ne->rcvcnt) / totalPkt;
+            ne->inquality = newEst;
+            ne->etx =
+              computeETX(ne->inquality);
+          }
 
-	  ne->flags |= MATURE_ENTRY;
-	  dbg("LI", "MinPkt: %d, totalPkt: %d\n", minPkt, totalPkt);
-	  newEst = (250UL * ne->rcvcnt) / totalPkt;
-	  dbg("LI,LITest", "  %hu: %hhu -> %hhu", ne->ll_addr, ne->inquality, (ALPHA * ne->inquality + (10-ALPHA) * newEst)/10);
-	  ne->inquality = (ALPHA * ne->inquality + (10-ALPHA) * newEst)/10;
-	  ne->rcvcnt = 0;
-	  ne->failcnt = 0;
-	  updateETX(ne, computeETX(ne->inquality));
-	} else {
-	  dbg("LI", " - entry %i is invalid.\n", (int)i);
-	}
+          ne->flags |= MATURE_ENTRY;
+          dbg("LI", "MinPkt: %d, totalPkt: %d\n", minPkt, totalPkt);
+          newEst = (250UL * ne->rcvcnt) / totalPkt;
+          dbg("LI,LITest", "  %hu: %hhu -> %hhu", ne->ll_addr, ne->inquality, (ALPHA * ne->inquality + (10-ALPHA) * newEst)/10);
+          ne->inquality = (ALPHA * ne->inquality + (10-ALPHA) * newEst)/10;
+          ne->rcvcnt = 0;
+          ne->failcnt = 0;
+          updateETX(ne, computeETX(ne->inquality));
+        } else {
+          dbg("LI", " - entry %u is invalid.\n", i);
+        }
       }
     }
   }
@@ -371,7 +366,7 @@ implementation {
     
     packetGap = seq - NeighborTable[idx].lastseq;
     dbg("LI", "updateNeighborEntryIdx: prevseq %d, curseq %d, gap %d\n",
-	NeighborTable[idx].lastseq, seq, packetGap);
+        NeighborTable[idx].lastseq, seq, packetGap);
     NeighborTable[idx].lastseq = seq;
     NeighborTable[idx].rcvcnt++;
     if (packetGap > 0) {
@@ -383,7 +378,7 @@ implementation {
       NeighborTable[idx].lastseq = seq;
       NeighborTable[idx].rcvcnt = 1;
     } else if (((NeighborTable[idx].rcvcnt + NeighborTable[idx].failcnt) >= BLQ_PKT_WINDOW)
-	       || (packetGap >= BLQ_PKT_WINDOW)) {
+               || (packetGap >= BLQ_PKT_WINDOW)) {
       updateNeighborTableEst(NeighborTable[idx].ll_addr);
     }
 
@@ -393,20 +388,23 @@ implementation {
 
   // print the neighbor table. for debugging.
   void print_neighbor_table() {
+#ifndef TOSSIM_NO_DEBUG
     uint8_t i;
     neighbor_table_entry_t *ne;
     for (i = 0; i < NEIGHBOR_TABLE_SIZE; i++) {
       ne = &NeighborTable[i];
       if (ne->flags & VALID_ENTRY) {
-	dbg("LI,LITest", "%d:%d inQ=%d, rcv=%d, fail=%d, Q=%d\n",
-	    i, ne->ll_addr, ne->inquality, 
-	    ne->rcvcnt, ne->failcnt, computeETX(ne->inquality));
+        dbg("LI,LITest", "%d:%d inQ=%d, rcv=%d, fail=%d, Q=%d\n",
+            i, ne->ll_addr, ne->inquality, 
+            ne->rcvcnt, ne->failcnt, computeETX(ne->inquality));
       }
     }
+#endif
   }
 
   // print the packet. for debugging.
   void print_packet(message_t* msg, uint8_t len) {
+#ifndef TOSSIM_NO_DEBUG
     uint8_t i;
     uint8_t* b;
 
@@ -414,6 +412,7 @@ implementation {
     for(i=0; i<len; i++)
       dbg_clear("LI", "%x ", b[i]);
     dbg_clear("LI", "\n");
+#endif
   }
 
   // initialize the neighbor table in the very beginning
@@ -449,9 +448,9 @@ implementation {
       return VERY_LARGE_ETX_VALUE;
     } else {
       if (NeighborTable[idx].flags & MATURE_ENTRY) {
-	return NeighborTable[idx].etx;
+        return NeighborTable[idx].etx;
       } else {
-	return VERY_LARGE_ETX_VALUE;
+        return VERY_LARGE_ETX_VALUE;
       }
     }
   }
@@ -475,11 +474,11 @@ implementation {
     } else {
       nidx = findWorstNeighborIdx(BEST_ETX);
       if (nidx != INVALID_RVAL) {
-	dbg("LI", "insert: inserted by replacing an entry for neighbor: %d\n",
-	    NeighborTable[nidx].ll_addr);
-	signal LinkEstimator.evicted(NeighborTable[nidx].ll_addr);
-	initNeighborIdx(nidx, neighbor);
-	return SUCCESS;
+        dbg("LI", "insert: inserted by replacing an entry for neighbor: %d\n",
+            NeighborTable[nidx].ll_addr);
+        signal LinkEstimator.evicted(NeighborTable[nidx].ll_addr);
+        initNeighborIdx(nidx, neighbor);
+        return SUCCESS;
       }
     }
     return FAIL;
@@ -621,42 +620,42 @@ implementation {
       //       we can not accommodate this neighbor in the table
       nidx = findIdx(ll_addr);
       if (nidx != INVALID_RVAL) {
-	dbg("LI", "Found the entry so updating\n");
-	updateNeighborEntryIdx(nidx, hdr->seq);
+        dbg("LI", "Found the entry so updating\n");
+        updateNeighborEntryIdx(nidx, hdr->seq);
       } else {
-	nidx = findEmptyNeighborIdx();
-	if (nidx != INVALID_RVAL) {
-	  dbg("LI", "Found an empty entry\n");
-	  initNeighborIdx(nidx, ll_addr);
-	  NeighborTable[nidx].lastseq = hdr->seq;
-	  updateNeighborEntryIdx(nidx, hdr->seq);
-	} else {
-	  nidx = findWorstNeighborIdx(EVICT_ETX_THRESHOLD);
-	  if (nidx != INVALID_RVAL) {
-	    dbg("LI", "Evicted neighbor %d at idx %d\n",
-		NeighborTable[nidx].ll_addr, nidx);
-	    signal LinkEstimator.evicted(NeighborTable[nidx].ll_addr);
-	    initNeighborIdx(nidx, ll_addr);
-	  } else {
-	    dbg("LI", "No room in the table\n");
+        nidx = findEmptyNeighborIdx();
+        if (nidx != INVALID_RVAL) {
+          dbg("LI", "Found an empty entry\n");
+          initNeighborIdx(nidx, ll_addr);
+          NeighborTable[nidx].lastseq = hdr->seq;
+          updateNeighborEntryIdx(nidx, hdr->seq);
+        } else {
+          nidx = findWorstNeighborIdx(EVICT_ETX_THRESHOLD);
+          if (nidx != INVALID_RVAL) {
+            dbg("LI", "Evicted neighbor %d at idx %d\n",
+                NeighborTable[nidx].ll_addr, nidx);
+            signal LinkEstimator.evicted(NeighborTable[nidx].ll_addr);
+            initNeighborIdx(nidx, ll_addr);
+          } else {
+            dbg("LI", "No room in the table\n");
 
-	    /* if the white bit is set, lets ask the router if the path through
-	       this link is better than at least one known path - if so
-	       lets insert this link into the table.
-	    */
-	    if (call LinkPacketMetadata.highChannelQuality(msg)) {
-	      if (signal CompareBit.shouldInsert(msg, 
-						 call Packet.getPayload(msg, call Packet.payloadLength(msg)),
-						 call Packet.payloadLength(msg))) {
-		nidx = findRandomNeighborIdx();
-		if (nidx != INVALID_RVAL) {
-		  signal LinkEstimator.evicted(NeighborTable[nidx].ll_addr);
-		  initNeighborIdx(nidx, ll_addr);
-		}
-	      }
-	    }
-	  }
-	}
+            /* if the white bit is set, lets ask the router if the path through
+               this link is better than at least one known path - if so
+               lets insert this link into the table.
+            */
+            if (call LinkPacketMetadata.highChannelQuality(msg)) {
+              if (signal CompareBit.shouldInsert(msg, 
+                                                 call Packet.getPayload(msg, call Packet.payloadLength(msg)),
+                                                 call Packet.payloadLength(msg))) {
+                nidx = findRandomNeighborIdx();
+                if (nidx != INVALID_RVAL) {
+                  signal LinkEstimator.evicted(NeighborTable[nidx].ll_addr);
+                  initNeighborIdx(nidx, ll_addr);
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -666,13 +665,13 @@ implementation {
   // and footer in the message
   // then signal the user of this component
   event message_t* SubReceive.receive(message_t* msg,
-				      void* payload,
-				      uint8_t len) {
+                                      void* payload,
+                                      uint8_t len) {
     dbg("LI", "Received upper packet. Will signal up\n");
     processReceivedMessage(msg, payload, len);
     return signal Receive.receive(msg,
-				  call Packet.getPayload(msg, call Packet.payloadLength(msg)),
-				  call Packet.payloadLength(msg));
+                                  call Packet.getPayload(msg, call Packet.payloadLength(msg)),
+                                  call Packet.payloadLength(msg));
   }
 
   command void Packet.clear(message_t* msg) {
@@ -695,9 +694,9 @@ implementation {
     linkest_header_t *hdr;
     hdr = getHeader(msg);
     call SubPacket.setPayloadLength(msg,
-				    len
-				    + sizeof(linkest_header_t)
-				    + sizeof(linkest_footer_t)*(NUM_ENTRIES_FLAG & hdr->flags));
+                                    len
+                                    + sizeof(linkest_header_t)
+                                    + sizeof(linkest_footer_t)*(NUM_ENTRIES_FLAG & hdr->flags));
   }
 
   command uint8_t Packet.maxPayloadLength() {
@@ -706,7 +705,7 @@ implementation {
 
   // application payload pointer is just past the link estimation header
   command void* Packet.getPayload(message_t* msg, uint8_t len) {
-    void* payload = call SubPacket.getPayload(msg, len + sizeof(linkest_header_t));
+    char* payload = (char*)call SubPacket.getPayload(msg, len + sizeof(linkest_header_t));
     if (payload != NULL) {
       payload += sizeof(linkest_header_t);
     }
