@@ -52,14 +52,14 @@
 
 class Radio {
  public:
-  Radio();
-  ~Radio();
+  Radio() = default;
+  ~Radio() = default;
 
-  void add(int src, int dest, double gain);
-  double gain(int src, int dest);
-  bool connected(int src, int dest);
-  void remove(int src, int dest);
-  void setNoise(int node, double mean, double range);
-  void setSensitivity(double sensitivity);   
+  void add(int src, int dest, double gain) noexcept;
+  double gain(int src, int dest) noexcept;
+  bool connected(int src, int dest) noexcept;
+  void remove(int src, int dest) noexcept;
+  void setNoise(int node, double mean, double range) noexcept;
+  void setSensitivity(double sensitivity) noexcept;   
 };
 
