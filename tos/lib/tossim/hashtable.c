@@ -219,7 +219,14 @@ hashtable_destroy(struct hashtable *h, void (*free_value)(void*))
 {
     unsigned int i;
     struct entry *e, *f;
-    struct entry **table = h->table;
+    struct entry **table;
+
+    if (h == NULL)
+    {
+        return;
+    }
+
+    table = h->table;
 
     for (i = 0; i < h->tablelength; i++)
     {
