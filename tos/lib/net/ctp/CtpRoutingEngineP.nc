@@ -441,7 +441,7 @@ implementation {
          post updateRouteTask();
       }
     }
-      
+
     event void BeaconTimer.fired() {
       if (radioOn && running) {
         if (!tHasPassed) {

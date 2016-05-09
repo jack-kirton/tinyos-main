@@ -115,7 +115,7 @@ interface Timer<precision_tag>
 
   /**
    * Set a single-short timer to time t0+dt. Replaces any current timer
-   * settings. The <code>fired</code> will be signaled when the timer
+   * settings. The <code>fired</code> will be signalled when the timer
    * expires. Timers set in the past will fire "soon".
    *
    * <p>Because the current time may wrap around, it is possible to use

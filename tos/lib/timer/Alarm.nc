@@ -59,7 +59,7 @@ interface Alarm<precision_tag, size_type>
   /**
    * Set a single-short alarm to some time units in the future. Replaces
    * any current alarm time. Equivalent to start(getNow(), dt). The
-   * <code>fired</code> will be signaled when the alarm expires.
+   * <code>fired</code> will be signalled when the alarm expires.
    *
    * @param dt Time until the alarm fires.
    */
@@ -67,20 +67,20 @@ interface Alarm<precision_tag, size_type>
 
   /**
    * Cancel an alarm. Note that the <code>fired</code> event may have
-   * already been signaled (even if your code has not yet started
+   * already been signalled (even if your code has not yet started
    * executing).
    */
   async command void stop();
 
   /**
-   * Signaled when the alarm expires.
+   * Signalled when the alarm expires.
    */
   async event void fired();
 
   // extended interface
   /**
    * Check if alarm is running. Note that a FALSE return does not indicate
-   * that the <code>fired</code> event will not be signaled (it may have
+   * that the <code>fired</code> event will not be signalled (it may have
    * already started executing, but not reached your code yet).
    *
    * @return TRUE if the alarm is still running.
