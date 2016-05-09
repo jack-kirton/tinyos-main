@@ -110,7 +110,7 @@ static int tossim_hash_eq(const void* key1, const void* key2) {
 
 variable_string_t Variable::getData() {
   variable_string_t str;
-  if (data != NULL && ptr != NULL) {
+  if (data != nullptr && ptr != nullptr) {
     str.ptr = data;
     str.type = format;
     str.len = len;
