@@ -1,2 +1,6 @@
 *.pyo
 *.pyc
+*.so
+simbuild
+app.xml
+
