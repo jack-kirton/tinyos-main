@@ -59,6 +59,8 @@
 
 uint16_t TOS_NODE_ID = 1;
 
+static bool python_event_called = false;
+
 Variable::Variable(const char* name, const char* formatStr, bool array, int which) {
   format = strdup(formatStr);
   isArray = array;
@@ -332,6 +334,8 @@ static void handle_python_event(void* void_event)
 
   // Set to NULL to avoid a double free from TOSSIM trying to clean up the sim event
   event->data = NULL;
+
+  python_event_called = false;
 }
 
 void Tossim::register_event_callback(std::function<bool(double)> callback, double event_time) {
@@ -347,7 +351,7 @@ bool Tossim::runNextEvent() {
 }
 
 unsigned int Tossim::runAllEvents(std::function<bool(double)> continue_events, std::function<void (unsigned int)> callback) {
-  int event_count = 0;
+  unsigned int event_count = 0;
   while (continue_events(timeInSeconds()))
   {
     if (!runNextEvent())
@@ -367,10 +371,16 @@ unsigned int Tossim::runAllEvents(std::function<bool(double)> continue_events, s
 }
 
 unsigned int Tossim::runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events, std::function<void (unsigned int)> callback) {
-  int event_count = 0;
+  const long long int end_time_ticks = (long long int)ceil(end_time * ticksPerSecond());
+  unsigned int event_count = 0;
   bool process_callback = true;
-  while (timeInSeconds() < end_time && (!process_callback || continue_events()))
+
+  // We can skip calling the continue_events predicate if no log info was outputted, or no python callback occurred
+  while (sim_time() < end_time_ticks && ((!process_callback && !python_event_called) || continue_events()))
   {
+    // Reset the python event called flag as we have no handled it
+    python_event_called = false;
+
     if (!runNextEvent())
     {
       break;
