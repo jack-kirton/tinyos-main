@@ -418,7 +418,7 @@ char sim_noise_generate(uint16_t node_id, uint32_t cur_t)__attribute__ ((C, spon
     return 127;
   }
   
-  if (0 <= cur_t && cur_t < NOISE_HISTORY) {
+  if (/*0U <= cur_t &&*/ cur_t < NOISE_HISTORY) {
     noiseData[node_id].noiseGenTime = cur_t;
     noiseData[node_id].key[cur_t] = search_bin_num(noiseData[node_id].noiseTrace[cur_t]);
     noiseData[node_id].lastNoiseVal = noiseData[node_id].noiseTrace[cur_t];
