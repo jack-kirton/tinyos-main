@@ -51,6 +51,7 @@
 #include <hashtable.h>
 
 #include <functional>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -61,12 +62,21 @@ typedef struct variable_string {
   bool isArray;
 } variable_string_t;
 
-typedef struct nesc_app {
-  unsigned int numVariables;
-  const char** variableNames;
-  const char** variableTypes;
-  bool* variableArray;
-} nesc_app_t;
+class NescApp {
+public:
+    NescApp(unsigned int size)
+        : numVariables(size)
+        , variableNames(size)
+        , variableTypes(size)
+        , variableArray(size)
+    {
+    }
+
+    unsigned int numVariables;
+    std::vector<std::string> variableNames;
+    std::vector<std::string> variableTypes;
+    std::vector<bool> variableArray;
+};
 
 class Variable {
  public:
@@ -89,7 +99,7 @@ class Variable {
 
 class Mote {
  public:
-  Mote(nesc_app_t* app);
+  Mote(const NescApp* app);
   ~Mote();
 
   unsigned long id() noexcept;
@@ -113,13 +123,13 @@ class Mote {
   
  private:
   unsigned long nodeID;
-  nesc_app_t* app;
+  const NescApp* app;
   std::unordered_map<std::string, Variable*> varTable;
 };
 
 class Tossim {
  public:
-  Tossim(nesc_app_t* app);
+  Tossim(const NescApp* app);
   ~Tossim();
   
   void init();
@@ -152,7 +162,7 @@ private:
   void free_motes();
 
  private:
-  nesc_app_t* app;
+  std::unique_ptr<const NescApp> app;
   std::vector<Mote*> motes;
   char timeBuf[128];
 };

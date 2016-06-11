@@ -148,23 +148,23 @@ void sim_gain_remove(int src, int dest) __attribute__ ((C, spontaneous))  {
 }
 
 void sim_gain_set_noise_floor(int node, double mean, double range) __attribute__ ((C, spontaneous))  {
-  if (node > TOSSIM_MAX_NODES) {
-    node = TOSSIM_MAX_NODES;
+  if (node >= TOSSIM_MAX_NODES) {
+    return;
   }
   localNoise[node].mean = mean;
   localNoise[node].range = range;
 }
 
 double sim_gain_noise_mean(int node) {
-  if (node > TOSSIM_MAX_NODES) {
-    node = TOSSIM_MAX_NODES;
+  if (node >= TOSSIM_MAX_NODES) {
+    return NAN;
   }
   return localNoise[node].mean;
 }
 
 double sim_gain_noise_range(int node) {
-  if (node > TOSSIM_MAX_NODES) {
-    node = TOSSIM_MAX_NODES;
+  if (node >= TOSSIM_MAX_NODES) {
+    return NAN;
   }
   return localNoise[node].range;
 }
@@ -173,8 +173,8 @@ double sim_gain_noise_range(int node) {
 // [mean-range, mean+range].
 double sim_gain_sample_noise(int node)  __attribute__ ((C, spontaneous)) {
   double val, adjust;
-  if (node > TOSSIM_MAX_NODES) {
-    node = TOSSIM_MAX_NODES;
+  if (node >= TOSSIM_MAX_NODES) {
+    return NAN;
   } 
   val = localNoise[node].mean;
   adjust = (sim_random() % 2000000);

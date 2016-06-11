@@ -74,8 +74,8 @@ Variable::Variable(const std::string& name, const char* formatStr, bool array, i
     data[len] = 0;
   }
   else {
-    data = NULL;
-    ptr = NULL;
+    data = nullptr;
+    ptr = nullptr;
   }
 }
 
@@ -109,7 +109,7 @@ variable_string_t Variable::getData() {
   return str;
 }
 
-Mote::Mote(nesc_app_t* n) : app(n) {
+Mote::Mote(const NescApp* n) : app(n) {
 }
 
 Mote::~Mote(){
@@ -169,10 +169,10 @@ Variable* Mote::getVariable(const char* name_cstr) {
     // Could hash this for greater efficiency,
     // but that would either require transformation
     // in Tossim class or a more complex typemap.
-    if (app != NULL) {
+    if (app != nullptr) {
       for (unsigned int i = 0; i < app->numVariables; i++) {
         if (name == app->variableNames[i]) {
-          typeStr = app->variableTypes[i];
+          typeStr = app->variableTypes[i].c_str();
           isArray = app->variableArray[i];
           break;
         }
@@ -202,9 +202,9 @@ int Mote::generateNoise(int when) {
   return static_cast<int>(sim_noise_generate(nodeID, when));
 }
 
-Tossim::Tossim(nesc_app_t* n)
-  : app(n)
-  , motes(TOSSIM_MAX_NODES, NULL)
+Tossim::Tossim(const NescApp* n)
+  : app(n) // Take ownership
+  , motes(TOSSIM_MAX_NODES, nullptr)
 {
   init();
 }
@@ -254,11 +254,11 @@ Mote* Tossim::currentNode() noexcept {
 Mote* Tossim::getNode(unsigned long nodeID) noexcept {
   if (nodeID >= TOSSIM_MAX_NODES) {
     // TODO: log an error, asked for an invalid node
-    return NULL;
+    return nullptr;
   }
   else {
-    if (motes[nodeID] == NULL) {
-      motes[nodeID] = new Mote(app);
+    if (motes[nodeID] == nullptr) {
+      motes[nodeID] = new Mote(app.get());
       if (nodeID == TOSSIM_MAX_NODES) {
         motes[nodeID]->setID(0xffff);
       }
@@ -308,8 +308,8 @@ static void handle_python_event(void* void_event)
 
   delete data;
 
-  // Set to NULL to avoid a double free from TOSSIM trying to clean up the sim event
-  event->data = NULL;
+  // Set to nullptr to avoid a double free from TOSSIM trying to clean up the sim event
+  event->data = nullptr;
 
   python_event_called = false;
 }

@@ -264,41 +264,35 @@ FILE* object_to_file(PyObject* o)
 
 %{
 // TODO: Fix the memory leak introduced here  by strdup
-bool fill_nesc_app(nesc_app_t* app, int i, PyObject* name, PyObject* array, PyObject* format)
+bool fill_nesc_app(NescApp* app, int i, PyObject* name, PyObject* array, PyObject* format)
 {
 #if PY_VERSION_HEX < 0x03000000
-    if (PyString_Check(name) && PyString_Check(format)) {
-        app->variableNames[i] = strdup(PyString_AsString(name));
-        app->variableTypes[i] = strdup(PyString_AsString(format));
+    if (PyString_Check(name) && PyString_Check(format) && PyString_Check(array)) {
+        app->variableNames[i] = PyString_AsString(name);
+        app->variableTypes[i] = PyString_AsString(format);
         app->variableArray[i] = (strcmp(PyString_AsString(array), "array") == 0);
 
         return true;
     }
     else {
-        free(app->variableNames);
-        free(app->variableTypes);
-        free(app->variableArray);
-        free(app);
         PyErr_SetString(PyExc_RuntimeError, "bad string");
         return false;
     }
 #else
-    if (PyUnicode_Check(name) && PyUnicode_Check(format)) {
+    if (PyUnicode_Check(name) && PyUnicode_Check(format) && PyUnicode_Check(array)) {
 
         PyObject* name_ascii = PyUnicode_AsASCIIString(name);
         PyObject* format_ascii = PyUnicode_AsASCIIString(format);
+        PyObject* array_ascii = PyUnicode_AsASCIIString(array);
 
-        app->variableNames[i] = strdup(PyBytes_AsString(name_ascii));
-        app->variableTypes[i] = strdup(PyBytes_AsString(format_ascii));
+        app->variableNames[i] = PyBytes_AsString(name_ascii);
+        app->variableTypes[i] = PyBytes_AsString(format_ascii);
+        app->variableArray[i] = (strcmp(PyBytes_AsString(array_ascii), "array") == 0);
 
         Py_DECREF(name_ascii);
         Py_DECREF(format_ascii);
-
-        PyObject* array_ascii = PyUnicode_AsASCIIString(array);
-        
-        app->variableArray[i] = (strcmp(PyBytes_AsString(array_ascii), "array") == 0);
-
         Py_DECREF(array_ascii);
+        
         return true;
     }
     else {
@@ -310,38 +304,30 @@ bool fill_nesc_app(nesc_app_t* app, int i, PyObject* name, PyObject* array, PyOb
 
 %}
 
-%typemap(in) nesc_app_t* {
+%typemap(in) NescApp* {
     if (!PyList_Check($input)) {
         PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
         return NULL;
     }
     else {
         Py_ssize_t size = PyList_Size($input);
-        unsigned int i = 0;
-        nesc_app_t* app;
+        Py_ssize_t i = 0;
+        NescApp* app;
 
         if (size < 0 || size % 3 != 0) {
-            PyErr_SetString(PyExc_RuntimeError, "List must have 2*N elements.");
+            PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
             return NULL;
         }
 
-        app = (nesc_app_t*)malloc(sizeof(nesc_app_t));
-
-        app->numVariables = static_cast<unsigned int>(size) / 3;
-        app->variableNames = (const char**)malloc(app->numVariables * sizeof(char*));
-        app->variableTypes = (const char**)malloc(app->numVariables * sizeof(char*));
-        app->variableArray = (bool*)malloc(app->numVariables * sizeof(bool));
+        app = new NescApp(static_cast<unsigned int>(size) / 3);
 
         for (i = 0; i < app->numVariables; i++) {
-            PyObject* name = PyList_GetItem($input, 3 * i);
-            PyObject* array = PyList_GetItem($input, (3 * i) + 1);
-            PyObject* format = PyList_GetItem($input, (3 * i) + 2);
+            PyObject* name = PyList_GET_ITEM($input, 3 * i);
+            PyObject* array = PyList_GET_ITEM($input, (3 * i) + 1);
+            PyObject* format = PyList_GET_ITEM($input, (3 * i) + 2);
             if (!fill_nesc_app(app, i, name, array, format))
             {
-                free(app->variableNames);
-                free(app->variableTypes);
-                free(app->variableArray);
-                free(app);
+                delete app;
                 return NULL;
             }
         }
@@ -358,12 +344,21 @@ typedef struct variable_string {
     bool isArray;
 } variable_string_t;
 
-typedef struct nesc_app {
+class NescApp {
+public:
+    NescApp(unsigned int size)
+        : numVariables(size)
+        , variableNames(size)
+        , variableTypes(size)
+        , variableArray(size)
+    {
+    }
+
     unsigned int numVariables;
-    const char** variableNames;
-    const char** variableTypes;
-    bool* variableArray;
-} nesc_app_t;
+    std::vector<std::string> variableNames;
+    std::vector<std::string> variableTypes;
+    std::vector<bool> variableArray;
+};
 
 class Variable {
  public:
@@ -374,7 +369,7 @@ class Variable {
 
 class Mote {
  public:
-    Mote(nesc_app_t* app);
+    Mote(const NescApp* app);
     ~Mote();
 
     unsigned long id();
@@ -436,7 +431,7 @@ class Mote {
 
 class Tossim {
  public:
-    Tossim(nesc_app_t* app);
+    Tossim(const NescApp* app);
     ~Tossim();
     
     void init();

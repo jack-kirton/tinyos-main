@@ -47,16 +47,16 @@ class MAC {
 
   int initHigh();
   int initLow();
-  int high();
-  int low();
-  int symbolsPerSec();
-  int bitsPerSymbol();
-  int preambleLength(); // in symbols
-  int exponentBase();
-  int maxIterations();
-  int minFreeSamples();
-  int rxtxDelay();
-  int ackTime(); // in symbols
+  int high() const;
+  int low() const;
+  int symbolsPerSec() const;
+  int bitsPerSymbol() const;
+  int preambleLength() const; // in symbols
+  int exponentBase() const;
+  int maxIterations() const;
+  int minFreeSamples() const;
+  int rxtxDelay() const;
+  int ackTime() const; // in symbols
   
   void setInitHigh(int val);
   void setInitLow(int val);

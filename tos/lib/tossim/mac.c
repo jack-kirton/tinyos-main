@@ -45,16 +45,16 @@ MAC::~MAC() {}
 
 int MAC::initHigh() {return sim_csma_init_high();}
 int MAC::initLow() {return sim_csma_init_low();}
-int MAC::high() {return sim_csma_high();}
-int MAC::low() {return sim_csma_low();}
-int MAC::symbolsPerSec() {return sim_csma_symbols_per_sec();}
-int MAC::bitsPerSymbol() {return sim_csma_bits_per_symbol();}
-int MAC::preambleLength() {return sim_csma_preamble_length();}
-int MAC::exponentBase() {return sim_csma_exponent_base();}
-int MAC::maxIterations() {return sim_csma_max_iterations();}
-int MAC::minFreeSamples() {return sim_csma_min_free_samples();}
-int MAC::rxtxDelay() {return sim_csma_rxtx_delay();}
-int MAC::ackTime() {return sim_csma_ack_time();}
+int MAC::high() const {return sim_csma_high();}
+int MAC::low() const {return sim_csma_low();}
+int MAC::symbolsPerSec() const {return sim_csma_symbols_per_sec();}
+int MAC::bitsPerSymbol() const {return sim_csma_bits_per_symbol();}
+int MAC::preambleLength() const {return sim_csma_preamble_length();}
+int MAC::exponentBase() const {return sim_csma_exponent_base();}
+int MAC::maxIterations() const {return sim_csma_max_iterations();}
+int MAC::minFreeSamples() const {return sim_csma_min_free_samples();}
+int MAC::rxtxDelay() const {return sim_csma_rxtx_delay();}
+int MAC::ackTime() const {return sim_csma_ack_time();}
 
 void MAC::setInitHigh(int val) {sim_csma_set_init_high(val);}
 void MAC::setInitLow(int val) {sim_csma_set_init_low(val);}

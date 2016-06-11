@@ -3545,18 +3545,18 @@ SwigPyBuiltin_SetMetaType (PyTypeObject *type, PyTypeObject *metatype)
 #define SWIGTYPE_p_FILE swig_types[0]
 #define SWIGTYPE_p_MAC swig_types[1]
 #define SWIGTYPE_p_Mote swig_types[2]
-#define SWIGTYPE_p_Packet swig_types[3]
-#define SWIGTYPE_p_Radio swig_types[4]
-#define SWIGTYPE_p_SwigPyObject swig_types[5]
-#define SWIGTYPE_p_Tossim swig_types[6]
-#define SWIGTYPE_p_Variable swig_types[7]
-#define SWIGTYPE_p_bool swig_types[8]
+#define SWIGTYPE_p_NescApp swig_types[3]
+#define SWIGTYPE_p_Packet swig_types[4]
+#define SWIGTYPE_p_Radio swig_types[5]
+#define SWIGTYPE_p_SwigPyObject swig_types[6]
+#define SWIGTYPE_p_Tossim swig_types[7]
+#define SWIGTYPE_p_Variable swig_types[8]
 #define SWIGTYPE_p_char swig_types[9]
-#define SWIGTYPE_p_nesc_app swig_types[10]
-#define SWIGTYPE_p_p_char swig_types[11]
-#define SWIGTYPE_p_std__functionT_bool_fF_t swig_types[12]
-#define SWIGTYPE_p_std__functionT_bool_fdoubleF_t swig_types[13]
-#define SWIGTYPE_p_std__functionT_void_funsigned_intF_t swig_types[14]
+#define SWIGTYPE_p_std__functionT_bool_fF_t swig_types[10]
+#define SWIGTYPE_p_std__functionT_bool_fdoubleF_t swig_types[11]
+#define SWIGTYPE_p_std__functionT_void_funsigned_intF_t swig_types[12]
+#define SWIGTYPE_p_std__vectorT_bool_t swig_types[13]
+#define SWIGTYPE_p_std__vectorT_std__string_t swig_types[14]
 #define SWIGTYPE_p_variable_string swig_types[15]
 #define SWIGTYPE_p_void swig_types[16]
 static swig_type_info *swig_types[18];
@@ -4236,41 +4236,35 @@ SWIG_AsVal_long_SS_long (PyObject *obj, long long *val)
 
 
 // TODO: Fix the memory leak introduced here  by strdup
-bool fill_nesc_app(nesc_app_t* app, int i, PyObject* name, PyObject* array, PyObject* format)
+bool fill_nesc_app(NescApp* app, int i, PyObject* name, PyObject* array, PyObject* format)
 {
 #if PY_VERSION_HEX < 0x03000000
-    if (PyString_Check(name) && PyString_Check(format)) {
-        app->variableNames[i] = strdup(PyString_AsString(name));
-        app->variableTypes[i] = strdup(PyString_AsString(format));
+    if (PyString_Check(name) && PyString_Check(format) && PyString_Check(array)) {
+        app->variableNames[i] = PyString_AsString(name);
+        app->variableTypes[i] = PyString_AsString(format);
         app->variableArray[i] = (strcmp(PyString_AsString(array), "array") == 0);
 
         return true;
     }
     else {
-        free(app->variableNames);
-        free(app->variableTypes);
-        free(app->variableArray);
-        free(app);
         PyErr_SetString(PyExc_RuntimeError, "bad string");
         return false;
     }
 #else
-    if (PyUnicode_Check(name) && PyUnicode_Check(format)) {
+    if (PyUnicode_Check(name) && PyUnicode_Check(format) && PyUnicode_Check(array)) {
 
         PyObject* name_ascii = PyUnicode_AsASCIIString(name);
         PyObject* format_ascii = PyUnicode_AsASCIIString(format);
+        PyObject* array_ascii = PyUnicode_AsASCIIString(array);
 
-        app->variableNames[i] = strdup(PyBytes_AsString(name_ascii));
-        app->variableTypes[i] = strdup(PyBytes_AsString(format_ascii));
+        app->variableNames[i] = PyBytes_AsString(name_ascii);
+        app->variableTypes[i] = PyBytes_AsString(format_ascii);
+        app->variableArray[i] = (strcmp(PyBytes_AsString(array_ascii), "array") == 0);
 
         Py_DECREF(name_ascii);
         Py_DECREF(format_ascii);
-
-        PyObject* array_ascii = PyUnicode_AsASCIIString(array);
-        
-        app->variableArray[i] = (strcmp(PyBytes_AsString(array_ascii), "array") == 0);
-
         Py_DECREF(array_ascii);
+        
         return true;
     }
     else {
@@ -4510,10 +4504,10 @@ SWIGINTERN PyObject *_wrap_MAC_high(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"MAC_high",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_high" "', argument " "1"" of type '" "MAC *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_high" "', argument " "1"" of type '" "MAC const *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  result = (int)(arg1)->high();
+  result = (int)((MAC const *)arg1)->high();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -4532,10 +4526,10 @@ SWIGINTERN PyObject *_wrap_MAC_low(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"MAC_low",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_low" "', argument " "1"" of type '" "MAC *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_low" "', argument " "1"" of type '" "MAC const *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  result = (int)(arg1)->low();
+  result = (int)((MAC const *)arg1)->low();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -4554,10 +4548,10 @@ SWIGINTERN PyObject *_wrap_MAC_symbolsPerSec(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"MAC_symbolsPerSec",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_symbolsPerSec" "', argument " "1"" of type '" "MAC *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_symbolsPerSec" "', argument " "1"" of type '" "MAC const *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  result = (int)(arg1)->symbolsPerSec();
+  result = (int)((MAC const *)arg1)->symbolsPerSec();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -4576,10 +4570,10 @@ SWIGINTERN PyObject *_wrap_MAC_bitsPerSymbol(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"MAC_bitsPerSymbol",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_bitsPerSymbol" "', argument " "1"" of type '" "MAC *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_bitsPerSymbol" "', argument " "1"" of type '" "MAC const *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  result = (int)(arg1)->bitsPerSymbol();
+  result = (int)((MAC const *)arg1)->bitsPerSymbol();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -4598,10 +4592,10 @@ SWIGINTERN PyObject *_wrap_MAC_preambleLength(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"MAC_preambleLength",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_preambleLength" "', argument " "1"" of type '" "MAC *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_preambleLength" "', argument " "1"" of type '" "MAC const *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  result = (int)(arg1)->preambleLength();
+  result = (int)((MAC const *)arg1)->preambleLength();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -4620,10 +4614,10 @@ SWIGINTERN PyObject *_wrap_MAC_exponentBase(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"MAC_exponentBase",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_exponentBase" "', argument " "1"" of type '" "MAC *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_exponentBase" "', argument " "1"" of type '" "MAC const *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  result = (int)(arg1)->exponentBase();
+  result = (int)((MAC const *)arg1)->exponentBase();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -4642,10 +4636,10 @@ SWIGINTERN PyObject *_wrap_MAC_maxIterations(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"MAC_maxIterations",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_maxIterations" "', argument " "1"" of type '" "MAC *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_maxIterations" "', argument " "1"" of type '" "MAC const *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  result = (int)(arg1)->maxIterations();
+  result = (int)((MAC const *)arg1)->maxIterations();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -4664,10 +4658,10 @@ SWIGINTERN PyObject *_wrap_MAC_minFreeSamples(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"MAC_minFreeSamples",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_minFreeSamples" "', argument " "1"" of type '" "MAC *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_minFreeSamples" "', argument " "1"" of type '" "MAC const *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  result = (int)(arg1)->minFreeSamples();
+  result = (int)((MAC const *)arg1)->minFreeSamples();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -4686,10 +4680,10 @@ SWIGINTERN PyObject *_wrap_MAC_rxtxDelay(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"MAC_rxtxDelay",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_rxtxDelay" "', argument " "1"" of type '" "MAC *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_rxtxDelay" "', argument " "1"" of type '" "MAC const *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  result = (int)(arg1)->rxtxDelay();
+  result = (int)((MAC const *)arg1)->rxtxDelay();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -4708,10 +4702,10 @@ SWIGINTERN PyObject *_wrap_MAC_ackTime(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"MAC_ackTime",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_ackTime" "', argument " "1"" of type '" "MAC *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_ackTime" "', argument " "1"" of type '" "MAC const *""'"); 
   }
   arg1 = reinterpret_cast< MAC * >(argp1);
-  result = (int)(arg1)->ackTime();
+  result = (int)((MAC const *)arg1)->ackTime();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -6013,26 +6007,72 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_numVariables_set(PyObject *self, PyObject *args) {
+SWIGINTERN int _wrap_new_NescApp(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
-  nesc_app *arg1 = (nesc_app *) 0 ;
+  unsigned int arg1 ;
+  unsigned int val1 ;
+  int ecode1 = 0 ;
+  PyObject *swig_obj[1] ;
+  NescApp *result = 0 ;
+  
+  if (!SWIG_Python_UnpackTuple(args,"new_NescApp",1,1,swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_unsigned_SS_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_NescApp" "', argument " "1"" of type '" "unsigned int""'");
+  } 
+  arg1 = static_cast< unsigned int >(val1);
+  result = (NescApp *)new NescApp(arg1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_NescApp, SWIG_BUILTIN_INIT |  0 );
+  return resultobj == Py_None ? -1 : 0;
+fail:
+  return -1;
+}
+
+
+SWIGINTERN PyObject *_wrap_NescApp_numVariables_set(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  NescApp *arg1 = (NescApp *) 0 ;
   unsigned int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
   unsigned int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_numVariables_set" "', argument " "1"" of type '" "nesc_app *""'"); 
+  {
+    if (!PyList_Check(self)) {
+      PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
+      return NULL;
+    }
+    else {
+      Py_ssize_t size = PyList_Size(self);
+      Py_ssize_t i = 0;
+      NescApp* app;
+      
+      if (size < 0 || size % 3 != 0) {
+        PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
+        return NULL;
+      }
+      
+      app = new NescApp(static_cast<unsigned int>(size) / 3);
+      
+      for (i = 0; i < app->numVariables; i++) {
+        PyObject* name = PyList_GET_ITEM(self, 3 * i);
+        PyObject* array = PyList_GET_ITEM(self, (3 * i) + 1);
+        PyObject* format = PyList_GET_ITEM(self, (3 * i) + 2);
+        if (!fill_nesc_app(app, i, name, array, format))
+        {
+          delete app;
+          return NULL;
+        }
+      }
+      
+      arg1 = app;
+    }
   }
-  arg1 = reinterpret_cast< nesc_app * >(argp1);
   ecode2 = SWIG_AsVal_unsigned_SS_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "nesc_app_t_numVariables_set" "', argument " "2"" of type '" "unsigned int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "NescApp_numVariables_set" "', argument " "2"" of type '" "unsigned int""'");
   } 
   arg2 = static_cast< unsigned int >(val2);
   if (arg1) (arg1)->numVariables = arg2;
@@ -6043,20 +6083,44 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_numVariables_get(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_NescApp_numVariables_get(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
-  nesc_app *arg1 = (nesc_app *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
+  NescApp *arg1 = (NescApp *) 0 ;
   PyObject *swig_obj[1] ;
   unsigned int result;
   
-  if (!SWIG_Python_UnpackTuple(args,"nesc_app_t_numVariables_get",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_numVariables_get" "', argument " "1"" of type '" "nesc_app *""'"); 
+  if (!SWIG_Python_UnpackTuple(args,"NescApp_numVariables_get",0,0,0)) SWIG_fail;
+  {
+    if (!PyList_Check(self)) {
+      PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
+      return NULL;
+    }
+    else {
+      Py_ssize_t size = PyList_Size(self);
+      Py_ssize_t i = 0;
+      NescApp* app;
+      
+      if (size < 0 || size % 3 != 0) {
+        PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
+        return NULL;
+      }
+      
+      app = new NescApp(static_cast<unsigned int>(size) / 3);
+      
+      for (i = 0; i < app->numVariables; i++) {
+        PyObject* name = PyList_GET_ITEM(self, 3 * i);
+        PyObject* array = PyList_GET_ITEM(self, (3 * i) + 1);
+        PyObject* format = PyList_GET_ITEM(self, (3 * i) + 2);
+        if (!fill_nesc_app(app, i, name, array, format))
+        {
+          delete app;
+          return NULL;
+        }
+      }
+      
+      arg1 = app;
+    }
   }
-  arg1 = reinterpret_cast< nesc_app * >(argp1);
   result = (unsigned int) ((arg1)->numVariables);
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
@@ -6065,29 +6129,61 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_variableNames_set(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_NescApp_variableNames_set(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
-  nesc_app *arg1 = (nesc_app *) 0 ;
-  char **arg2 = (char **) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
+  NescApp *arg1 = (NescApp *) 0 ;
+  std::vector< std::string > arg2 ;
+  void *argp2 ;
   int res2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_variableNames_set" "', argument " "1"" of type '" "nesc_app *""'"); 
+  {
+    if (!PyList_Check(self)) {
+      PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
+      return NULL;
+    }
+    else {
+      Py_ssize_t size = PyList_Size(self);
+      Py_ssize_t i = 0;
+      NescApp* app;
+      
+      if (size < 0 || size % 3 != 0) {
+        PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
+        return NULL;
+      }
+      
+      app = new NescApp(static_cast<unsigned int>(size) / 3);
+      
+      for (i = 0; i < app->numVariables; i++) {
+        PyObject* name = PyList_GET_ITEM(self, 3 * i);
+        PyObject* array = PyList_GET_ITEM(self, (3 * i) + 1);
+        PyObject* format = PyList_GET_ITEM(self, (3 * i) + 2);
+        if (!fill_nesc_app(app, i, name, array, format))
+        {
+          delete app;
+          return NULL;
+        }
+      }
+      
+      arg1 = app;
+    }
   }
-  arg1 = reinterpret_cast< nesc_app * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[0], &argp2,SWIGTYPE_p_p_char, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "nesc_app_t_variableNames_set" "', argument " "2"" of type '" "char const **""'"); 
+  {
+    res2 = SWIG_ConvertPtr(swig_obj[0], &argp2, SWIGTYPE_p_std__vectorT_std__string_t,  0  | 0);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "NescApp_variableNames_set" "', argument " "2"" of type '" "std::vector< std::string >""'"); 
+    }  
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "NescApp_variableNames_set" "', argument " "2"" of type '" "std::vector< std::string >""'");
+    } else {
+      std::vector< std::string > * temp = reinterpret_cast< std::vector< std::string > * >(argp2);
+      arg2 = *temp;
+      if (SWIG_IsNewObj(res2)) delete temp;
+    }
   }
-  arg2 = reinterpret_cast< char ** >(argp2);
-  if (arg1) (arg1)->variableNames = (char const **)arg2;
+  if (arg1) (arg1)->variableNames = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -6095,51 +6191,107 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_variableNames_get(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_NescApp_variableNames_get(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
-  nesc_app *arg1 = (nesc_app *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
+  NescApp *arg1 = (NescApp *) 0 ;
   PyObject *swig_obj[1] ;
-  char **result = 0 ;
+  std::vector< std::string > result;
   
-  if (!SWIG_Python_UnpackTuple(args,"nesc_app_t_variableNames_get",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_variableNames_get" "', argument " "1"" of type '" "nesc_app *""'"); 
+  if (!SWIG_Python_UnpackTuple(args,"NescApp_variableNames_get",0,0,0)) SWIG_fail;
+  {
+    if (!PyList_Check(self)) {
+      PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
+      return NULL;
+    }
+    else {
+      Py_ssize_t size = PyList_Size(self);
+      Py_ssize_t i = 0;
+      NescApp* app;
+      
+      if (size < 0 || size % 3 != 0) {
+        PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
+        return NULL;
+      }
+      
+      app = new NescApp(static_cast<unsigned int>(size) / 3);
+      
+      for (i = 0; i < app->numVariables; i++) {
+        PyObject* name = PyList_GET_ITEM(self, 3 * i);
+        PyObject* array = PyList_GET_ITEM(self, (3 * i) + 1);
+        PyObject* format = PyList_GET_ITEM(self, (3 * i) + 2);
+        if (!fill_nesc_app(app, i, name, array, format))
+        {
+          delete app;
+          return NULL;
+        }
+      }
+      
+      arg1 = app;
+    }
   }
-  arg1 = reinterpret_cast< nesc_app * >(argp1);
-  result = (char **) ((arg1)->variableNames);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p_char, 0 |  0 );
+  result =  ((arg1)->variableNames);
+  resultobj = SWIG_NewPointerObj((new std::vector< std::string >(static_cast< const std::vector< std::string >& >(result))), SWIGTYPE_p_std__vectorT_std__string_t, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_variableTypes_set(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_NescApp_variableTypes_set(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
-  nesc_app *arg1 = (nesc_app *) 0 ;
-  char **arg2 = (char **) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
+  NescApp *arg1 = (NescApp *) 0 ;
+  std::vector< std::string > arg2 ;
+  void *argp2 ;
   int res2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_variableTypes_set" "', argument " "1"" of type '" "nesc_app *""'"); 
+  {
+    if (!PyList_Check(self)) {
+      PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
+      return NULL;
+    }
+    else {
+      Py_ssize_t size = PyList_Size(self);
+      Py_ssize_t i = 0;
+      NescApp* app;
+      
+      if (size < 0 || size % 3 != 0) {
+        PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
+        return NULL;
+      }
+      
+      app = new NescApp(static_cast<unsigned int>(size) / 3);
+      
+      for (i = 0; i < app->numVariables; i++) {
+        PyObject* name = PyList_GET_ITEM(self, 3 * i);
+        PyObject* array = PyList_GET_ITEM(self, (3 * i) + 1);
+        PyObject* format = PyList_GET_ITEM(self, (3 * i) + 2);
+        if (!fill_nesc_app(app, i, name, array, format))
+        {
+          delete app;
+          return NULL;
+        }
+      }
+      
+      arg1 = app;
+    }
   }
-  arg1 = reinterpret_cast< nesc_app * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[0], &argp2,SWIGTYPE_p_p_char, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "nesc_app_t_variableTypes_set" "', argument " "2"" of type '" "char const **""'"); 
+  {
+    res2 = SWIG_ConvertPtr(swig_obj[0], &argp2, SWIGTYPE_p_std__vectorT_std__string_t,  0  | 0);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "NescApp_variableTypes_set" "', argument " "2"" of type '" "std::vector< std::string >""'"); 
+    }  
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "NescApp_variableTypes_set" "', argument " "2"" of type '" "std::vector< std::string >""'");
+    } else {
+      std::vector< std::string > * temp = reinterpret_cast< std::vector< std::string > * >(argp2);
+      arg2 = *temp;
+      if (SWIG_IsNewObj(res2)) delete temp;
+    }
   }
-  arg2 = reinterpret_cast< char ** >(argp2);
-  if (arg1) (arg1)->variableTypes = (char const **)arg2;
+  if (arg1) (arg1)->variableTypes = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -6147,50 +6299,106 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_variableTypes_get(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_NescApp_variableTypes_get(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
-  nesc_app *arg1 = (nesc_app *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
+  NescApp *arg1 = (NescApp *) 0 ;
   PyObject *swig_obj[1] ;
-  char **result = 0 ;
+  std::vector< std::string > result;
   
-  if (!SWIG_Python_UnpackTuple(args,"nesc_app_t_variableTypes_get",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_variableTypes_get" "', argument " "1"" of type '" "nesc_app *""'"); 
+  if (!SWIG_Python_UnpackTuple(args,"NescApp_variableTypes_get",0,0,0)) SWIG_fail;
+  {
+    if (!PyList_Check(self)) {
+      PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
+      return NULL;
+    }
+    else {
+      Py_ssize_t size = PyList_Size(self);
+      Py_ssize_t i = 0;
+      NescApp* app;
+      
+      if (size < 0 || size % 3 != 0) {
+        PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
+        return NULL;
+      }
+      
+      app = new NescApp(static_cast<unsigned int>(size) / 3);
+      
+      for (i = 0; i < app->numVariables; i++) {
+        PyObject* name = PyList_GET_ITEM(self, 3 * i);
+        PyObject* array = PyList_GET_ITEM(self, (3 * i) + 1);
+        PyObject* format = PyList_GET_ITEM(self, (3 * i) + 2);
+        if (!fill_nesc_app(app, i, name, array, format))
+        {
+          delete app;
+          return NULL;
+        }
+      }
+      
+      arg1 = app;
+    }
   }
-  arg1 = reinterpret_cast< nesc_app * >(argp1);
-  result = (char **) ((arg1)->variableTypes);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p_char, 0 |  0 );
+  result =  ((arg1)->variableTypes);
+  resultobj = SWIG_NewPointerObj((new std::vector< std::string >(static_cast< const std::vector< std::string >& >(result))), SWIGTYPE_p_std__vectorT_std__string_t, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_variableArray_set(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_NescApp_variableArray_set(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
-  nesc_app *arg1 = (nesc_app *) 0 ;
-  bool *arg2 = (bool *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
+  NescApp *arg1 = (NescApp *) 0 ;
+  std::vector< bool > arg2 ;
+  void *argp2 ;
   int res2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_variableArray_set" "', argument " "1"" of type '" "nesc_app *""'"); 
+  {
+    if (!PyList_Check(self)) {
+      PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
+      return NULL;
+    }
+    else {
+      Py_ssize_t size = PyList_Size(self);
+      Py_ssize_t i = 0;
+      NescApp* app;
+      
+      if (size < 0 || size % 3 != 0) {
+        PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
+        return NULL;
+      }
+      
+      app = new NescApp(static_cast<unsigned int>(size) / 3);
+      
+      for (i = 0; i < app->numVariables; i++) {
+        PyObject* name = PyList_GET_ITEM(self, 3 * i);
+        PyObject* array = PyList_GET_ITEM(self, (3 * i) + 1);
+        PyObject* format = PyList_GET_ITEM(self, (3 * i) + 2);
+        if (!fill_nesc_app(app, i, name, array, format))
+        {
+          delete app;
+          return NULL;
+        }
+      }
+      
+      arg1 = app;
+    }
   }
-  arg1 = reinterpret_cast< nesc_app * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[0], &argp2,SWIGTYPE_p_bool, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "nesc_app_t_variableArray_set" "', argument " "2"" of type '" "bool *""'"); 
+  {
+    res2 = SWIG_ConvertPtr(swig_obj[0], &argp2, SWIGTYPE_p_std__vectorT_bool_t,  0  | 0);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "NescApp_variableArray_set" "', argument " "2"" of type '" "std::vector< bool >""'"); 
+    }  
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "NescApp_variableArray_set" "', argument " "2"" of type '" "std::vector< bool >""'");
+    } else {
+      std::vector< bool > * temp = reinterpret_cast< std::vector< bool > * >(argp2);
+      arg2 = *temp;
+      if (SWIG_IsNewObj(res2)) delete temp;
+    }
   }
-  arg2 = reinterpret_cast< bool * >(argp2);
   if (arg1) (arg1)->variableArray = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -6199,54 +6407,89 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_nesc_app_t_variableArray_get(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_NescApp_variableArray_get(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
-  nesc_app *arg1 = (nesc_app *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
+  NescApp *arg1 = (NescApp *) 0 ;
   PyObject *swig_obj[1] ;
-  bool *result = 0 ;
+  std::vector< bool > result;
   
-  if (!SWIG_Python_UnpackTuple(args,"nesc_app_t_variableArray_get",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "nesc_app_t_variableArray_get" "', argument " "1"" of type '" "nesc_app *""'"); 
+  if (!SWIG_Python_UnpackTuple(args,"NescApp_variableArray_get",0,0,0)) SWIG_fail;
+  {
+    if (!PyList_Check(self)) {
+      PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
+      return NULL;
+    }
+    else {
+      Py_ssize_t size = PyList_Size(self);
+      Py_ssize_t i = 0;
+      NescApp* app;
+      
+      if (size < 0 || size % 3 != 0) {
+        PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
+        return NULL;
+      }
+      
+      app = new NescApp(static_cast<unsigned int>(size) / 3);
+      
+      for (i = 0; i < app->numVariables; i++) {
+        PyObject* name = PyList_GET_ITEM(self, 3 * i);
+        PyObject* array = PyList_GET_ITEM(self, (3 * i) + 1);
+        PyObject* format = PyList_GET_ITEM(self, (3 * i) + 2);
+        if (!fill_nesc_app(app, i, name, array, format))
+        {
+          delete app;
+          return NULL;
+        }
+      }
+      
+      arg1 = app;
+    }
   }
-  arg1 = reinterpret_cast< nesc_app * >(argp1);
-  result = (bool *) ((arg1)->variableArray);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_bool, 0 |  0 );
+  result =  ((arg1)->variableArray);
+  resultobj = SWIG_NewPointerObj((new std::vector< bool >(static_cast< const std::vector< bool >& >(result))), SWIGTYPE_p_std__vectorT_bool_t, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN int _wrap_new_nesc_app_t(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_NescApp(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
-  nesc_app *result = 0 ;
-  
-  if (!SWIG_Python_UnpackTuple(args,"new_nesc_app_t",0,0,0)) SWIG_fail;
-  result = (nesc_app *)new nesc_app();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_nesc_app, SWIG_BUILTIN_INIT |  0 );
-  return resultobj == Py_None ? -1 : 0;
-fail:
-  return -1;
-}
-
-
-SWIGINTERN PyObject *_wrap_delete_nesc_app_t(PyObject *self, PyObject *args) {
-  PyObject *resultobj = 0;
-  nesc_app *arg1 = (nesc_app *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
+  NescApp *arg1 = (NescApp *) 0 ;
   PyObject *swig_obj[1] ;
   
-  if (!SWIG_Python_UnpackTuple(args,"delete_nesc_app_t",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_nesc_app, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_nesc_app_t" "', argument " "1"" of type '" "nesc_app *""'"); 
+  if (!SWIG_Python_UnpackTuple(args,"delete_NescApp",0,0,0)) SWIG_fail;
+  {
+    if (!PyList_Check(self)) {
+      PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
+      return NULL;
+    }
+    else {
+      Py_ssize_t size = PyList_Size(self);
+      Py_ssize_t i = 0;
+      NescApp* app;
+      
+      if (size < 0 || size % 3 != 0) {
+        PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
+        return NULL;
+      }
+      
+      app = new NescApp(static_cast<unsigned int>(size) / 3);
+      
+      for (i = 0; i < app->numVariables; i++) {
+        PyObject* name = PyList_GET_ITEM(self, 3 * i);
+        PyObject* array = PyList_GET_ITEM(self, (3 * i) + 1);
+        PyObject* format = PyList_GET_ITEM(self, (3 * i) + 2);
+        if (!fill_nesc_app(app, i, name, array, format))
+        {
+          delete app;
+          return NULL;
+        }
+      }
+      
+      arg1 = app;
+    }
   }
-  arg1 = reinterpret_cast< nesc_app * >(argp1);
   delete arg1;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -6362,7 +6605,7 @@ fail:
 
 SWIGINTERN int _wrap_new_Mote(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
-  nesc_app_t *arg1 = (nesc_app_t *) 0 ;
+  NescApp *arg1 = (NescApp *) 0 ;
   PyObject *swig_obj[1] ;
   Mote *result = 0 ;
   
@@ -6374,31 +6617,23 @@ SWIGINTERN int _wrap_new_Mote(PyObject *self, PyObject *args) {
     }
     else {
       Py_ssize_t size = PyList_Size(swig_obj[0]);
-      unsigned int i = 0;
-      nesc_app_t* app;
+      Py_ssize_t i = 0;
+      NescApp* app;
       
       if (size < 0 || size % 3 != 0) {
-        PyErr_SetString(PyExc_RuntimeError, "List must have 2*N elements.");
+        PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
         return NULL;
       }
       
-      app = (nesc_app_t*)malloc(sizeof(nesc_app_t));
-      
-      app->numVariables = static_cast<unsigned int>(size) / 3;
-      app->variableNames = (const char**)malloc(app->numVariables * sizeof(char*));
-      app->variableTypes = (const char**)malloc(app->numVariables * sizeof(char*));
-      app->variableArray = (bool*)malloc(app->numVariables * sizeof(bool));
+      app = new NescApp(static_cast<unsigned int>(size) / 3);
       
       for (i = 0; i < app->numVariables; i++) {
-        PyObject* name = PyList_GetItem(swig_obj[0], 3 * i);
-        PyObject* array = PyList_GetItem(swig_obj[0], (3 * i) + 1);
-        PyObject* format = PyList_GetItem(swig_obj[0], (3 * i) + 2);
+        PyObject* name = PyList_GET_ITEM(swig_obj[0], 3 * i);
+        PyObject* array = PyList_GET_ITEM(swig_obj[0], (3 * i) + 1);
+        PyObject* format = PyList_GET_ITEM(swig_obj[0], (3 * i) + 2);
         if (!fill_nesc_app(app, i, name, array, format))
         {
-          free(app->variableNames);
-          free(app->variableTypes);
-          free(app->variableArray);
-          free(app);
+          delete app;
           return NULL;
         }
       }
@@ -6406,7 +6641,7 @@ SWIGINTERN int _wrap_new_Mote(PyObject *self, PyObject *args) {
       arg1 = app;
     }
   }
-  result = (Mote *)new Mote(arg1);
+  result = (Mote *)new Mote((NescApp const *)arg1);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Mote, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -6743,7 +6978,7 @@ fail:
 
 SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
-  nesc_app_t *arg1 = (nesc_app_t *) 0 ;
+  NescApp *arg1 = (NescApp *) 0 ;
   PyObject *swig_obj[1] ;
   Tossim *result = 0 ;
   
@@ -6755,31 +6990,23 @@ SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
     }
     else {
       Py_ssize_t size = PyList_Size(swig_obj[0]);
-      unsigned int i = 0;
-      nesc_app_t* app;
+      Py_ssize_t i = 0;
+      NescApp* app;
       
       if (size < 0 || size % 3 != 0) {
-        PyErr_SetString(PyExc_RuntimeError, "List must have 2*N elements.");
+        PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
         return NULL;
       }
       
-      app = (nesc_app_t*)malloc(sizeof(nesc_app_t));
-      
-      app->numVariables = static_cast<unsigned int>(size) / 3;
-      app->variableNames = (const char**)malloc(app->numVariables * sizeof(char*));
-      app->variableTypes = (const char**)malloc(app->numVariables * sizeof(char*));
-      app->variableArray = (bool*)malloc(app->numVariables * sizeof(bool));
+      app = new NescApp(static_cast<unsigned int>(size) / 3);
       
       for (i = 0; i < app->numVariables; i++) {
-        PyObject* name = PyList_GetItem(swig_obj[0], 3 * i);
-        PyObject* array = PyList_GetItem(swig_obj[0], (3 * i) + 1);
-        PyObject* format = PyList_GetItem(swig_obj[0], (3 * i) + 2);
+        PyObject* name = PyList_GET_ITEM(swig_obj[0], 3 * i);
+        PyObject* array = PyList_GET_ITEM(swig_obj[0], (3 * i) + 1);
+        PyObject* format = PyList_GET_ITEM(swig_obj[0], (3 * i) + 2);
         if (!fill_nesc_app(app, i, name, array, format))
         {
-          free(app->variableNames);
-          free(app->variableTypes);
-          free(app->variableArray);
-          free(app);
+          delete app;
           return NULL;
         }
       }
@@ -6787,7 +7014,7 @@ SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
       arg1 = app;
     }
   }
-  result = (Tossim *)new Tossim(arg1);
+  result = (Tossim *)new Tossim((NescApp const *)arg1);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Tossim, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -8507,28 +8734,28 @@ static PyHeapTypeObject SwigPyBuiltin__variable_string_type = {
 
 SWIGINTERN SwigPyClientData SwigPyBuiltin__variable_string_clientdata = {0, 0, 0, 0, 0, 0, (PyTypeObject *)&SwigPyBuiltin__variable_string_type};
 
-SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_nesc_app_t)
-static SwigPyGetSet nesc_app_t_variableTypes_getset = { _wrap_nesc_app_t_variableTypes_get, _wrap_nesc_app_t_variableTypes_set };
-static SwigPyGetSet nesc_app_t_numVariables_getset = { _wrap_nesc_app_t_numVariables_get, _wrap_nesc_app_t_numVariables_set };
-static SwigPyGetSet nesc_app_t___dict___getset = { SwigPyObject_get___dict__, 0 };
-static SwigPyGetSet nesc_app_t_variableNames_getset = { _wrap_nesc_app_t_variableNames_get, _wrap_nesc_app_t_variableNames_set };
-static SwigPyGetSet nesc_app_t_variableArray_getset = { _wrap_nesc_app_t_variableArray_get, _wrap_nesc_app_t_variableArray_set };
-SWIGINTERN PyGetSetDef SwigPyBuiltin__nesc_app_getset[] = {
-    { (char*) "variableTypes", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"nesc_app.variableTypes", (void*) &nesc_app_t_variableTypes_getset }
+SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_NescApp)
+static SwigPyGetSet NescApp_variableTypes_getset = { _wrap_NescApp_variableTypes_get, _wrap_NescApp_variableTypes_set };
+static SwigPyGetSet NescApp_numVariables_getset = { _wrap_NescApp_numVariables_get, _wrap_NescApp_numVariables_set };
+static SwigPyGetSet NescApp___dict___getset = { SwigPyObject_get___dict__, 0 };
+static SwigPyGetSet NescApp_variableNames_getset = { _wrap_NescApp_variableNames_get, _wrap_NescApp_variableNames_set };
+static SwigPyGetSet NescApp_variableArray_getset = { _wrap_NescApp_variableArray_get, _wrap_NescApp_variableArray_set };
+SWIGINTERN PyGetSetDef SwigPyBuiltin__NescApp_getset[] = {
+    { (char*) "variableTypes", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"NescApp.variableTypes", (void*) &NescApp_variableTypes_getset }
 ,
-    { (char*) "numVariables", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"nesc_app.numVariables", (void*) &nesc_app_t_numVariables_getset }
+    { (char*) "numVariables", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"NescApp.numVariables", (void*) &NescApp_numVariables_getset }
 ,
-    { (char*) "__dict__", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) 0, (char*)"nesc_app.__dict__", (void*) &nesc_app_t___dict___getset }
+    { (char*) "__dict__", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) 0, (char*)"NescApp.__dict__", (void*) &NescApp___dict___getset }
 ,
-    { (char*) "variableNames", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"nesc_app.variableNames", (void*) &nesc_app_t_variableNames_getset }
+    { (char*) "variableNames", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"NescApp.variableNames", (void*) &NescApp_variableNames_getset }
 ,
-    { (char*) "variableArray", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"nesc_app.variableArray", (void*) &nesc_app_t_variableArray_getset }
+    { (char*) "variableArray", (getter) SwigPyBuiltin_FunpackGetterClosure, (setter) SwigPyBuiltin_FunpackSetterClosure, (char*)"NescApp.variableArray", (void*) &NescApp_variableArray_getset }
 ,
     {NULL, NULL, NULL, NULL, NULL} /* Sentinel */
 };
 
 SWIGINTERN PyObject *
-SwigPyBuiltin__nesc_app_richcompare(PyObject *self, PyObject *other, int op) {
+SwigPyBuiltin__NescApp_richcompare(PyObject *self, PyObject *other, int op) {
   PyObject *result = NULL;
   if (!result) {
     if (SwigPyObject_Check(self) && SwigPyObject_Check(other)) {
@@ -8541,11 +8768,11 @@ SwigPyBuiltin__nesc_app_richcompare(PyObject *self, PyObject *other, int op) {
   return result;
 }
 
-SWIGINTERN PyMethodDef SwigPyBuiltin__nesc_app_methods[] = {
+SWIGINTERN PyMethodDef SwigPyBuiltin__NescApp_methods[] = {
   { NULL, NULL, 0, NULL } /* Sentinel */
 };
 
-static PyHeapTypeObject SwigPyBuiltin__nesc_app_type = {
+static PyHeapTypeObject SwigPyBuiltin__NescApp_type = {
   {
 #if PY_VERSION_HEX >= 0x03000000
     PyVarObject_HEAD_INIT(NULL, 0)
@@ -8553,10 +8780,10 @@ static PyHeapTypeObject SwigPyBuiltin__nesc_app_type = {
     PyObject_HEAD_INIT(NULL)
     0,                                        /* ob_size */
 #endif
-    "TOSSIM.nesc_app_t",                      /* tp_name */
+    "TOSSIM.NescApp",                         /* tp_name */
     sizeof(SwigPyObject),                     /* tp_basicsize */
     0,                                        /* tp_itemsize */
-    (destructor) _wrap_delete_nesc_app_t_closure, /* tp_dealloc */
+    (destructor) _wrap_delete_NescApp_closure, /* tp_dealloc */
     (printfunc) 0,                            /* tp_print */
     (getattrfunc) 0,                          /* tp_getattr */
     (setattrfunc) 0,                          /* tp_setattr */
@@ -8566,36 +8793,36 @@ static PyHeapTypeObject SwigPyBuiltin__nesc_app_type = {
     (cmpfunc) 0,                              /* tp_compare */
 #endif
     (reprfunc) 0,                             /* tp_repr */
-    &SwigPyBuiltin__nesc_app_type.as_number,      /* tp_as_number */
-    &SwigPyBuiltin__nesc_app_type.as_sequence,    /* tp_as_sequence */
-    &SwigPyBuiltin__nesc_app_type.as_mapping,     /* tp_as_mapping */
+    &SwigPyBuiltin__NescApp_type.as_number,      /* tp_as_number */
+    &SwigPyBuiltin__NescApp_type.as_sequence,    /* tp_as_sequence */
+    &SwigPyBuiltin__NescApp_type.as_mapping,     /* tp_as_mapping */
     (hashfunc) 0,                             /* tp_hash */
     (ternaryfunc) 0,                          /* tp_call */
     (reprfunc) 0,                             /* tp_str */
     (getattrofunc) 0,                         /* tp_getattro */
     (setattrofunc) 0,                         /* tp_setattro */
-    &SwigPyBuiltin__nesc_app_type.as_buffer,      /* tp_as_buffer */
+    &SwigPyBuiltin__NescApp_type.as_buffer,      /* tp_as_buffer */
 #if PY_VERSION_HEX >= 0x03000000
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,   /* tp_flags */
 #else
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES, /* tp_flags */
 #endif
-    "::nesc_app",                             /* tp_doc */
+    "::NescApp",                              /* tp_doc */
     (traverseproc) 0,                         /* tp_traverse */
     (inquiry) 0,                              /* tp_clear */
-    (richcmpfunc) SwigPyBuiltin__nesc_app_richcompare, /* feature:python:tp_richcompare */
+    (richcmpfunc) SwigPyBuiltin__NescApp_richcompare, /* feature:python:tp_richcompare */
     0,                                        /* tp_weaklistoffset */
     (getiterfunc) 0,                          /* tp_iter */
     (iternextfunc) 0,                         /* tp_iternext */
-    SwigPyBuiltin__nesc_app_methods,          /* tp_methods */
+    SwigPyBuiltin__NescApp_methods,           /* tp_methods */
     0,                                        /* tp_members */
-    SwigPyBuiltin__nesc_app_getset,           /* tp_getset */
+    SwigPyBuiltin__NescApp_getset,            /* tp_getset */
     0,                                        /* tp_base */
     0,                                        /* tp_dict */
     (descrgetfunc) 0,                         /* tp_descr_get */
     (descrsetfunc) 0,                         /* tp_descr_set */
     (Py_ssize_t)offsetof(SwigPyObject, dict), /* tp_dictoffset */
-    (initproc) _wrap_new_nesc_app_t,          /* tp_init */
+    (initproc) _wrap_new_NescApp,             /* tp_init */
     (allocfunc) 0,                            /* tp_alloc */
     (newfunc) 0,                              /* tp_new */
     (freefunc) 0,                             /* tp_free */
@@ -8733,7 +8960,7 @@ static PyHeapTypeObject SwigPyBuiltin__nesc_app_type = {
 #endif
 };
 
-SWIGINTERN SwigPyClientData SwigPyBuiltin__nesc_app_clientdata = {0, 0, 0, 0, 0, 0, (PyTypeObject *)&SwigPyBuiltin__nesc_app_type};
+SWIGINTERN SwigPyClientData SwigPyBuiltin__NescApp_clientdata = {0, 0, 0, 0, 0, 0, (PyTypeObject *)&SwigPyBuiltin__NescApp_type};
 
 SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Variable)
 static SwigPyGetSet Variable___dict___getset = { SwigPyObject_get___dict__, 0 };
@@ -9421,18 +9648,18 @@ SWIGINTERN SwigPyClientData SwigPyBuiltin__Tossim_clientdata = {0, 0, 0, 0, 0, 0
 static swig_type_info _swigt__p_FILE = {"_p_FILE", "FILE *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_MAC = {"_p_MAC", "MAC *", 0, 0, (void*)&SwigPyBuiltin__MAC_clientdata, 0};
 static swig_type_info _swigt__p_Mote = {"_p_Mote", "Mote *", 0, 0, (void*)&SwigPyBuiltin__Mote_clientdata, 0};
+static swig_type_info _swigt__p_NescApp = {"_p_NescApp", "NescApp *", 0, 0, (void*)&SwigPyBuiltin__NescApp_clientdata, 0};
 static swig_type_info _swigt__p_Packet = {"_p_Packet", "Packet *", 0, 0, (void*)&SwigPyBuiltin__Packet_clientdata, 0};
 static swig_type_info _swigt__p_Radio = {"_p_Radio", "Radio *", 0, 0, (void*)&SwigPyBuiltin__Radio_clientdata, 0};
 static swig_type_info _swigt__p_SwigPyObject = {"_p_SwigPyObject", "SwigPyObject *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Tossim = {"_p_Tossim", "Tossim *", 0, 0, (void*)&SwigPyBuiltin__Tossim_clientdata, 0};
 static swig_type_info _swigt__p_Variable = {"_p_Variable", "Variable *", 0, 0, (void*)&SwigPyBuiltin__Variable_clientdata, 0};
-static swig_type_info _swigt__p_bool = {"_p_bool", "bool *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_nesc_app = {"_p_nesc_app", "nesc_app *|nesc_app_t *", 0, 0, (void*)&SwigPyBuiltin__nesc_app_clientdata, 0};
-static swig_type_info _swigt__p_p_char = {"_p_p_char", "char **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_bool_fF_t = {"_p_std__functionT_bool_fF_t", "std::function< bool () > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_bool_fdoubleF_t = {"_p_std__functionT_bool_fdoubleF_t", "std::function< bool (double) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_void_funsigned_intF_t = {"_p_std__functionT_void_funsigned_intF_t", "std::function< void (unsigned int) > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__vectorT_bool_t = {"_p_std__vectorT_bool_t", "std::vector< bool > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__vectorT_std__string_t = {"_p_std__vectorT_std__string_t", "std::vector< std::string > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_variable_string = {"_p_variable_string", "variable_string *|variable_string_t *", 0, 0, (void*)&SwigPyBuiltin__variable_string_clientdata, 0};
 static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 
@@ -9440,18 +9667,18 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_FILE,
   &_swigt__p_MAC,
   &_swigt__p_Mote,
+  &_swigt__p_NescApp,
   &_swigt__p_Packet,
   &_swigt__p_Radio,
   &_swigt__p_SwigPyObject,
   &_swigt__p_Tossim,
   &_swigt__p_Variable,
-  &_swigt__p_bool,
   &_swigt__p_char,
-  &_swigt__p_nesc_app,
-  &_swigt__p_p_char,
   &_swigt__p_std__functionT_bool_fF_t,
   &_swigt__p_std__functionT_bool_fdoubleF_t,
   &_swigt__p_std__functionT_void_funsigned_intF_t,
+  &_swigt__p_std__vectorT_bool_t,
+  &_swigt__p_std__vectorT_std__string_t,
   &_swigt__p_variable_string,
   &_swigt__p_void,
 };
@@ -9459,18 +9686,18 @@ static swig_type_info *swig_type_initial[] = {
 static swig_cast_info _swigc__p_FILE[] = {  {&_swigt__p_FILE, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_MAC[] = {  {&_swigt__p_MAC, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Mote[] = {  {&_swigt__p_Mote, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_NescApp[] = {  {&_swigt__p_NescApp, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Packet[] = {  {&_swigt__p_Packet, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Radio[] = {  {&_swigt__p_Radio, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_SwigPyObject[] = {  {&_swigt__p_SwigPyObject, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Tossim[] = {  {&_swigt__p_Tossim, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Variable[] = {  {&_swigt__p_Variable, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_bool[] = {  {&_swigt__p_bool, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_nesc_app[] = {  {&_swigt__p_nesc_app, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_p_char[] = {  {&_swigt__p_p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_bool_fF_t[] = {  {&_swigt__p_std__functionT_bool_fF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_bool_fdoubleF_t[] = {  {&_swigt__p_std__functionT_bool_fdoubleF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_void_funsigned_intF_t[] = {  {&_swigt__p_std__functionT_void_funsigned_intF_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorT_bool_t[] = {  {&_swigt__p_std__vectorT_bool_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorT_std__string_t[] = {  {&_swigt__p_std__vectorT_std__string_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_variable_string[] = {  {&_swigt__p_variable_string, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0, 0}};
 
@@ -9478,18 +9705,18 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_FILE,
   _swigc__p_MAC,
   _swigc__p_Mote,
+  _swigc__p_NescApp,
   _swigc__p_Packet,
   _swigc__p_Radio,
   _swigc__p_SwigPyObject,
   _swigc__p_Tossim,
   _swigc__p_Variable,
-  _swigc__p_bool,
   _swigc__p_char,
-  _swigc__p_nesc_app,
-  _swigc__p_p_char,
   _swigc__p_std__functionT_bool_fF_t,
   _swigc__p_std__functionT_bool_fdoubleF_t,
   _swigc__p_std__functionT_void_funsigned_intF_t,
+  _swigc__p_std__vectorT_bool_t,
+  _swigc__p_std__vectorT_std__string_t,
   _swigc__p_variable_string,
   _swigc__p_void,
 };
@@ -10281,8 +10508,8 @@ SWIG_init(void) {
   SwigPyBuiltin_AddPublicSymbol(public_interface, "variable_string_t");
   d = md;
   
-  /* type '::nesc_app' */
-  builtin_pytype = (PyTypeObject *)&SwigPyBuiltin__nesc_app_type;
+  /* type '::NescApp' */
+  builtin_pytype = (PyTypeObject *)&SwigPyBuiltin__NescApp_type;
   builtin_pytype->tp_dict = d = PyDict_New();
   SwigPyBuiltin_SetMetaType(builtin_pytype, metatype);
   builtin_pytype->tp_new = PyType_GenericNew;
@@ -10292,7 +10519,7 @@ SWIG_init(void) {
   PyDict_SetItemString(d, "this", this_descr);
   PyDict_SetItemString(d, "thisown", thisown_descr);
   if (PyType_Ready(builtin_pytype) < 0) {
-    PyErr_SetString(PyExc_TypeError, "Could not create type 'nesc_app_t'.");
+    PyErr_SetString(PyExc_TypeError, "Could not create type 'NescApp'.");
 #if PY_VERSION_HEX >= 0x03000000
     return NULL;
 #else
@@ -10300,8 +10527,8 @@ SWIG_init(void) {
 #endif
   }
   Py_INCREF(builtin_pytype);
-  PyModule_AddObject(m, "nesc_app_t", (PyObject*) builtin_pytype);
-  SwigPyBuiltin_AddPublicSymbol(public_interface, "nesc_app_t");
+  PyModule_AddObject(m, "NescApp", (PyObject*) builtin_pytype);
+  SwigPyBuiltin_AddPublicSymbol(public_interface, "NescApp");
   d = md;
   
   /* type '::Variable' */
