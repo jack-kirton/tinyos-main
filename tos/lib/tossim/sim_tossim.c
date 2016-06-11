@@ -42,6 +42,7 @@
 
 #include <sim_tossim.h>
 #include <sim_event_queue.h>
+#include <sim_gain.h>
 #include <sim_mote.h>
 #include <sim_log.h>
 #include <stdlib.h>
@@ -80,6 +81,7 @@ void sim_init(void) __attribute__ ((C, spontaneous)) {
 }
 
 void sim_end(void) __attribute__ ((C, spontaneous)) {
+  sim_gain_free();
   sim_noise_free();
   sim_log_free();
   sim_queue_free();

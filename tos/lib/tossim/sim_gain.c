@@ -10,13 +10,17 @@ static gain_entry_t* connectivity[TOSSIM_MAX_NODES + 1];
 static sim_gain_noise_t localNoise[TOSSIM_MAX_NODES + 1];
 static double sensitivity = 4.0;
 
+static gain_entry_t* sim_gain_allocate_link(int mote);
+static void sim_gain_deallocate_link(gain_entry_t* linkToDelete);
+static void sim_gain_deallocate_links(gain_entry_t* linkToDelete);
+
 void sim_gain_init(void) __attribute__ ((C, spontaneous)) {
   size_t i;
 
   for (i = 0; i != TOSSIM_MAX_NODES + 1; ++i)
   {
     if (connectivity[i] != NULL) {
-      sim_gain_deallocate_link(connectivity[i]);
+      sim_gain_deallocate_links(connectivity[i]);
       connectivity[i] = NULL;
     }
 
@@ -27,8 +31,19 @@ void sim_gain_init(void) __attribute__ ((C, spontaneous)) {
   sensitivity = 4.0;
 }
 
-gain_entry_t* sim_gain_allocate_link(int mote);
-void sim_gain_deallocate_link(gain_entry_t* linkToDelete);
+void sim_gain_free(void) __attribute__ ((C, spontaneous)) {
+  size_t i;
+
+  for (i = 0; i != TOSSIM_MAX_NODES + 1; ++i)
+  {
+    if (connectivity[i] != NULL) {
+      sim_gain_deallocate_links(connectivity[i]);
+      connectivity[i] = NULL;
+    }
+  }
+}
+
+
 
 gain_entry_t* sim_gain_first(int src) __attribute__ ((C, spontaneous)) {
   if (src > TOSSIM_MAX_NODES) {
@@ -169,7 +184,7 @@ double sim_gain_sample_noise(int node)  __attribute__ ((C, spontaneous)) {
   return val + adjust;
 }
 
-gain_entry_t* sim_gain_allocate_link(int mote) {
+static gain_entry_t* sim_gain_allocate_link(int mote) {
   gain_entry_t* newLink = (gain_entry_t*)malloc(sizeof(gain_entry_t));
   newLink->next = NULL;
   newLink->mote = mote;
@@ -177,8 +192,16 @@ gain_entry_t* sim_gain_allocate_link(int mote) {
   return newLink;
 }
 
-void sim_gain_deallocate_link(gain_entry_t* linkToDelete) __attribute__ ((C, spontaneous)) {
+static void sim_gain_deallocate_link(gain_entry_t* linkToDelete) {
   free(linkToDelete);
+}
+
+static void sim_gain_deallocate_links(gain_entry_t* linkToDelete) {
+  gain_entry_t* next = linkToDelete->next;
+  sim_gain_deallocate_link(linkToDelete);
+  if (next != NULL) {
+    sim_gain_deallocate_link(next);
+  }
 }
 
 void sim_gain_set_sensitivity(double s) __attribute__ ((C, spontaneous)) {
