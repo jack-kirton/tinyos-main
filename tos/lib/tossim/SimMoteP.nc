@@ -65,8 +65,8 @@ implementation {
     return isOn;
   }
 
-  async command int SimMote.getVariableInfo(char* name, void** addr, size_t* size) {
-    return __nesc_nido_resolve(sim_node(), name, (uintptr_t*)addr, (size_t*)size);
+  async command int SimMote.getVariableInfo(const char* name, void** addr, size_t* size) {
+    return __nesc_nido_resolve(sim_node(), (char*)name, (uintptr_t*)addr, (size_t*)size);
   }
 
   command void SimMote.turnOn() {
@@ -112,7 +112,7 @@ implementation {
     return result;
   }
 
-  int sim_mote_get_variable_info(int mote, char* name, void** ptr, size_t* len) @C() @spontaneous() {
+  int sim_mote_get_variable_info(int mote, const char* name, void** ptr, size_t* len) @C() @spontaneous() {
     int result;
     int tmpID = sim_node();
     sim_set_node(mote);

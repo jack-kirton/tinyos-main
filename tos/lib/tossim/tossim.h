@@ -50,7 +50,9 @@
 #include <packet.h>
 #include <hashtable.h>
 
- #include <functional>
+#include <functional>
+#include <unordered_map>
+#include <vector>
 
 typedef struct variable_string {
   const char* type;
@@ -68,13 +70,16 @@ typedef struct nesc_app {
 
 class Variable {
  public:
-  Variable(const char* name, const char* format, bool array, int mote);
+  Variable(const std::string& name, const char* format, bool array, int mote);
   ~Variable();
   variable_string_t getData();
+
+ private:
+  void update();
   
  private:
-  char* realName;
-  char* format;
+  std::string realName;
+  std::string format;
   void* ptr;
   uint8_t* data;
   size_t len;
@@ -104,12 +109,12 @@ class Mote {
   void createNoiseModel();
   int generateNoise(int when);
   
-  Variable* getVariable(const char* name);
+  Variable* getVariable(const char* name_cstr);
   
  private:
   unsigned long nodeID;
   nesc_app_t* app;
-  struct hashtable* varTable;
+  std::unordered_map<std::string, Variable*> varTable;
 };
 
 class Tossim {
@@ -148,7 +153,7 @@ private:
 
  private:
   nesc_app_t* app;
-  Mote** motes;
+  std::vector<Mote*> motes;
   char timeBuf[128];
 };
 

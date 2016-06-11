@@ -6646,10 +6646,10 @@ SWIGINTERN PyObject *_wrap_Mote_getVariable(PyObject *self, PyObject *args) {
   arg1 = reinterpret_cast< Mote * >(argp1);
   res2 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Mote_getVariable" "', argument " "2"" of type '" "char *""'");
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Mote_getVariable" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
-  result = (Variable *)(arg1)->getVariable(arg2);
+  result = (Variable *)(arg1)->getVariable((char const *)arg2);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Variable, 0 |  0 );
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
   return resultobj;

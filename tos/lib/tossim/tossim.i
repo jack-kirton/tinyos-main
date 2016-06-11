@@ -389,7 +389,7 @@ class Mote {
     bool isOn();
     void turnOff();
     void turnOn();
-    Variable* getVariable(char* name);
+    Variable* getVariable(const char* name_cstr);
 
     void addNoiseTraceReading(int val);
     void createNoiseModel();

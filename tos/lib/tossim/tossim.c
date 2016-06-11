@@ -56,72 +56,52 @@
 #include <radio.c>
 #include <packet.c>
 
-
 uint16_t TOS_NODE_ID = 1;
 
 static bool python_event_called = false;
 
-Variable::Variable(const char* name, const char* formatStr, bool array, int which) {
-  format = strdup(formatStr);
-  isArray = array;
-  mote = which;
-  
-  size_t sLen = strlen(name);
-  realName = strndup(name, sLen);
+Variable::Variable(const std::string& name, const char* formatStr, bool array, int which)
+  : realName(name)
+  , format(formatStr)
 
-  std::replace(realName, realName + sLen, '.', '$');
+  , mote(which)
+  , isArray(array)
+{
+  std::replace(realName.begin(), realName.end(), '.', '$');
 
-  //printf("Creating %s realName: %s format: '%s' %s\n", name, realName, formatStr, array? "[]":"");
-
-  if (sim_mote_get_variable_info(mote, realName, &ptr, &len) == 0) {
-    data = (uint8_t*)malloc(len + 1);
+  if (sim_mote_get_variable_info(mote, realName.c_str(), &ptr, &len) == 0) {
+    data = new uint8_t[len + 1];
     data[len] = 0;
   }
   else {
-    //fprintf(stderr, "Could not find variable %s\n", realName);
     data = NULL;
     ptr = NULL;
   }
-  //printf("Allocated variable %s\n", realName);
 }
 
 Variable::~Variable() {
-  //fprintf(stderr, "Freeing variable %s\n", realName);
-  free(data);
-  free(realName);
-  free(format);
+  delete[] data;
 }
 
-/* This is the sdbm algorithm, taken from
-   http://www.cs.yorku.ca/~oz/hash.html -pal */
-static unsigned int tossim_hash(const void* key) {
-  const char* str = (const char*)key;
-  unsigned int hashVal = 0;
-  int c;
-  
-  while ((c = *str++))
-    hashVal = c + (hashVal << 6) + (hashVal << 16) - hashVal;
-  
-  return hashVal;
+void Variable::update() {
+  if (data != nullptr && ptr != nullptr) {
+    // Copy the data from the variable (ptr) into our local data (data).
+    memcpy(data, ptr, len);
+  }
 }
-
-static int tossim_hash_eq(const void* key1, const void* key2) {
-  return strcmp((const char*)key1, (const char*)key2) == 0;
-}
-
 
 variable_string_t Variable::getData() {
   variable_string_t str;
   if (data != nullptr && ptr != nullptr) {
     str.ptr = data;
-    str.type = format;
+    str.type = format.c_str();
     str.len = len;
     str.isArray = isArray;
-    memcpy(data, ptr, len);
-    //printf("Getting '%s' %s %d %s\n", format, isArray? "[]":"", len, realName);
+
+    update();
   }
   else {
-    str.ptr = (char*)"<no such variable>";
+    str.ptr = const_cast<char*>("<no such variable>");
     str.type = "<no such variable>";
     str.len = strlen("<no such variable>");
     str.isArray = 0;
@@ -130,17 +110,13 @@ variable_string_t Variable::getData() {
 }
 
 Mote::Mote(nesc_app_t* n) : app(n) {
-  varTable = create_hashtable(128, tossim_hash, tossim_hash_eq);
-}
-
-static void delete_Variable(void* voidptr)
-{
-  Variable* var = static_cast<Variable*>(voidptr);
-  delete var;
 }
 
 Mote::~Mote(){
-  hashtable_destroy(varTable, &delete_Variable);
+  for (auto iter = varTable.begin(), end = varTable.end(); iter != end; ++iter)
+  {
+    delete iter->second;
+  }
 }
 
 unsigned long Mote::id() noexcept {
@@ -180,61 +156,64 @@ void Mote::setID(unsigned long val) noexcept {
   nodeID = val;
 }
 
-Variable* Mote::getVariable(const char* name) {
-  const char* typeStr = "";
-  bool isArray = false;
+Variable* Mote::getVariable(const char* name_cstr) {
   Variable* var;
 
-  var = (Variable*)hashtable_search(varTable, name);
-  if (var == NULL) {
+  std::string name(name_cstr);
+
+  auto find = varTable.find(name);
+
+  if (find == varTable.end()) {
+    const char* typeStr = "";
+    bool isArray = false;
     // Could hash this for greater efficiency,
     // but that would either require transformation
     // in Tossim class or a more complex typemap.
     if (app != NULL) {
       for (unsigned int i = 0; i < app->numVariables; i++) {
-        if (strcmp(name, app->variableNames[i]) == 0) {
+        if (name == app->variableNames[i]) {
           typeStr = app->variableTypes[i];
           isArray = app->variableArray[i];
           break;
         }
       }
     }
-    //printf("Getting variable %s of type %s %s\n", name, typeStr, isArray? "[]" : "");
+
     var = new Variable(name, typeStr, isArray, nodeID);
-    hashtable_insert(varTable, strdup(name), var);
+
+    varTable.emplace(std::move(name), var);
+  }
+  else {
+    var = find->second;
   }
 
   return var;
 }
 
 void Mote::addNoiseTraceReading(int val) {
-  sim_noise_trace_add(id(), (char)val);
+  sim_noise_trace_add(nodeID, (char)val);
 }
 
 void Mote::createNoiseModel() {
-  sim_noise_create_model(id());
+  sim_noise_create_model(nodeID);
 }
 
 int Mote::generateNoise(int when) {
-  return static_cast<int>(sim_noise_generate(id(), when));
+  return static_cast<int>(sim_noise_generate(nodeID, when));
 }
 
-Tossim::Tossim(nesc_app_t* n) : app(n) {
-  motes = NULL;
+Tossim::Tossim(nesc_app_t* n)
+  : app(n)
+  , motes(TOSSIM_MAX_NODES, NULL)
+{
   init();
 }
 
 void Tossim::free_motes()
 {
-  if (motes != NULL)
+  for (auto iter = motes.begin(), end = motes.end(); iter != end; ++iter)
   {
-    for (size_t i = 0; i != (TOSSIM_MAX_NODES + 1); ++i)
-    {
-      if (motes[i] != NULL)
-        delete motes[i];
-    }
-    free(motes);
-    motes = NULL;
+    delete *iter;
   }
 }
 
@@ -243,10 +222,8 @@ Tossim::~Tossim() {
   sim_end();
 }
 
-void Tossim::init() {
+void Tossim::init(){
   sim_init();
-  free_motes();
-  motes = (Mote**)calloc(TOSSIM_MAX_NODES + 1, sizeof(Mote*));
 }
 
 long long int Tossim::time() const noexcept {
@@ -262,7 +239,7 @@ long long int Tossim::ticksPerSecond() noexcept {
 }
 
 const char* Tossim::timeStr() noexcept {
-  sim_print_now(timeBuf, 256);
+  sim_print_now(timeBuf, 128);
   return timeBuf;
 }
 
@@ -275,8 +252,7 @@ Mote* Tossim::currentNode() noexcept {
 }
 
 Mote* Tossim::getNode(unsigned long nodeID) noexcept {
-  if (nodeID > TOSSIM_MAX_NODES) {
-    nodeID = TOSSIM_MAX_NODES;
+  if (nodeID >= TOSSIM_MAX_NODES) {
     // TODO: log an error, asked for an invalid node
     return NULL;
   }
