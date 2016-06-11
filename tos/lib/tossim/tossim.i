@@ -263,7 +263,6 @@ FILE* object_to_file(PyObject* o)
 }
 
 %{
-// TODO: Fix the memory leak introduced here  by strdup
 bool fill_nesc_app(NescApp* app, int i, PyObject* name, PyObject* array, PyObject* format)
 {
 #if PY_VERSION_HEX < 0x03000000
