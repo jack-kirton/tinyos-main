@@ -96,6 +96,11 @@ void RandomInitialise(int ij,int kl)
    test = TRUE;
 }
 
+void RandomReset(void)
+{
+   test = FALSE;
+}
+
 /* 
    This is the random number generator proposed by George Marsaglia in
    Florida State University Report: FSU-SCRI-87-50

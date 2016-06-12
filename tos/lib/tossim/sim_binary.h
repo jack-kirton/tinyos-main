@@ -45,6 +45,7 @@
 #ifndef SIM_BINARY_H_INCLUDED
 #define SIM_BINARY_H_INCLUDED
 
+#error "FILE NOT USED"
 
 #ifdef __cplusplus
 extern "C" {

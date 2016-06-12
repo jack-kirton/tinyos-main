@@ -45,6 +45,8 @@
 #include <sim_gain.h>
 #include <sim_mote.h>
 #include <sim_log.h>
+#include <randomlib.h>
+
 #include <stdlib.h>
 #include <sys/time.h>
 
@@ -111,6 +113,9 @@ void sim_random_seed(int seed) __attribute__ ((C, spontaneous)) {
     seed = 1;
   }
   sim_seed = seed;
+
+  // Make sure to reset the other random number generator
+  RandomReset();
 }
 
 sim_time_t sim_time(void) __attribute__ ((C, spontaneous)) {

@@ -1,5 +1,7 @@
 #include <sim_binary.h>
 
+#error "FILE NOT USED"
+
 static link_t* connectivity[TOSSIM_MAX_NODES];
 
 static link_t* allocate_link(int mote);

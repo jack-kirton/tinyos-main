@@ -44,6 +44,7 @@ extern "C" {
 #endif
 
 void   RandomInitialise(int,int);
+void   RandomReset(void);
 double RandomUniform(void);
 double RandomGaussian(double,double);
 int    RandomInt(int,int);
