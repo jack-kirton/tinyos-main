@@ -44,7 +44,7 @@ endif
 
 # general rule for java files
 %.class: %.java
-	$(JAVAC) $<
+	$(JAVAC) -Xlint:unchecked $<
 
 ifeq ($(SUBDIRS)_x, _x)
 

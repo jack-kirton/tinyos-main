@@ -204,7 +204,7 @@ public class TOSSerial extends NativeSerial implements SerialPort {
 
   private SerialOutputStream m_out;
 
-  private Vector m_listeners = new Vector();
+  private List<SerialPortListener> m_listeners = new ArrayList<>();
 
   private EventDispatcher m_dispatch;
 

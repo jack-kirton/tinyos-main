@@ -1,30 +1,30 @@
 package net.tinyos.packet;
 
-import java.util.*;
+import java.util.HashMap;
 
 class Platform {
     static int x;
-    static Hashtable platforms;
+    static HashMap<String, Integer> platforms;
 
     static void add(int dummy, String name, int baudrate) {
-	platforms.put(name, new Integer(baudrate));
+        platforms.put(name, baudrate);
     }
 
     static int get(String name) {
-	if (platforms == null) {
-	    platforms = new Hashtable();
+        if (platforms == null) {
+            platforms = new HashMap<>();
             try {
-	      BaudRate.init();
+              BaudRate.init();
             }
             catch (Exception e) {
               System.err.println("Failed to initialize baud rates for platforms. Serial communication may not work properly.");
             }
-	}
-	Object val = platforms.get(name);
+        }
+        Integer val = platforms.get(name);
 
-	if (val != null)
-	    return ((Integer)val).intValue();
-	else
-	    return -1;
+        if (val != null)
+            return val.intValue();
+        else
+            return -1;
     }
 }
