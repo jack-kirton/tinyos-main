@@ -69,11 +69,13 @@
 #undef putchar
 
 #include "message.h"
+
 int printfflush();
 
 #ifndef PRINTF_MSG_LENGTH
 #define PRINTF_MSG_LENGTH	28
 #endif
+
 typedef nx_struct printf_msg {
   nx_uint8_t buffer[PRINTF_MSG_LENGTH];
 } printf_msg_t;
@@ -82,10 +84,10 @@ enum {
   AM_PRINTF_MSG = 100,
 };
 
-#define simdbg(name, ...) printf(name ":" __VA_ARGS__); printfflush()
-#define simdbg_clear(name, ...) printf(name ":" __VA_ARGS__); printfflush()
-#define simdbgerror(name, ...) printf(name ":" __VA_ARGS__); printfflush()
-#define simdbgerror_clear(name, ...) printf(name ":" __VA_ARGS__); printfflush()
+#define simdbg(name, ...) do { printf(name); printf(":" __VA_ARGS__); printfflush(); } while (FALSE)
+#define simdbg_clear(name, ...) do { printf(name); printf(":" __VA_ARGS__); printfflush(); } while (FALSE)
+#define simdbgerror(name, ...) do { printf(name); printf(":" __VA_ARGS__); printfflush(); } while (FALSE)
+#define simdbgerror_clear(name, ...) do { printf(name); printf(":" __VA_ARGS__); printfflush(); } while (FALSE)
 
 #endif //PRINTF_H
 
