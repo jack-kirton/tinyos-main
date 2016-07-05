@@ -84,10 +84,10 @@ enum {
   AM_PRINTF_MSG = 100,
 };
 
-#define simdbg(name, ...) do { printf(name); printf(":" __VA_ARGS__); printfflush(); } while (FALSE)
-#define simdbg_clear(name, ...) do { printf(name); printf(":" __VA_ARGS__); printfflush(); } while (FALSE)
-#define simdbgerror(name, ...) do { printf(name); printf(":" __VA_ARGS__); printfflush(); } while (FALSE)
-#define simdbgerror_clear(name, ...) do { printf(name); printf(":" __VA_ARGS__); printfflush(); } while (FALSE)
+#define simdbg(name, fmtstr, ...) do { printf("%s:" fmtstr, name, ##__VA_ARGS__); printfflush(); } while (FALSE)
+#define simdbg_clear(name, fmtstr, ...) do { printf("%s:" fmtstr, name, ##__VA_ARGS__); printfflush(); } while (FALSE)
+#define simdbgerror(name, fmtstr, ...) do { printf("%s:" fmtstr, name, ##__VA_ARGS__); printfflush(); } while (FALSE)
+#define simdbgerror_clear(name, fmtstr, ...) do { printf("%s:" fmtstr, name, ##__VA_ARGS__); printfflush(); } while (FALSE)
 
 #endif //PRINTF_H
 
