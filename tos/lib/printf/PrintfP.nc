@@ -117,7 +117,7 @@ implementation {
   }
   
   void sendNext() {
-    int i;
+    unsigned int i;
     printf_msg_t* m = (printf_msg_t*)call Packet.getPayload(&printfMsg, sizeof(printf_msg_t));
     uint16_t length_to_send = (call Queue.size() < sizeof(printf_msg_t)) ? call Queue.size() : sizeof(printf_msg_t);
     memset(m->buffer, 0, sizeof(printf_msg_t));
