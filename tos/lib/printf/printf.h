@@ -82,5 +82,10 @@ enum {
   AM_PRINTF_MSG = 100,
 };
 
+#define simdbg(name, ...) printf(name ":" __VA_ARGS__); printfflush()
+#define simdbg_clear(name, ...) printf(name ":" __VA_ARGS__); printfflush()
+#define simdbgerror(name, ...) printf(name ":" __VA_ARGS__); printfflush()
+#define simdbgerror_clear(name, ...) printf(name ":" __VA_ARGS__); printfflush()
+
 #endif //PRINTF_H
 
