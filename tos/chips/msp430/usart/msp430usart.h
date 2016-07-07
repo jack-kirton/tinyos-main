@@ -214,9 +214,7 @@ typedef union {
 } msp430_uart_union_config_t;
     
 msp430_uart_union_config_t msp430_uart_default_config = { 
-  {
-    utxe : 1, 
-    urxe : 1, 
+  { 
     ubr : UBR_1MHZ_57600, 
     umctl : UMCTL_1MHZ_57600, 
     ssel : 0x02, 
