@@ -116,13 +116,20 @@ implementation {
       post retrySend();
   }
   
-  void sendNext() {
+  task void sendNext() {
     unsigned int i;
+    uint16_t length_to_send;
     printf_msg_t* m = (printf_msg_t*)call Packet.getPayload(&printfMsg, sizeof(printf_msg_t));
-    uint16_t length_to_send = (call Queue.size() < sizeof(printf_msg_t)) ? call Queue.size() : sizeof(printf_msg_t);
     memset(m->buffer, 0, sizeof(printf_msg_t));
-    for(i=0; i<length_to_send; i++)
-      m->buffer[i] = call Queue.dequeue();
+
+    atomic {
+      length_to_send = (call Queue.size() < sizeof(printf_msg_t)) ? call Queue.size() : sizeof(printf_msg_t);
+      for(i=0; i<length_to_send; i++)
+      {
+        m->buffer[i] = call Queue.dequeue();
+      }
+    }
+
     if(call AMSend.send(AM_BROADCAST_ADDR, &printfMsg, sizeof(printf_msg_t)) != SUCCESS)
       post retrySend();  
   }
@@ -135,25 +142,36 @@ implementation {
         return FAIL;
       state = S_FLUSHING;
     }
-    sendNext();
+    post sendNext();
     return SUCCESS;
   }
     
   event void AMSend.sendDone(message_t* msg, error_t error) {    
     if(error == SUCCESS) {
-      if(call Queue.size() > 0)
-        sendNext();
-      else state = S_STARTED;
+      bool non_empty_queue;
+      atomic non_empty_queue = call Queue.size() > 0;
+      if(non_empty_queue)
+        post sendNext();
+      else
+        atomic state = S_STARTED;
     }
-    else post retrySend();
+    else {
+      post retrySend();
+    }
   }
   
 #undef putchar
   command int Putchar.putchar (int c)
   {
-    if((state == S_STARTED) && (call Queue.size() >= ((PRINTF_BUFFER_SIZE)/2))) {
-      state = S_FLUSHING;
-      sendNext();
+    bool should_send_next;
+    atomic {
+      should_send_next = (state == S_STARTED && call Queue.size() >= ((PRINTF_BUFFER_SIZE)/2));
+      if (should_send_next) {
+        state = S_FLUSHING;
+      }
+    }
+    if(should_send_next) {
+      post sendNext();
     }
     atomic {
       if(call Queue.enqueue(c) == SUCCESS)
