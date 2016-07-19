@@ -70,7 +70,7 @@ Variable::Variable(const std::string& name, const char* formatStr, bool array, i
   std::replace(realName.begin(), realName.end(), '.', '$');
 
   if (sim_mote_get_variable_info(mote, realName.c_str(), &ptr, &len) == 0) {
-    data = new uint8_t[len + 1];
+    data.reset(new uint8_t[len + 1]);
     data[len] = 0;
   }
   else {
@@ -80,20 +80,19 @@ Variable::Variable(const std::string& name, const char* formatStr, bool array, i
 }
 
 Variable::~Variable() {
-  delete[] data;
 }
 
 void Variable::update() {
   if (data != nullptr && ptr != nullptr) {
     // Copy the data from the variable (ptr) into our local data (data).
-    memcpy(data, ptr, len);
+    memcpy(data.get(), ptr, len);
   }
 }
 
 variable_string_t Variable::getData() {
   variable_string_t str;
   if (data != nullptr && ptr != nullptr) {
-    str.ptr = data;
+    str.ptr = data.get();
     str.type = format.c_str();
     str.len = len;
     str.isArray = isArray;
@@ -104,7 +103,7 @@ variable_string_t Variable::getData() {
     str.ptr = const_cast<char*>("<no such variable>");
     str.type = "<no such variable>";
     str.len = strlen("<no such variable>");
-    str.isArray = 0;
+    str.isArray = false;
   }
   return str;
 }
