@@ -91,7 +91,7 @@ class Variable {
   std::string realName;
   std::string format;
   void* ptr;
-  uint8_t* data;
+  std::unique_ptr<uint8_t[]> data;
   size_t len;
   int mote;
   bool isArray;
