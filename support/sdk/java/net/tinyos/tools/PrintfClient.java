@@ -41,6 +41,7 @@ package net.tinyos.tools;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import net.tinyos.message.*;
 import net.tinyos.packet.*;
@@ -53,6 +54,10 @@ public class PrintfClient implements MessageListener {
   private static final SimpleDateFormat fmt = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
 
   private boolean print_datetime;
+
+  static {
+    fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+  }
   
   public PrintfClient(MoteIF moteIF) {
     this.moteIF = moteIF;
