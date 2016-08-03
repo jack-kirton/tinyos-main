@@ -49,7 +49,7 @@ import net.tinyos.util.*;
 
 public class PrintfClient implements MessageListener {
 
-  private MoteIF moteIF;
+  private final MoteIF moteIF;
 
   private static final SimpleDateFormat fmt = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
 
@@ -72,7 +72,7 @@ public class PrintfClient implements MessageListener {
     PrintfMsg msg = (PrintfMsg)message;
 
     for(int i=0; i<PrintfMsg.totalSize_buffer(); i++) {
-      char nextChar = (char)(msg.getElement_buffer(i));
+      char nextChar = (char)msg.getElement_buffer(i);
 
       if (this.print_datetime)
       {
