@@ -117,7 +117,7 @@ public class PrintfClient implements MessageListener {
     else {
       phoenix = BuildSource.makePhoenix(source, PrintStreamMessenger.err);
     }
-    System.out.print(phoenix);
+    System.out.println(phoenix);
     MoteIF mif = new MoteIF(phoenix);
     PrintfClient client = new PrintfClient(mif);
   }
