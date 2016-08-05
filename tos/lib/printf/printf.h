@@ -84,10 +84,9 @@ enum {
   AM_PRINTF_MSG = 100,
 };
 
-#define simdbg(name, fmtstr, ...) do { printf("%s:%lu:DEBUG (%" PRIu16 "): " fmtstr, name, call LocalTime.get(), TOS_NODE_ID, ##__VA_ARGS__); printfflush(); } while (FALSE)
-#define simdbg_clear(name, fmtstr, ...) do { printf(fmtstr, ##__VA_ARGS__); printfflush(); } while (FALSE)
-#define simdbgerror(name, fmtstr, ...) do { printf("%s:%lu:ERROR (%" PRIu16 "): " fmtstr, name, call LocalTime.get(), TOS_NODE_ID, ##__VA_ARGS__); printfflush(); } while (FALSE)
-#define simdbgerror_clear(name, fmtstr, ...) do { printf(fmtstr, ##__VA_ARGS__); printfflush(); } while (FALSE)
+#define simdbg(name, fmtstr, ...) do { printf("%s:%lu:DEBUG (%" PRIu16 "): " fmtstr, name, call LocalTime.get(), TOS_NODE_ID, ##__VA_ARGS__); } while (FALSE)
+#define simdbg_clear(name, fmtstr, ...) do { printf(fmtstr, ##__VA_ARGS__); } while (FALSE)
+#define simdbgerror(name, fmtstr, ...) do { printf("%s:%lu:ERROR (%" PRIu16 "): " fmtstr, name, call LocalTime.get(), TOS_NODE_ID, ##__VA_ARGS__); } while (FALSE)
+#define simdbgerror_clear(name, fmtstr, ...) do { printf(fmtstr, ##__VA_ARGS__); } while (FALSE)
 
 #endif //PRINTF_H
-
