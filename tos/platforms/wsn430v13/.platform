@@ -4,7 +4,6 @@ push( @includes, qw(
   %T/platforms/wsn430v13
   %T/platforms/wsn430v13/chips/msp430
   %T/platforms/wsn430v13/chips/cc1101
-  %T/platforms/wsn430v13/chips/ds2401
 
   ## Unique ID chip
   %T/chips/ds2401
@@ -46,7 +45,7 @@ push( @includes, qw(
   @opts = qw(
 
   -gcc=msp430-gcc
-  -mmcu=msp430x1611
+  -mmcu=msp430f1611
   -fnesc-target=msp430
   -fnesc-no-debug
   -fnesc-scheduler=TinySchedulerC,TinySchedulerC.TaskBasic,TaskBasic,TaskBasic,runTask,postTask
