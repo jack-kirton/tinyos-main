@@ -186,7 +186,7 @@ implementation
 
 		SERIAL_ASSERT( ((uint8_t*)msg) + call SerialPacketInfo.offset[uart]() == payload );
 
-		return signal Receive.receive[uart](msg, payload + (length - newLength), newLength);
+		return signal Receive.receive[uart](msg, ((char*)payload) + (length - newLength), newLength);
 	}
 
 	default event message_t* Receive.receive[uart_id_t id](message_t* msg, void* payload, uint8_t length)
