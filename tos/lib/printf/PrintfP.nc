@@ -93,7 +93,6 @@ module PrintfP @safe() {
     interface PrintfQueue<uint8_t> as Queue;
     interface AMSend;
     interface Packet;
-    interface Leds;
   }
 }
 implementation {
@@ -107,7 +106,9 @@ implementation {
   uint8_t state = S_STARTED;
   
   command error_t Init.init() {
-      atomic state = S_STARTED;
+      atomic {
+        state = S_STARTED;
+      }
       return SUCCESS;
   }
 
@@ -163,7 +164,7 @@ implementation {
   command int Putchar.putchar (int c)
   {
     atomic {
-      if (state == S_STARTED && call Queue.size() >= ((PRINTF_BUFFER_SIZE)/2)) {
+      if (state == S_STARTED && call Queue.size() >= (call Queue.maxSize() / 2)) {
         state = S_FLUSHING;
         post sendNext();
       }

@@ -60,7 +60,6 @@ implementation {
   components new PrintfQueueC(uint8_t, PRINTF_BUFFER_SIZE) as QueueC;
 
   components PrintfP;
-  components LedsC;
   
   MainC.SoftwareInit -> PrintfP;
   PrintfP.Queue -> QueueC;
@@ -70,4 +69,3 @@ implementation {
   components PutcharC;
   PutcharC.Putchar -> PrintfP;
 }
-
