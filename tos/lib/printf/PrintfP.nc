@@ -170,9 +170,7 @@ implementation {
         state = S_FLUSHING;
         post sendNext();
       }
-    }
 
-    atomic {
       if (call Queue.enqueue(c) == SUCCESS)
       {
         // Flush if newline
@@ -182,10 +180,12 @@ implementation {
           post sendNext();
         }
 
-        return 0;
+        // On success the character written is returned
+        return c;
       }
       else
       {
+        // On failure EOF (-1) is returned
         return -1;
       }
     }
