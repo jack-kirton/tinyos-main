@@ -141,18 +141,20 @@ implementation {
       if(call Queue.empty())
         return FAIL;
       state = S_FLUSHING;
+      post sendNext();
     }
-    post sendNext();
     return SUCCESS;
   }
     
-  event void AMSend.sendDone(message_t* msg, error_t error) {    
+  event void AMSend.sendDone(message_t* msg, error_t error) {
     if(error == SUCCESS) {
       atomic {
-        if(call Queue.size() > 0)
+        if(call Queue.size() > 0) {
           post sendNext();
-        else
+        }
+        else {
           state = S_STARTED;
+        }
       } 
     }
     else {
