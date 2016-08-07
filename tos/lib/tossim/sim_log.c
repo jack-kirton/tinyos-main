@@ -271,7 +271,7 @@ void sim_log_debug(uint16_t id, const char* string, const char* format, ...) {
   for (i = 0; i < outputs[id].num; i++) {
     FILE* file = outputs[id].files[i];
     va_start(args, format);
-    fprintf(file, "DEBUG (%lu): ", sim_node());
+    fprintf(file, "D:%lu:%lf:", sim_node(), sim_time() / (double)sim_ticks_per_sec());
     vfprintf(file, format, args); 
     fflush(file);
   }
@@ -287,7 +287,7 @@ void sim_log_error(uint16_t id, const char* string, const char* format, ...) {
   for (i = 0; i < outputs[id].num; i++) {
     FILE* file = outputs[id].files[i];
     va_start(args, format);
-    fprintf(file, "ERROR (%lu): ", sim_node());
+    fprintf(file, "E:%lu:%lf:", sim_node(), sim_time() / (double)sim_ticks_per_sec());
     vfprintf(file, format, args);
     fflush(file);
   }
