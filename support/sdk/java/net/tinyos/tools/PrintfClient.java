@@ -41,6 +41,7 @@ package net.tinyos.tools;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import net.tinyos.message.*;
 import net.tinyos.packet.*;
@@ -48,11 +49,15 @@ import net.tinyos.util.*;
 
 public class PrintfClient implements MessageListener {
 
-  private MoteIF moteIF;
+  private final MoteIF moteIF;
 
   private static final SimpleDateFormat fmt = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
 
   private boolean print_datetime;
+
+  static {
+    fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+  }
   
   public PrintfClient(MoteIF moteIF) {
     this.moteIF = moteIF;
@@ -67,7 +72,7 @@ public class PrintfClient implements MessageListener {
     PrintfMsg msg = (PrintfMsg)message;
 
     for(int i=0; i<PrintfMsg.totalSize_buffer(); i++) {
-      char nextChar = (char)(msg.getElement_buffer(i));
+      char nextChar = (char)msg.getElement_buffer(i);
 
       if (this.print_datetime)
       {
@@ -112,7 +117,7 @@ public class PrintfClient implements MessageListener {
     else {
       phoenix = BuildSource.makePhoenix(source, PrintStreamMessenger.err);
     }
-    System.out.print(phoenix);
+    System.out.println(phoenix);
     MoteIF mif = new MoteIF(phoenix);
     PrintfClient client = new PrintfClient(mif);
   }
