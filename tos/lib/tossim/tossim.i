@@ -385,6 +385,7 @@ class Mote {
     void turnOn();
     Variable* getVariable(const char* name_cstr);
 
+    void reserveNoiseTraces(size_t num_traces);
     void addNoiseTraceReading(int val);
     void createNoiseModel();
     int generateNoise(int when);

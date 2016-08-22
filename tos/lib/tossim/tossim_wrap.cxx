@@ -4378,6 +4378,16 @@ SWIG_From_long_SS_long  (long long value)
     PyLong_FromLongLong(value) : PyLong_FromLong(static_cast< long >(value)); 
 }
 
+
+SWIGINTERNINLINE int
+SWIG_AsVal_size_t (PyObject * obj, size_t *val)
+{
+  unsigned long v;
+  int res = SWIG_AsVal_unsigned_SS_long (obj, val ? &v : 0);
+  if (SWIG_IsOK(res) && val) *val = static_cast< size_t >(v);
+  return res;
+}
+
 SWIGINTERN PyObject *Tossim_register_event_callback__SWIG_1(Tossim *self,PyObject *callback,double time){
         try
         {
@@ -6893,6 +6903,36 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Mote_reserveNoiseTraces(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Mote *arg1 = (Mote *) 0 ;
+  size_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  size_t val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_reserveNoiseTraces" "', argument " "1"" of type '" "Mote *""'"); 
+  }
+  arg1 = reinterpret_cast< Mote * >(argp1);
+  ecode2 = SWIG_AsVal_size_t(swig_obj[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Mote_reserveNoiseTraces" "', argument " "2"" of type '" "size_t""'");
+  } 
+  arg2 = static_cast< size_t >(val2);
+  (arg1)->reserveNoiseTraces(arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Mote_addNoiseTraceReading(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Mote *arg1 = (Mote *) 0 ;
@@ -9210,6 +9250,7 @@ SWIGINTERN PyMethodDef SwigPyBuiltin__Mote_methods[] = {
   { "turnOff", (PyCFunction) _wrap_Mote_turnOff, METH_NOARGS, (char*) "" },
   { "turnOn", (PyCFunction) _wrap_Mote_turnOn, METH_NOARGS, (char*) "" },
   { "getVariable", (PyCFunction) _wrap_Mote_getVariable, METH_O, (char*) "" },
+  { "reserveNoiseTraces", (PyCFunction) _wrap_Mote_reserveNoiseTraces, METH_O, (char*) "" },
   { "addNoiseTraceReading", (PyCFunction) _wrap_Mote_addNoiseTraceReading, METH_O, (char*) "" },
   { "createNoiseModel", (PyCFunction) _wrap_Mote_createNoiseModel, METH_NOARGS, (char*) "" },
   { "generateNoise", (PyCFunction) _wrap_Mote_generateNoise, METH_O, (char*) "" },

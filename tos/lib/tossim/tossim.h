@@ -115,6 +115,7 @@ class Mote {
   void turnOn() noexcept;
   void setID(unsigned long id) noexcept;  
 
+  void reserveNoiseTraces(size_t num_traces);
   void addNoiseTraceReading(int val);
   void createNoiseModel();
   int generateNoise(int when);

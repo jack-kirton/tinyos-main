@@ -189,6 +189,10 @@ Variable* Mote::getVariable(const char* name_cstr) {
   return var;
 }
 
+void Mote::reserveNoiseTraces(size_t num_traces) {
+  sim_noise_reserve(nodeID, num_traces);
+}
+
 void Mote::addNoiseTraceReading(int val) {
   sim_noise_trace_add(nodeID, (char)val);
 }
