@@ -45,6 +45,7 @@
 %{
 #include <memory.h>
 #include <tossim.h>
+#include <sim_noise.h>
 
 #include <functional>
 
@@ -389,6 +390,48 @@ class Mote {
     void addNoiseTraceReading(int val);
     void createNoiseModel();
     int generateNoise(int when);
+
+    %extend {
+        PyObject* addNoiseTraces(PyObject *traces)
+        {
+            if (!PyList_Check(traces)) {
+                PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
+                return NULL;
+            }
+
+            Py_ssize_t size = PyList_GET_SIZE(traces);
+
+            $self->reserveNoiseTraces(size);
+
+            for (Py_ssize_t i = 0; i != size; ++i)
+            {
+                PyObject* trace = PyList_GET_ITEM(traces, i);
+
+                long trace_int;
+
+                if (PyLong_Check(trace)) {
+                    trace_int = PyLong_AsLong(trace);
+                }
+                else if (PyInt_Check(trace)) {
+                    trace_int = PyInt_AsLong(trace);
+                }
+                else {
+                    PyErr_SetString(PyExc_TypeError, "Requires a list of ints as a parameter.");
+                    return NULL;
+                }
+
+                if (trace_int < NOISE_MIN || trace_int > NOISE_MAX) {
+                    PyErr_Format(PyExc_ValueError, "Noise needs to be in valid range [%d, %d] but was %ld.",
+                        NOISE_MIN, NOISE_MAX, trace_int);
+                    return NULL;
+                }
+
+                $self->addNoiseTraceReading(trace_int);
+            }
+
+            Py_RETURN_NONE;
+        }
+    }
 };
 
 %extend Tossim {

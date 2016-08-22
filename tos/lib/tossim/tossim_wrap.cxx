@@ -3683,6 +3683,7 @@ namespace swig {
 
 #include <memory.h>
 #include <tossim.h>
+#include <sim_noise.h>
 
 #include <functional>
 
@@ -4388,6 +4389,44 @@ SWIG_AsVal_size_t (PyObject * obj, size_t *val)
   return res;
 }
 
+SWIGINTERN PyObject *Mote_addNoiseTraces(Mote *self,PyObject *traces){
+            if (!PyList_Check(traces)) {
+                PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
+                return NULL;
+            }
+
+            Py_ssize_t size = PyList_GET_SIZE(traces);
+
+            self->reserveNoiseTraces(size);
+
+            for (Py_ssize_t i = 0; i != size; ++i)
+            {
+                PyObject* trace = PyList_GET_ITEM(traces, i);
+
+                long trace_int;
+
+                if (PyLong_Check(trace)) {
+                    trace_int = PyLong_AsLong(trace);
+                }
+                else if (PyInt_Check(trace)) {
+                    trace_int = PyInt_AsLong(trace);
+                }
+                else {
+                    PyErr_SetString(PyExc_TypeError, "Requires a list of ints as a parameter.");
+                    return NULL;
+                }
+
+                if (trace_int < NOISE_MIN || trace_int > NOISE_MAX) {
+                    PyErr_Format(PyExc_ValueError, "Noise needs to be in valid range [%d, %d] but was %ld.",
+                        NOISE_MIN, NOISE_MAX, trace_int);
+                    return NULL;
+                }
+
+                self->addNoiseTraceReading(trace_int);
+            }
+
+            Py_RETURN_NONE;
+        }
 SWIGINTERN PyObject *Tossim_register_event_callback__SWIG_1(Tossim *self,PyObject *callback,double time){
         try
         {
@@ -7015,6 +7054,31 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Mote_addNoiseTraces(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Mote *arg1 = (Mote *) 0 ;
+  PyObject *arg2 = (PyObject *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  PyObject *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_addNoiseTraces" "', argument " "1"" of type '" "Mote *""'"); 
+  }
+  arg1 = reinterpret_cast< Mote * >(argp1);
+  arg2 = swig_obj[0];
+  result = (PyObject *)Mote_addNoiseTraces(arg1,arg2);
+  resultobj = result;
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   NescApp *arg1 = (NescApp *) 0 ;
@@ -9254,6 +9318,7 @@ SWIGINTERN PyMethodDef SwigPyBuiltin__Mote_methods[] = {
   { "addNoiseTraceReading", (PyCFunction) _wrap_Mote_addNoiseTraceReading, METH_O, (char*) "" },
   { "createNoiseModel", (PyCFunction) _wrap_Mote_createNoiseModel, METH_NOARGS, (char*) "" },
   { "generateNoise", (PyCFunction) _wrap_Mote_generateNoise, METH_O, (char*) "" },
+  { "addNoiseTraces", (PyCFunction) _wrap_Mote_addNoiseTraces, METH_O, (char*) "" },
   { NULL, NULL, 0, NULL } /* Sentinel */
 };
 
