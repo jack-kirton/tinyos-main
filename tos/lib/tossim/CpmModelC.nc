@@ -149,8 +149,8 @@ implementation {
   }
   
   double arr_estimate_from_snr(double SNR) {
-    double beta1 = 0.9794;
-    double beta2 = 2.3851;
+    const double beta1 = 0.9794;
+    const double beta2 = 2.3851;
     double X = SNR-beta2;
     double PSE = 0.5*erfc(beta1*X/sqrt(2));
     double prr_hat = pow(1-PSE, 23*2);
@@ -230,8 +230,8 @@ implementation {
     // Based on CC2420 measurement by Kannan.
     // The updated function below fixes the problem of non-zero PRR
     // at very low SNR. With this function PRR is 0 for SNR <= 3.
-    double beta1 = 0.9794;
-    double beta2 = 2.3851;
+    const double beta1 = 0.9794;
+    const double beta2 = 2.3851;
     double X = SNR-beta2;
     double PSE = 0.5*erfc(beta1*X/sqrt(2));
     double prr_hat = pow(1-PSE, 23*2);
