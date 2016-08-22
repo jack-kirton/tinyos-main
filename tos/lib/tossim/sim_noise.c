@@ -222,10 +222,10 @@ void sim_noise_dist(uint16_t node_id)__attribute__ ((C, spontaneous))
   size_t i;
   uint8_t bin;
   float cmf = 0.0f;
-  struct hashtable *pnoiseTable = noiseData[node_id].noiseTable;
-  char *key = noiseData[node_id].key;
-  char *freqKey = noiseData[node_id].freqKey;
-  sim_noise_hash_t *noise_hash = (sim_noise_hash_t *)hashtable_search(pnoiseTable, key);
+  struct hashtable *const pnoiseTable = noiseData[node_id].noiseTable;
+  char *const key = noiseData[node_id].key;
+  char *const freqKey = noiseData[node_id].freqKey;
+  sim_noise_hash_t *const noise_hash = (sim_noise_hash_t *)hashtable_search(pnoiseTable, key);
   const unsigned int numElements = noise_hash->numElements;
 
 //  noise_hash->flag;
@@ -279,7 +279,7 @@ void sim_noise_dist(uint16_t node_id)__attribute__ ((C, spontaneous))
 void arrangeKey(uint16_t node_id)__attribute__ ((C, spontaneous))
 {
   char *pKey = noiseData[node_id].key;
-  memcpy(pKey, pKey+1, NOISE_HISTORY-1);
+  memmove(pKey, pKey+1, NOISE_HISTORY-1);
 }
 
 /*
