@@ -199,6 +199,34 @@ public:
             throw std::runtime_error("Python exception occurred");
         }
     }
+
+    void operator()(const char* str, size_t length) const {
+        PyObject *args = PyTuple_New(1);
+
+#if PY_VERSION_HEX < 0x03000000
+        PyObject *pystring = PyString_FromStringAndSize(str, length);
+        if (pystring == NULL) {
+            throw std::runtime_error("Bad string");
+        }
+#else
+        PyObject *pystring = PyUnicode_FromStringAndSize(str, length);
+        if (pystring == NULL) {
+            throw std::runtime_error("Bad string");
+        }
+#endif
+
+        PyTuple_SetItem(args, 0, pystring);
+
+        PyObject *result = PyObject_CallObject(func, args);
+
+        Py_DECREF(args);
+        Py_XDECREF(result);
+
+        if (PyErr_Occurred() != NULL)
+        {
+            throw std::runtime_error("Python exception occurred");
+        }
+    }
 };
 
 FILE* object_to_file(PyObject* o)
@@ -435,6 +463,18 @@ class Mote {
 };
 
 %extend Tossim {
+    PyObject* addCallback(const char* channel, PyObject *callback) {
+        try
+        {
+            $self->addCallback(channel, PyCallback(callback));
+            Py_RETURN_NONE;
+        }
+        catch (std::runtime_error ex)
+        {
+            return NULL;
+        }
+    }
+
     PyObject* register_event_callback(PyObject *callback, double time) {
         try
         {
@@ -447,22 +487,10 @@ class Mote {
         }
     }
 
-    PyObject* runAllEvents(PyObject *continue_events, PyObject *callback) {
+    PyObject* runAllEventsWithMaxTime(double end_time, PyObject *continue_events) {
         try
         {
-            unsigned int result = $self->runAllEvents(PyCallback(continue_events), PyCallback(callback));
-            return PyLong_FromUnsignedLong(result);
-        }
-        catch (std::runtime_error ex)
-        {
-            return NULL;
-        }
-    }
-
-    PyObject* runAllEventsWithMaxTime(double end_time, PyObject *continue_events, PyObject *callback) {
-        try
-        {
-            unsigned int result = $self->runAllEventsWithMaxTime(end_time, PyCallback(continue_events), PyCallback(callback));
+            unsigned int result = $self->runAllEventsWithMaxTime(end_time, PyCallback(continue_events));
             return PyLong_FromUnsignedLong(result);
         }
         catch (std::runtime_error ex)
@@ -491,13 +519,14 @@ class Tossim {
 
     void addChannel(const char* channel, FILE* file);
     bool removeChannel(const char* channel, FILE* file);
+    void addCallback(const char* channel, std::function<void(const char*, size_t)> callback);
+
     void randomSeed(int seed);
 
     void register_event_callback(std::function<bool(double)> callback, double time);
 
     bool runNextEvent();
-    unsigned int runAllEvents(std::function<bool(double)> continue_events, std::function<void (unsigned int)> callback);
-    unsigned int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events, std::function<void (unsigned int)> callback);
+    unsigned int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events);
 
     MAC* mac();
     Radio* radio();

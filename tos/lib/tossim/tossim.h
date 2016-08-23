@@ -147,13 +147,14 @@ class Tossim {
 
   void addChannel(const char* channel, FILE* file);
   bool removeChannel(const char* channel, FILE* file);
+  void addCallback(const char* channel, std::function<void(const char*, size_t)> callback);
+
   void randomSeed(int seed);
 
   void register_event_callback(std::function<bool(double)> callback, double time);
   
   bool runNextEvent();
-  unsigned int runAllEvents(std::function<bool(double)> continue_events, std::function<void (unsigned int)> callback);
-  unsigned int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events, std::function<void (unsigned int)> callback);
+  unsigned int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events);
 
   MAC* mac();
   Radio* radio();
