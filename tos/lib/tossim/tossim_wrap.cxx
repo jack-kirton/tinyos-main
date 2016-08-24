@@ -4480,7 +4480,7 @@ SWIGINTERN PyObject *Tossim_register_event_callback__SWIG_1(Tossim *self,PyObjec
 SWIGINTERN PyObject *Tossim_runAllEventsWithMaxTime__SWIG_1(Tossim *self,double end_time,PyObject *continue_events){
         try
         {
-            unsigned int result = self->runAllEventsWithMaxTime(end_time, PyCallback(continue_events));
+            long long int result = self->runAllEventsWithMaxTime(end_time, PyCallback(continue_events));
             return PyLong_FromUnsignedLong(result);
         }
         catch (std::runtime_error ex)
@@ -7622,7 +7622,7 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEventsWithMaxTime__SWIG_0(PyObject *self
   int ecode2 = 0 ;
   void *argp3 ;
   int res3 = 0 ;
-  unsigned int result;
+  long long result;
   
   if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
@@ -7648,8 +7648,8 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEventsWithMaxTime__SWIG_0(PyObject *self
       if (SWIG_IsNewObj(res3)) delete temp;
     }
   }
-  result = (unsigned int)(arg1)->runAllEventsWithMaxTime(arg2,arg3);
-  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  result = (long long)(arg1)->runAllEventsWithMaxTime(arg2,arg3);
+  resultobj = SWIG_From_long_SS_long(static_cast< long long >(result));
   return resultobj;
 fail:
   return NULL;

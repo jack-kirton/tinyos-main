@@ -154,7 +154,7 @@ class Tossim {
   void register_event_callback(std::function<bool(double)> callback, double time);
   
   bool runNextEvent();
-  unsigned int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events);
+  long long int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events);
 
   MAC* mac();
   Radio* radio();

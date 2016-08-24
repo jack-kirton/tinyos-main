@@ -349,7 +349,7 @@ bool Tossim::runNextEvent() {
   return sim_run_next_event();
 }
 
-unsigned int Tossim::runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events) {
+long long int Tossim::runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events) {
   const long long int end_time_ticks = (long long int)ceil(end_time * ticksPerSecond());
   unsigned int event_count = 0;
   bool process_callback = true;
@@ -362,6 +362,8 @@ unsigned int Tossim::runAllEventsWithMaxTime(double end_time, std::function<bool
 
     if (!runNextEvent())
     {
+      // Use negative to signal no more events
+      event_count = -event_count;
       break;
     }
 

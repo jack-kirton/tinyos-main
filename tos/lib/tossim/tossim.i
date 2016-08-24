@@ -490,7 +490,7 @@ class Mote {
     PyObject* runAllEventsWithMaxTime(double end_time, PyObject *continue_events) {
         try
         {
-            unsigned int result = $self->runAllEventsWithMaxTime(end_time, PyCallback(continue_events));
+            long long int result = $self->runAllEventsWithMaxTime(end_time, PyCallback(continue_events));
             return PyLong_FromUnsignedLong(result);
         }
         catch (std::runtime_error ex)
@@ -526,7 +526,7 @@ class Tossim {
     void register_event_callback(std::function<bool(double)> callback, double time);
 
     bool runNextEvent();
-    unsigned int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events);
+    long long int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events);
 
     MAC* mac();
     Radio* radio();
