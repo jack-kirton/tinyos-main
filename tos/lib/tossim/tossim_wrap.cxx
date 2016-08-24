@@ -3804,13 +3804,11 @@ public:
         return bool_result;
     }
 
-    bool operator()(double t) const {
+    void operator()(double t) const {
         PyObject *args = PyTuple_New(1);
         PyTuple_SetItem(args, 0, PyFloat_FromDouble(t));
 
         PyObject *result = PyObject_CallObject(func, args);
-
-        bool bool_result = result != NULL && PyObject_IsTrue(result);
 
         Py_DECREF(args);
         Py_XDECREF(result);
@@ -3819,8 +3817,6 @@ public:
         {
             throw std::runtime_error("Python exception occurred");
         }
-
-        return bool_result;
     }
 
     void operator()(unsigned int i) const {
@@ -4481,7 +4477,7 @@ SWIGINTERN PyObject *Tossim_runAllEventsWithMaxTime__SWIG_1(Tossim *self,double 
         try
         {
             long long int result = self->runAllEventsWithMaxTime(end_time, PyCallback(continue_events));
-            return PyLong_FromUnsignedLong(result);
+            return PyLong_FromLongLong(result);
         }
         catch (std::runtime_error ex)
         {

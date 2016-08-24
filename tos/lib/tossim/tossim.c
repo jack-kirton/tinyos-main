@@ -310,7 +310,7 @@ void Tossim::randomSeed(int seed) {
 }
 
 typedef struct handle_python_event_data {
-  handle_python_event_data(Tossim* tossim, std::function<bool(double)> provided_event_callback)
+  handle_python_event_data(Tossim* tossim, std::function<void(double)> provided_event_callback)
     : self(tossim)
     , event_callback(std::move(provided_event_callback))
   {
@@ -318,26 +318,24 @@ typedef struct handle_python_event_data {
 
   Tossim* const self;
 
-  const std::function<bool(double)> event_callback;
+  const std::function<void(double)> event_callback;
 } handle_python_event_data_t;
 
 static void handle_python_event(void* void_event)
 {
   sim_event_t* event = static_cast<sim_event_t*>(void_event);
 
-  handle_python_event_data_t* data = static_cast<handle_python_event_data_t*>(event->data);
-
-  data->event_callback(data->self->timeInSeconds());
-
-  delete data;
+  std::unique_ptr<handle_python_event_data_t> data(static_cast<handle_python_event_data_t*>(event->data));
 
   // Set to nullptr to avoid a double free from TOSSIM trying to clean up the sim event
   event->data = nullptr;
 
   python_event_called = true;
+
+  data->event_callback(data->self->timeInSeconds());
 }
 
-void Tossim::register_event_callback(std::function<bool(double)> callback, double event_time) {
+void Tossim::register_event_callback(std::function<void(double)> callback, double event_time) {
   sim_register_event(
     static_cast<sim_time_t>(event_time * ticksPerSecond()),
     &handle_python_event,
