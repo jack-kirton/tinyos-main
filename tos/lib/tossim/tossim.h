@@ -151,7 +151,7 @@ class Tossim {
 
   void randomSeed(int seed);
 
-  void register_event_callback(std::function<bool(double)> callback, double time);
+  void register_event_callback(std::function<void(double)> callback, double time);
   
   bool runNextEvent();
   long long int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events);
