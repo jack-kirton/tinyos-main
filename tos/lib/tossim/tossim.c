@@ -351,7 +351,7 @@ bool Tossim::runNextEvent() {
 
 long long int Tossim::runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events) {
   const long long int end_time_ticks = (long long int)ceil(end_time * ticksPerSecond());
-  unsigned int event_count = 0;
+  long long int event_count = 0;
   bool process_callback = true;
 
   // We can skip calling the continue_events predicate if no log info was outputted, or no python callback occurred
