@@ -45,6 +45,7 @@
 %{
 #include <memory.h>
 #include <tossim.h>
+#include <sim_noise.h>
 
 #include <functional>
 
@@ -187,6 +188,34 @@ public:
     void operator()(unsigned int i) const {
         PyObject *args = PyTuple_New(1);
         PyTuple_SetItem(args, 0, PyLong_FromUnsignedLong(i));
+
+        PyObject *result = PyObject_CallObject(func, args);
+
+        Py_DECREF(args);
+        Py_XDECREF(result);
+
+        if (PyErr_Occurred() != NULL)
+        {
+            throw std::runtime_error("Python exception occurred");
+        }
+    }
+
+    void operator()(const char* str, size_t length) const {
+        PyObject *args = PyTuple_New(1);
+
+#if PY_VERSION_HEX < 0x03000000
+        PyObject *pystring = PyString_FromStringAndSize(str, length);
+        if (pystring == NULL) {
+            throw std::runtime_error("Bad string");
+        }
+#else
+        PyObject *pystring = PyUnicode_FromStringAndSize(str, length);
+        if (pystring == NULL) {
+            throw std::runtime_error("Bad string");
+        }
+#endif
+
+        PyTuple_SetItem(args, 0, pystring);
 
         PyObject *result = PyObject_CallObject(func, args);
 
@@ -385,12 +414,67 @@ class Mote {
     void turnOn();
     Variable* getVariable(const char* name_cstr);
 
+    void reserveNoiseTraces(size_t num_traces);
     void addNoiseTraceReading(int val);
     void createNoiseModel();
     int generateNoise(int when);
+
+    %extend {
+        PyObject* addNoiseTraces(PyObject *traces)
+        {
+            if (!PyList_Check(traces)) {
+                PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
+                return NULL;
+            }
+
+            Py_ssize_t size = PyList_GET_SIZE(traces);
+
+            $self->reserveNoiseTraces(size);
+
+            for (Py_ssize_t i = 0; i != size; ++i)
+            {
+                PyObject* trace = PyList_GET_ITEM(traces, i);
+
+                long trace_int;
+
+                if (PyLong_Check(trace)) {
+                    trace_int = PyLong_AsLong(trace);
+                }
+                else if (PyInt_Check(trace)) {
+                    trace_int = PyInt_AsLong(trace);
+                }
+                else {
+                    PyErr_SetString(PyExc_TypeError, "Requires a list of ints as a parameter.");
+                    return NULL;
+                }
+
+                if (trace_int < NOISE_MIN || trace_int > NOISE_MAX) {
+                    PyErr_Format(PyExc_ValueError, "Noise needs to be in valid range [%d, %d] but was %ld.",
+                        NOISE_MIN, NOISE_MAX, trace_int);
+                    return NULL;
+                }
+
+                $self->addNoiseTraceReading(trace_int);
+            }
+
+            Py_RETURN_NONE;
+        }
+    }
 };
 
 %extend Tossim {
+    PyObject* addCallback(const char* channel, PyObject *callback) {
+        try
+        {
+            $self->addCallback(channel, PyCallback(callback));
+            Py_RETURN_NONE;
+        }
+        catch (std::runtime_error ex)
+        {
+            return NULL;
+        }
+    }
+
     PyObject* register_event_callback(PyObject *callback, double time) {
         try
         {
@@ -403,22 +487,10 @@ class Mote {
         }
     }
 
-    PyObject* runAllEvents(PyObject *continue_events, PyObject *callback) {
+    PyObject* runAllEventsWithMaxTime(double end_time, PyObject *continue_events) {
         try
         {
-            unsigned int result = $self->runAllEvents(PyCallback(continue_events), PyCallback(callback));
-            return PyLong_FromUnsignedLong(result);
-        }
-        catch (std::runtime_error ex)
-        {
-            return NULL;
-        }
-    }
-
-    PyObject* runAllEventsWithMaxTime(double end_time, PyObject *continue_events, PyObject *callback) {
-        try
-        {
-            unsigned int result = $self->runAllEventsWithMaxTime(end_time, PyCallback(continue_events), PyCallback(callback));
+            long long int result = $self->runAllEventsWithMaxTime(end_time, PyCallback(continue_events));
             return PyLong_FromUnsignedLong(result);
         }
         catch (std::runtime_error ex)
@@ -447,13 +519,14 @@ class Tossim {
 
     void addChannel(const char* channel, FILE* file);
     bool removeChannel(const char* channel, FILE* file);
+    void addCallback(const char* channel, std::function<void(const char*, size_t)> callback);
+
     void randomSeed(int seed);
 
     void register_event_callback(std::function<bool(double)> callback, double time);
 
     bool runNextEvent();
-    unsigned int runAllEvents(std::function<bool(double)> continue_events, std::function<void (unsigned int)> callback);
-    unsigned int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events, std::function<void (unsigned int)> callback);
+    long long int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events);
 
     MAC* mac();
     Radio* radio();

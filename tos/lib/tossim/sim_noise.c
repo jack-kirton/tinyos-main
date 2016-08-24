@@ -100,7 +100,7 @@ void sim_noise_free(void) __attribute__ ((C, spontaneous)) {
   FreqKeyNum = 0;
 }
 
-void sim_noise_create_model(uint16_t node_id)__attribute__ ((C, spontaneous)) {
+void sim_noise_create_model(uint16_t node_id) __attribute__ ((C, spontaneous)) {
   makeNoiseModel(node_id);
   makePmfDistr(node_id);
 }
@@ -113,7 +113,15 @@ char sim_real_noise(uint16_t node_id, uint32_t cur_t) {
   return noiseData[node_id].noiseTrace[cur_t];
 }
 
-void sim_noise_trace_add(uint16_t node_id, char noiseVal)__attribute__ ((C, spontaneous)) {
+void sim_noise_reserve(uint16_t node_id, uint32_t num_traces) __attribute__ ((C, spontaneous)) {
+  sim_noise_node_t* const noise = &noiseData[node_id];
+  if (num_traces > noise->noiseTraceLen) {
+    noise->noiseTrace = (char*)realloc(noise->noiseTrace, sizeof(char) * num_traces);
+    noise->noiseTraceLen = num_traces;
+  }
+}
+
+void sim_noise_trace_add(uint16_t node_id, char noiseVal) __attribute__ ((C, spontaneous)) {
   sim_noise_node_t* const noise = &noiseData[node_id];
   // Need to double size of trace array
   if (noise->noiseTraceIndex == noise->noiseTraceLen) {
@@ -129,7 +137,7 @@ void sim_noise_trace_add(uint16_t node_id, char noiseVal)__attribute__ ((C, spon
 }
 
 
-uint8_t search_bin_num(char noise)__attribute__ ((C, spontaneous))
+uint8_t search_bin_num(char noise) __attribute__ ((C, spontaneous))
 {
   uint8_t bin;
   if (noise > NOISE_MAX || noise < NOISE_MIN) {
@@ -214,10 +222,10 @@ void sim_noise_dist(uint16_t node_id)__attribute__ ((C, spontaneous))
   size_t i;
   uint8_t bin;
   float cmf = 0.0f;
-  struct hashtable *pnoiseTable = noiseData[node_id].noiseTable;
-  char *key = noiseData[node_id].key;
-  char *freqKey = noiseData[node_id].freqKey;
-  sim_noise_hash_t *noise_hash = (sim_noise_hash_t *)hashtable_search(pnoiseTable, key);
+  struct hashtable *const pnoiseTable = noiseData[node_id].noiseTable;
+  char *const key = noiseData[node_id].key;
+  char *const freqKey = noiseData[node_id].freqKey;
+  sim_noise_hash_t *const noise_hash = (sim_noise_hash_t *)hashtable_search(pnoiseTable, key);
   const unsigned int numElements = noise_hash->numElements;
 
 //  noise_hash->flag;
@@ -271,7 +279,7 @@ void sim_noise_dist(uint16_t node_id)__attribute__ ((C, spontaneous))
 void arrangeKey(uint16_t node_id)__attribute__ ((C, spontaneous))
 {
   char *pKey = noiseData[node_id].key;
-  memcpy(pKey, pKey+1, NOISE_HISTORY-1);
+  memmove(pKey, pKey+1, NOISE_HISTORY-1);
 }
 
 /*

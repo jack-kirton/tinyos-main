@@ -208,6 +208,10 @@ bool sim_remove_channel(const char* channel, FILE* file) __attribute__ ((C, spon
   return sim_log_remove_channel(channel, file);
 }
 
+void sim_add_callback(const char* channel, void (*handle)(void* data, const char* line, size_t line_length), void* data) __attribute__ ((C, spontaneous)) {
+  sim_log_add_callback(channel, handle, data);
+}
+
 void sim_register_event(sim_time_t execution_time, void (*handle)(void*), void* data) __attribute__ ((C, spontaneous)) {
   sim_event_t* event = sim_queue_allocate_event();
 

@@ -69,6 +69,7 @@ const char* sim_time_string(void);
 
 void sim_add_channel(const char* channel, FILE* file);
 bool sim_remove_channel(const char* channel, FILE* file);
+void sim_add_callback(const char* channel, void (*handle)(void* data, const char* line, size_t line_length), void* data);
   
 bool sim_run_next_event(void);
 

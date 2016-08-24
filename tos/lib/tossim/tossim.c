@@ -189,6 +189,10 @@ Variable* Mote::getVariable(const char* name_cstr) {
   return var;
 }
 
+void Mote::reserveNoiseTraces(size_t num_traces) {
+  sim_noise_reserve(nodeID, num_traces);
+}
+
 void Mote::addNoiseTraceReading(int val) {
   sim_noise_trace_add(nodeID, (char)val);
 }
@@ -281,6 +285,26 @@ bool Tossim::removeChannel(const char* channel, FILE* file) {
   return sim_remove_channel(channel, file);
 }
 
+typedef struct handle_tossim_callback_data {
+  handle_tossim_callback_data(std::function<void(const char*, size_t)> provided_callback)
+    : callback(std::move(provided_callback))
+  {
+  }
+
+  const std::function<void(const char*, size_t)> callback;
+} handle_tossim_callback_data_t;
+
+static void handle_tossim_callback(void* void_data, const char* line, size_t line_length)
+{
+  handle_tossim_callback_data_t* data = static_cast<handle_tossim_callback_data_t*>(void_data);
+
+  data->callback(line, line_length);
+}
+
+void Tossim::addCallback(const char* channel, std::function<void(const char*, size_t)> callback) {
+  sim_add_callback(channel, &handle_tossim_callback, new handle_tossim_callback_data_t(std::move(callback)));
+}
+
 void Tossim::randomSeed(int seed) {
   return sim_random_seed(seed);
 }
@@ -310,7 +334,7 @@ static void handle_python_event(void* void_event)
   // Set to nullptr to avoid a double free from TOSSIM trying to clean up the sim event
   event->data = nullptr;
 
-  python_event_called = false;
+  python_event_called = true;
 }
 
 void Tossim::register_event_callback(std::function<bool(double)> callback, double event_time) {
@@ -325,29 +349,9 @@ bool Tossim::runNextEvent() {
   return sim_run_next_event();
 }
 
-unsigned int Tossim::runAllEvents(std::function<bool(double)> continue_events, std::function<void (unsigned int)> callback) {
-  unsigned int event_count = 0;
-  while (continue_events(timeInSeconds()))
-  {
-    if (!runNextEvent())
-    {
-      break;
-    }
-
-    // Only call the callback if there is something for it to process
-    if (sim_log_test_flag()) {
-      callback(event_count);
-    }
-
-    event_count += 1;
-  }
-
-  return event_count;
-}
-
-unsigned int Tossim::runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events, std::function<void (unsigned int)> callback) {
+long long int Tossim::runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events) {
   const long long int end_time_ticks = (long long int)ceil(end_time * ticksPerSecond());
-  unsigned int event_count = 0;
+  long long int event_count = 0;
   bool process_callback = true;
 
   // We can skip calling the continue_events predicate if no log info was outputted, or no python callback occurred
@@ -358,15 +362,12 @@ unsigned int Tossim::runAllEventsWithMaxTime(double end_time, std::function<bool
 
     if (!runNextEvent())
     {
+      // Use negative to signal no more events
+      event_count = -event_count;
       break;
     }
 
-    process_callback = sim_log_test_flag();
-
-    // Only call the callback if there is something for it to process
-    if (process_callback) {
-      callback(event_count);
-    }
+    process_callback = sim_log_test_write_flag() | sim_log_test_callback_flag();
 
     event_count += 1;
   }

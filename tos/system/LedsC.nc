@@ -56,9 +56,6 @@ implementation {
   LedsP.Led2 -> PlatformLedsC.Led2;
 
 #ifdef USE_SERIAL_PRINTF
-	components PrintfC;
-	components SerialStartC;
-
 	components LocalTimeMilliC;
 	
 	LedsP.LocalTime -> LocalTimeMilliC;
