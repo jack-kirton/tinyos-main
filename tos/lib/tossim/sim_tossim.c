@@ -148,7 +148,7 @@ bool sim_run_next_event(void) __attribute__ ((C, spontaneous)) {
 
     // Need to test whether function pointers are for statically
     // allocated events that are zeroed out on reboot
-    dbg("Tossim", "CORE: popping event 0x%p for %ul at %llu with handler %p...\n",
+    dbg("Tossim", "CORE: popping event 0x%p for %lu at %llu with handler %p...\n",
       event, sim_node(), sim_time(), event->handle);
     if ((event->force || sim_mote_is_on(event->mote)) && event->handle != NULL) {
       result = TRUE;
