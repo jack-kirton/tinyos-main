@@ -396,11 +396,13 @@ class Mote {
     Mote(const NescApp* app);
     ~Mote();
 
-    unsigned long id();
-    
-    long long int euid();
-    void setEuid(long long int id);
+    unsigned long id() const noexcept;
+  
+    long long int euid() const noexcept;
+    void setEuid(long long int id) noexcept;
 
+    long long int tag() const noexcept;
+    void setTag(long long int tag) noexcept;
     
     long long int bootTime() const noexcept;
     void bootAtTime(long long int time);

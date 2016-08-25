@@ -118,16 +118,24 @@ Mote::~Mote(){
   }
 }
 
-unsigned long Mote::id() noexcept {
+unsigned long Mote::id() const noexcept {
   return nodeID;
 }
 
-long long int Mote::euid() noexcept {
+long long int Mote::euid() const noexcept {
   return sim_mote_euid(nodeID);
 }
 
 void Mote::setEuid(long long int val) noexcept {
   sim_mote_set_euid(nodeID, val);
+}
+
+long long int Mote::tag() const noexcept {
+  return sim_mote_tag(nodeID);
+}
+
+void Mote::setTag(long long int val) noexcept {
+  sim_mote_set_tag(nodeID, val);
 }
 
 long long int Mote::bootTime() const noexcept {
@@ -204,6 +212,7 @@ void Mote::createNoiseModel() {
 int Mote::generateNoise(int when) {
   return static_cast<int>(sim_noise_generate(nodeID, when));
 }
+
 
 Tossim::Tossim(const NescApp* n)
   : app(n) // Take ownership
@@ -365,7 +374,7 @@ long long int Tossim::runAllEventsWithMaxTime(double end_time, std::function<boo
       break;
     }
 
-    process_callback = sim_log_test_write_flag() | sim_log_test_callback_flag();
+    process_callback = sim_log_test_flag();
 
     event_count += 1;
   }

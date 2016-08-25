@@ -49,6 +49,7 @@ module SimMoteP {
 implementation {
   long long int euid;
   long long int startTime;
+  long long int tag; // An arbitrary tag supplied by the developer, use to customise simulation actions.
   bool isOn;
   sim_event_t* bootEvent;
   
@@ -57,6 +58,12 @@ implementation {
   }
   async command void SimMote.setEuid(long long int e) {
     euid = e;
+  }
+  async command long long int SimMote.getTag() {
+    return tag;
+  }
+  async command void SimMote.setTag(long long int t) {
+    tag = t;
   }
   async command long long int SimMote.getStartTime() {
     return startTime;
@@ -71,10 +78,19 @@ implementation {
 
   command void SimMote.turnOn() {
     if (!isOn) {
+      // Backup variables that need to survive the memset'ing in __nesc_nido_initialise
+      const long long int tag_store = tag, euid_store = euid;
+
       if (bootEvent != NULL) {
         bootEvent->cancelled = TRUE;
       }
+
       __nesc_nido_initialise(sim_node());
+
+      // Restore variables
+      tag = tag_store;
+      euid = euid_store;
+
       startTime = sim_time();
       dbg("SimMoteP", "Setting start time to %llu\n", startTime);
       isOn = TRUE;
@@ -100,6 +116,22 @@ implementation {
     int tmp = sim_node();
     sim_set_node(mote);
     call SimMote.setEuid(id);
+    sim_set_node(tmp);
+  }
+
+  long long int sim_mote_tag(int mote) @C() @spontaneous() {
+    long long int result;
+    int tmp = sim_node();
+    sim_set_node(mote);
+    result = call SimMote.getTag();
+    sim_set_node(tmp);
+    return result;
+  }
+
+  void sim_mote_set_tag(int mote, long long int t)  @C() @spontaneous() {
+    int tmp = sim_node();
+    sim_set_node(mote);
+    call SimMote.setTag(t);
     sim_set_node(tmp);
   }
   

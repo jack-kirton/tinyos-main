@@ -6753,10 +6753,10 @@ SWIGINTERN PyObject *_wrap_Mote_id(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"Mote_id",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_id" "', argument " "1"" of type '" "Mote *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_id" "', argument " "1"" of type '" "Mote const *""'"); 
   }
   arg1 = reinterpret_cast< Mote * >(argp1);
-  result = (unsigned long)(arg1)->id();
+  result = (unsigned long)((Mote const *)arg1)->id();
   resultobj = SWIG_From_unsigned_SS_long(static_cast< unsigned long >(result));
   return resultobj;
 fail:
@@ -6775,10 +6775,10 @@ SWIGINTERN PyObject *_wrap_Mote_euid(PyObject *self, PyObject *args) {
   if (!SWIG_Python_UnpackTuple(args,"Mote_euid",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_euid" "', argument " "1"" of type '" "Mote *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_euid" "', argument " "1"" of type '" "Mote const *""'"); 
   }
   arg1 = reinterpret_cast< Mote * >(argp1);
-  result = (long long)(arg1)->euid();
+  result = (long long)((Mote const *)arg1)->euid();
   resultobj = SWIG_From_long_SS_long(static_cast< long long >(result));
   return resultobj;
 fail:
@@ -6809,6 +6809,58 @@ SWIGINTERN PyObject *_wrap_Mote_setEuid(PyObject *self, PyObject *args) {
   } 
   arg2 = static_cast< long long >(val2);
   (arg1)->setEuid(arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Mote_tag(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Mote *arg1 = (Mote *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  long long result;
+  
+  if (!SWIG_Python_UnpackTuple(args,"Mote_tag",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_tag" "', argument " "1"" of type '" "Mote const *""'"); 
+  }
+  arg1 = reinterpret_cast< Mote * >(argp1);
+  result = (long long)((Mote const *)arg1)->tag();
+  resultobj = SWIG_From_long_SS_long(static_cast< long long >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Mote_setTag(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Mote *arg1 = (Mote *) 0 ;
+  long long arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  long long val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Mote_setTag" "', argument " "1"" of type '" "Mote *""'"); 
+  }
+  arg1 = reinterpret_cast< Mote * >(argp1);
+  ecode2 = SWIG_AsVal_long_SS_long(swig_obj[0], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Mote_setTag" "', argument " "2"" of type '" "long long""'");
+  } 
+  arg2 = static_cast< long long >(val2);
+  (arg1)->setTag(arg2);
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -9307,6 +9359,8 @@ SWIGINTERN PyMethodDef SwigPyBuiltin__Mote_methods[] = {
   { "id", (PyCFunction) _wrap_Mote_id, METH_NOARGS, (char*) "" },
   { "euid", (PyCFunction) _wrap_Mote_euid, METH_NOARGS, (char*) "" },
   { "setEuid", (PyCFunction) _wrap_Mote_setEuid, METH_O, (char*) "" },
+  { "tag", (PyCFunction) _wrap_Mote_tag, METH_NOARGS, (char*) "" },
+  { "setTag", (PyCFunction) _wrap_Mote_setTag, METH_O, (char*) "" },
   { "bootTime", (PyCFunction) _wrap_Mote_bootTime, METH_NOARGS, (char*) "" },
   { "bootAtTime", (PyCFunction) _wrap_Mote_bootAtTime, METH_O, (char*) "" },
   { "isOn", (PyCFunction) _wrap_Mote_isOn, METH_NOARGS, (char*) "" },

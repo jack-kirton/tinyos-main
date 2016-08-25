@@ -102,10 +102,13 @@ class Mote {
   Mote(const NescApp* app);
   ~Mote();
 
-  unsigned long id() noexcept;
+  unsigned long id() const noexcept;
   
-  long long int euid() noexcept;
+  long long int euid() const noexcept;
   void setEuid(long long int id) noexcept;
+
+  long long int tag() const noexcept;
+  void setTag(long long int tag) noexcept;
 
   long long int bootTime() const noexcept;
   void bootAtTime(long long int time) noexcept;
@@ -121,7 +124,7 @@ class Mote {
   int generateNoise(int when);
   
   Variable* getVariable(const char* name_cstr);
-  
+
  private:
   unsigned long nodeID;
   const NescApp* app;

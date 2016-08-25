@@ -74,7 +74,7 @@ void sim_add_callback(const char* channel, void (*handle)(void* data, const char
 bool sim_run_next_event(void);
 
 void sim_register_event(sim_time_t execution_time, void (*handle)(void*), void* data);
-  
+
 #ifdef __cplusplus
 }
 #endif
