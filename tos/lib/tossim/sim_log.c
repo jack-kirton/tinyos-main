@@ -82,22 +82,15 @@ static sim_log_output_t outputs[SIM_LOG_OUTPUT_COUNT];
 static struct hashtable* channelTable = NULL;
 
 static bool write_performed = FALSE;
-static bool callback_performed = FALSE;
 
 void sim_log_reset_flag(void) __attribute__ ((C, spontaneous))
 {
   write_performed = FALSE;
-  callback_performed = TRUE;
 }
 
-bool sim_log_test_write_flag(void) __attribute__ ((C, spontaneous))
+bool sim_log_test_flag(void) __attribute__ ((C, spontaneous))
 {
   return write_performed;
-}
-
-bool sim_log_test_callback_flag(void) __attribute__ ((C, spontaneous))
-{
-  return callback_performed;
 }
 
 

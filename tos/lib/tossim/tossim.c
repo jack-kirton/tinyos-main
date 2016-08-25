@@ -365,7 +365,7 @@ long long int Tossim::runAllEventsWithMaxTime(double end_time, std::function<boo
       break;
     }
 
-    process_callback = sim_log_test_write_flag() | sim_log_test_callback_flag();
+    process_callback = sim_log_test_flag();
 
     event_count += 1;
   }
