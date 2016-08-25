@@ -53,6 +53,9 @@ extern "C" {
 long long int sim_mote_euid(int mote);
 void sim_mote_set_euid(int mote, long long int euid);
 
+long long int sim_mote_tag(int mote);
+void sim_mote_set_tag(int mote, long long int tag);
+
 long long int sim_mote_start_time(int mote);
 void sim_mote_set_start_time(int mote, long long int t);
 

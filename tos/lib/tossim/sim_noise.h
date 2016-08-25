@@ -60,7 +60,7 @@ enum {
   NOISE_MIN_TRACE = 128, 
   NOISE_NUM_VALUES = NOISE_MAX - NOISE_MIN + 1,    //TODO check the + 1, also in NOISE_BIN_SIZE above in the inner parens
 };
-  
+
 typedef struct sim_noise_hash_t {
   char key[NOISE_HISTORY];
   unsigned int numElements;

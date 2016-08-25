@@ -42,6 +42,8 @@
 interface SimMote {
   async command long long int getEuid();
   async command void setEuid(long long int euid);
+  async command long long int getTag();
+  async command void setTag(long long int tag);
   async command long long int getStartTime();
   async command bool isOn();
   async command int getVariableInfo(const char* name, void** ptr, size_t* len);
