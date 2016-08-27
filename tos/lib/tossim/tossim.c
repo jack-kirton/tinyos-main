@@ -382,6 +382,36 @@ long long int Tossim::runAllEventsWithMaxTime(double end_time, std::function<boo
   return event_count;
 }
 
+long long int Tossim::runAllEventsWithMaxTimeAndCallback(double end_time, std::function<bool()> continue_events, std::function<void(long long int)> callback) {
+  const long long int end_time_ticks = (long long int)ceil(end_time * ticksPerSecond());
+  long long int event_count = 0;
+  bool process_callback = true;
+
+  // We can skip calling the continue_events predicate if no log info was outputted, or no python callback occurred
+  while (sim_time() < end_time_ticks && ((!process_callback && !python_event_called) || continue_events()))
+  {
+    // Reset the python event called flag as we have no handled it
+    python_event_called = false;
+
+    if (!runNextEvent())
+    {
+      // Use negative to signal no more events
+      event_count = -event_count;
+      break;
+    }
+
+    process_callback = sim_log_test_flag();
+
+    if (process_callback) {
+      callback(event_count);
+    }
+
+    event_count += 1;
+  }
+
+  return event_count;
+}
+
 MAC* Tossim::mac() {
   return new MAC();
 }
