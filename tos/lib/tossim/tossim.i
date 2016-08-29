@@ -136,7 +136,7 @@ public:
         Py_XINCREF(func);
     }
     PyCallback(PyObject *pfunc) {
-        if (!pfunc || Py_None == pfunc || !PyCallable_Check(pfunc))
+        if (!pfunc || Py_None == func || !PyCallable_Check(pfunc))
         {
             PyErr_SetString(PyExc_TypeError, "Requires a callable as a parameter.");
             throw std::runtime_error("Python exception occurred");
@@ -181,9 +181,9 @@ public:
         }
     }
 
-    void operator()(unsigned int i) const {
+    void operator()(long long int i) const {
         PyObject *args = PyTuple_New(1);
-        PyTuple_SetItem(args, 0, PyLong_FromUnsignedLong(i));
+        PyTuple_SetItem(args, 0, PyLong_FromLongLong(i));
 
         PyObject *result = PyObject_CallObject(func, args);
 
@@ -496,6 +496,18 @@ class Mote {
             return NULL;
         }
     }
+
+    PyObject* runAllEventsWithMaxTimeAndCallback(double end_time, PyObject *continue_events, PyObject *callback) {
+        try
+        {
+            long long int result = $self->runAllEventsWithMaxTimeAndCallback(end_time, PyCallback(continue_events), PyCallback(callback));
+            return PyLong_FromLongLong(result);
+        }
+        catch (std::runtime_error ex)
+        {
+            return NULL;
+        }
+    }
 }
 
 class Tossim {
@@ -525,6 +537,7 @@ class Tossim {
 
     bool runNextEvent();
     long long int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events);
+    long long int runAllEventsWithMaxTimeAndCallback(double end_time, std::function<bool()> continue_events, std::function<void(long long int)> callback);
 
     MAC* mac();
     Radio* radio();
