@@ -3775,7 +3775,7 @@ public:
         Py_XINCREF(func);
     }
     PyCallback(PyObject *pfunc) {
-        if (!pfunc || Py_None == func || !PyCallable_Check(pfunc))
+        if (!pfunc || Py_None == pfunc || !PyCallable_Check(pfunc))
         {
             PyErr_SetString(PyExc_TypeError, "Requires a callable as a parameter.");
             throw std::runtime_error("Python exception occurred");
@@ -4463,10 +4463,10 @@ SWIGINTERN PyObject *Tossim_addCallback__SWIG_1(Tossim *self,char const *channel
             return NULL;
         }
     }
-SWIGINTERN PyObject *Tossim_register_event_callback__SWIG_1(Tossim *self,PyObject *callback,double time){
+SWIGINTERN PyObject *Tossim_register_event_callback__SWIG_1(Tossim *self,PyObject *callback,double current_time){
         try
         {
-            self->register_event_callback(PyCallback(callback), time);
+            self->register_event_callback(PyCallback(callback), current_time);
             Py_RETURN_NONE;
         }
         catch (std::runtime_error ex)

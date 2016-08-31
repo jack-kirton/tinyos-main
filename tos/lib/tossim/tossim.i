@@ -136,7 +136,7 @@ public:
         Py_XINCREF(func);
     }
     PyCallback(PyObject *pfunc) {
-        if (!pfunc || Py_None == func || !PyCallable_Check(pfunc))
+        if (!pfunc || Py_None == pfunc || !PyCallable_Check(pfunc))
         {
             PyErr_SetString(PyExc_TypeError, "Requires a callable as a parameter.");
             throw std::runtime_error("Python exception occurred");
@@ -473,10 +473,10 @@ class Mote {
         }
     }
 
-    PyObject* register_event_callback(PyObject *callback, double time) {
+    PyObject* register_event_callback(PyObject *callback, double current_time) {
         try
         {
-            $self->register_event_callback(PyCallback(callback), time);
+            $self->register_event_callback(PyCallback(callback), current_time);
             Py_RETURN_NONE;
         }
         catch (std::runtime_error ex)
@@ -533,7 +533,7 @@ class Tossim {
 
     void randomSeed(int seed);
 
-    void register_event_callback(std::function<bool(double)> callback, double time);
+    void register_event_callback(std::function<bool(double)> callback, double current_time);
 
     bool runNextEvent();
     long long int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events);
