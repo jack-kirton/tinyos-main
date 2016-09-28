@@ -67,7 +67,18 @@ Variable::Variable(const std::string& name, const char* formatStr, bool array, i
   , mote(which)
   , isArray(array)
 {
-  std::replace(realName.begin(), realName.end(), '.', '$');
+  // Names can come in two formats:
+  // nongeneric: "ActiveMessageAddressC$addr"
+  // generic: "/*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm128AlarmAsyncP*/Atm128AlarmAsyncP$0$set"
+  // We need to change the "." to "$" in parts after the /*...*/ part
+
+  size_t last_slash_pos = realName.find_last_of('/');
+  if (last_slash_pos == std::string::npos)
+  {
+    last_slash_pos = 0;
+  }
+
+  std::replace(realName.begin() + last_slash_pos, realName.end(), '.', '$');
 
   if (sim_mote_get_variable_info(mote, realName.c_str(), &ptr, &len) == 0) {
     data.reset(new uint8_t[len + 1]);
