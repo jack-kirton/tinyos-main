@@ -123,12 +123,12 @@ class Mote {
   void createNoiseModel();
   int generateNoise(int when);
   
-  Variable* getVariable(const char* name_cstr);
+  std::shared_ptr<Variable> getVariable(const char* name_cstr);
 
  private:
   unsigned long nodeID;
   const NescApp* app;
-  std::unordered_map<std::string, Variable*> varTable;
+  std::unordered_map<std::string, std::shared_ptr<Variable>> varTable;
 };
 
 class Tossim {
@@ -168,9 +168,9 @@ class Tossim {
     std::function<bool()> continue_events,
     std::function<void(long long int)> callback);
 
-  MAC* mac();
-  Radio* radio();
-  Packet* newPacket();
+  std::shared_ptr<MAC> mac();
+  std::shared_ptr<Radio> radio();
+  std::shared_ptr<Packet> newPacket();
 
 private:
   void free_motes();

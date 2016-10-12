@@ -45,6 +45,7 @@
 #include <stdint.h>
 
 #include <algorithm>
+#include <stdexcept>
 
 #include <tossim.h>
 #include <sim_tossim.h>
@@ -122,11 +123,7 @@ variable_string_t Variable::getData() {
 Mote::Mote(const NescApp* n) : app(n) {
 }
 
-Mote::~Mote(){
-  for (auto iter = varTable.begin(), end = varTable.end(); iter != end; ++iter)
-  {
-    delete iter->second;
-  }
+Mote::~Mote() {
 }
 
 unsigned long Mote::id() const noexcept {
@@ -174,8 +171,8 @@ void Mote::setID(unsigned long val) noexcept {
   nodeID = val;
 }
 
-Variable* Mote::getVariable(const char* name_cstr) {
-  Variable* var;
+std::shared_ptr<Variable> Mote::getVariable(const char* name_cstr) {
+  std::shared_ptr<Variable> var;
 
   std::string name(name_cstr);
 
@@ -197,7 +194,7 @@ Variable* Mote::getVariable(const char* name_cstr) {
       }
     }
 
-    var = new Variable(name, typeStr, isArray, nodeID);
+    var = std::make_shared<Variable>(name, typeStr, isArray, nodeID);
 
     varTable.emplace(std::move(name), var);
   }
@@ -277,21 +274,19 @@ Mote* Tossim::currentNode() noexcept {
 
 Mote* Tossim::getNode(unsigned long nodeID) noexcept {
   if (nodeID >= TOSSIM_MAX_NODES) {
-    // TODO: log an error, asked for an invalid node
-    return nullptr;
+    throw std::runtime_error("Asked for an invalid node id. You may need to increase the maximum number of nodes.");
   }
-  else {
-    if (motes[nodeID] == nullptr) {
-      motes[nodeID] = new Mote(app.get());
-      if (nodeID == TOSSIM_MAX_NODES) {
-        motes[nodeID]->setID(0xffff);
-      }
-      else {
-        motes[nodeID]->setID(nodeID);
-      }
+
+  if (motes[nodeID] == nullptr) {
+    motes[nodeID] = new Mote(app.get());
+    if (nodeID == TOSSIM_MAX_NODES) {
+      motes[nodeID]->setID(0xffff);
     }
-    return motes[nodeID];
+    else {
+      motes[nodeID]->setID(nodeID);
+    }
   }
+  return motes[nodeID];
 }
 
 void Tossim::setCurrentNode(unsigned long nodeID) noexcept {
@@ -445,14 +440,14 @@ long long int Tossim::runAllEventsWithTriggeredMaxTimeAndCallback(
   return event_count;
 }
 
-MAC* Tossim::mac() {
-  return new MAC();
+std::shared_ptr<MAC> Tossim::mac() {
+  return std::make_shared<MAC>();
 }
 
-Radio* Tossim::radio() {
-  return new Radio();
+std::shared_ptr<Radio> Tossim::radio() {
+  return std::make_shared<Radio>();
 }
 
-Packet* Tossim::newPacket() {
-  return new Packet();
+std::shared_ptr<Packet> Tossim::newPacket() {
+  return std::make_shared<Packet>();
 }

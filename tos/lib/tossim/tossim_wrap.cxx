@@ -3556,12 +3556,16 @@ SwigPyBuiltin_SetMetaType (PyTypeObject *type, PyTypeObject *metatype)
 #define SWIGTYPE_p_std__functionT_bool_fdoubleF_t swig_types[11]
 #define SWIGTYPE_p_std__functionT_void_fchar_const_p_size_tF_t swig_types[12]
 #define SWIGTYPE_p_std__functionT_void_flong_longF_t swig_types[13]
-#define SWIGTYPE_p_std__vectorT_bool_t swig_types[14]
-#define SWIGTYPE_p_std__vectorT_std__string_t swig_types[15]
-#define SWIGTYPE_p_variable_string swig_types[16]
-#define SWIGTYPE_p_void swig_types[17]
-static swig_type_info *swig_types[19];
-static swig_module_info swig_module = {swig_types, 18, 0, 0, 0, 0};
+#define SWIGTYPE_p_std__shared_ptrT_MAC_t swig_types[14]
+#define SWIGTYPE_p_std__shared_ptrT_Packet_t swig_types[15]
+#define SWIGTYPE_p_std__shared_ptrT_Radio_t swig_types[16]
+#define SWIGTYPE_p_std__shared_ptrT_Variable_t swig_types[17]
+#define SWIGTYPE_p_std__vectorT_bool_t swig_types[18]
+#define SWIGTYPE_p_std__vectorT_std__string_t swig_types[19]
+#define SWIGTYPE_p_variable_string swig_types[20]
+#define SWIGTYPE_p_void swig_types[21]
+static swig_type_info *swig_types[23];
+static swig_module_info swig_module = {swig_types, 22, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -3680,6 +3684,13 @@ namespace swig {
 
 
 #include <stddef.h>
+
+
+SWIGINTERNINLINE PyObject*
+  SWIG_From_int  (int value)
+{
+  return PyInt_FromLong((long) value);
+}
 
 
 #include <memory.h>
@@ -3902,11 +3913,17 @@ FILE* object_to_file(PyObject* o)
 #include <mac.h>
 
 
-SWIGINTERNINLINE PyObject*
-  SWIG_From_int  (int value)
-{
-  return PyInt_FromLong((long) value);
-}
+struct SWIG_null_deleter {
+  void operator() (void const *) const {
+  }
+};
+#define SWIG_NO_NULL_DELETER_0 , SWIG_null_deleter()
+#define SWIG_NO_NULL_DELETER_1
+#define SWIG_NO_NULL_DELETER_SWIG_POINTER_NEW
+#define SWIG_NO_NULL_DELETER_SWIG_POINTER_OWN
+
+
+#define SWIG_NO_NULL_DELETER_SWIG_BUILTIN_INIT
 
 
 #include <limits.h>
@@ -4505,7 +4522,10 @@ SWIGINTERN int _wrap_new_MAC(PyObject *self, PyObject *args) {
   
   if (!SWIG_Python_UnpackTuple(args,"new_MAC",0,0,0)) SWIG_fail;
   result = (MAC *)new MAC();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MAC, SWIG_BUILTIN_INIT |  0 );
+  {
+    std::shared_ptr<  MAC > *smartresult = result ? new std::shared_ptr<  MAC >(result SWIG_NO_NULL_DELETER_SWIG_BUILTIN_INIT) : 0;
+    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_MAC_t, SWIG_BUILTIN_INIT | SWIG_POINTER_OWN);
+  }
   return resultobj == Py_None ? -1 : 0;
 fail:
   return -1;
@@ -4517,15 +4537,27 @@ SWIGINTERN PyObject *_wrap_delete_MAC(PyObject *self, PyObject *args) {
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   
   if (!SWIG_Python_UnpackTuple(args,"delete_MAC",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_MAC" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_MAC" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
-  delete arg1;
+  (void)arg1; delete smartarg1;
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4538,15 +4570,27 @@ SWIGINTERN PyObject *_wrap_MAC_initHigh(PyObject *self, PyObject *args) {
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"MAC_initHigh",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_initHigh" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_initHigh" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   result = (int)(arg1)->initHigh();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -4560,15 +4604,27 @@ SWIGINTERN PyObject *_wrap_MAC_initLow(PyObject *self, PyObject *args) {
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"MAC_initLow",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_initLow" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_initLow" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   result = (int)(arg1)->initLow();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -4582,15 +4638,27 @@ SWIGINTERN PyObject *_wrap_MAC_high(PyObject *self, PyObject *args) {
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC const > tempshared1 ;
+  std::shared_ptr< MAC const > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"MAC_high",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_high" "', argument " "1"" of type '" "MAC const *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_high" "', argument " "1"" of type '" "MAC const *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   result = (int)((MAC const *)arg1)->high();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -4604,15 +4672,27 @@ SWIGINTERN PyObject *_wrap_MAC_low(PyObject *self, PyObject *args) {
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC const > tempshared1 ;
+  std::shared_ptr< MAC const > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"MAC_low",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_low" "', argument " "1"" of type '" "MAC const *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_low" "', argument " "1"" of type '" "MAC const *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   result = (int)((MAC const *)arg1)->low();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -4626,15 +4706,27 @@ SWIGINTERN PyObject *_wrap_MAC_symbolsPerSec(PyObject *self, PyObject *args) {
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC const > tempshared1 ;
+  std::shared_ptr< MAC const > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"MAC_symbolsPerSec",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_symbolsPerSec" "', argument " "1"" of type '" "MAC const *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_symbolsPerSec" "', argument " "1"" of type '" "MAC const *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   result = (int)((MAC const *)arg1)->symbolsPerSec();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -4648,15 +4740,27 @@ SWIGINTERN PyObject *_wrap_MAC_bitsPerSymbol(PyObject *self, PyObject *args) {
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC const > tempshared1 ;
+  std::shared_ptr< MAC const > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"MAC_bitsPerSymbol",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_bitsPerSymbol" "', argument " "1"" of type '" "MAC const *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_bitsPerSymbol" "', argument " "1"" of type '" "MAC const *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   result = (int)((MAC const *)arg1)->bitsPerSymbol();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -4670,15 +4774,27 @@ SWIGINTERN PyObject *_wrap_MAC_preambleLength(PyObject *self, PyObject *args) {
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC const > tempshared1 ;
+  std::shared_ptr< MAC const > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"MAC_preambleLength",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_preambleLength" "', argument " "1"" of type '" "MAC const *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_preambleLength" "', argument " "1"" of type '" "MAC const *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   result = (int)((MAC const *)arg1)->preambleLength();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -4692,15 +4808,27 @@ SWIGINTERN PyObject *_wrap_MAC_exponentBase(PyObject *self, PyObject *args) {
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC const > tempshared1 ;
+  std::shared_ptr< MAC const > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"MAC_exponentBase",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_exponentBase" "', argument " "1"" of type '" "MAC const *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_exponentBase" "', argument " "1"" of type '" "MAC const *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   result = (int)((MAC const *)arg1)->exponentBase();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -4714,15 +4842,27 @@ SWIGINTERN PyObject *_wrap_MAC_maxIterations(PyObject *self, PyObject *args) {
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC const > tempshared1 ;
+  std::shared_ptr< MAC const > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"MAC_maxIterations",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_maxIterations" "', argument " "1"" of type '" "MAC const *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_maxIterations" "', argument " "1"" of type '" "MAC const *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   result = (int)((MAC const *)arg1)->maxIterations();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -4736,15 +4876,27 @@ SWIGINTERN PyObject *_wrap_MAC_minFreeSamples(PyObject *self, PyObject *args) {
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC const > tempshared1 ;
+  std::shared_ptr< MAC const > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"MAC_minFreeSamples",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_minFreeSamples" "', argument " "1"" of type '" "MAC const *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_minFreeSamples" "', argument " "1"" of type '" "MAC const *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   result = (int)((MAC const *)arg1)->minFreeSamples();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -4758,15 +4910,27 @@ SWIGINTERN PyObject *_wrap_MAC_rxtxDelay(PyObject *self, PyObject *args) {
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC const > tempshared1 ;
+  std::shared_ptr< MAC const > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"MAC_rxtxDelay",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_rxtxDelay" "', argument " "1"" of type '" "MAC const *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_rxtxDelay" "', argument " "1"" of type '" "MAC const *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   result = (int)((MAC const *)arg1)->rxtxDelay();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -4780,15 +4944,27 @@ SWIGINTERN PyObject *_wrap_MAC_ackTime(PyObject *self, PyObject *args) {
   MAC *arg1 = (MAC *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC const > tempshared1 ;
+  std::shared_ptr< MAC const > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"MAC_ackTime",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_ackTime" "', argument " "1"" of type '" "MAC const *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_ackTime" "', argument " "1"" of type '" "MAC const *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr< const MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   result = (int)((MAC const *)arg1)->ackTime();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -4803,17 +4979,29 @@ SWIGINTERN PyObject *_wrap_MAC_setInitHigh(PyObject *self, PyObject *args) {
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setInitHigh" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setInitHigh" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setInitHigh" "', argument " "2"" of type '" "int""'");
@@ -4833,17 +5021,29 @@ SWIGINTERN PyObject *_wrap_MAC_setInitLow(PyObject *self, PyObject *args) {
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setInitLow" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setInitLow" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setInitLow" "', argument " "2"" of type '" "int""'");
@@ -4863,17 +5063,29 @@ SWIGINTERN PyObject *_wrap_MAC_setHigh(PyObject *self, PyObject *args) {
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setHigh" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setHigh" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setHigh" "', argument " "2"" of type '" "int""'");
@@ -4893,17 +5105,29 @@ SWIGINTERN PyObject *_wrap_MAC_setLow(PyObject *self, PyObject *args) {
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setLow" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setLow" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setLow" "', argument " "2"" of type '" "int""'");
@@ -4923,17 +5147,29 @@ SWIGINTERN PyObject *_wrap_MAC_setSymbolsPerSec(PyObject *self, PyObject *args) 
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setSymbolsPerSec" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setSymbolsPerSec" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setSymbolsPerSec" "', argument " "2"" of type '" "int""'");
@@ -4953,17 +5189,29 @@ SWIGINTERN PyObject *_wrap_MAC_setBitsBerSymbol(PyObject *self, PyObject *args) 
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setBitsBerSymbol" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setBitsBerSymbol" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setBitsBerSymbol" "', argument " "2"" of type '" "int""'");
@@ -4983,17 +5231,29 @@ SWIGINTERN PyObject *_wrap_MAC_setPreambleLength(PyObject *self, PyObject *args)
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setPreambleLength" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setPreambleLength" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setPreambleLength" "', argument " "2"" of type '" "int""'");
@@ -5013,17 +5273,29 @@ SWIGINTERN PyObject *_wrap_MAC_setExponentBase(PyObject *self, PyObject *args) {
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setExponentBase" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setExponentBase" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setExponentBase" "', argument " "2"" of type '" "int""'");
@@ -5043,17 +5315,29 @@ SWIGINTERN PyObject *_wrap_MAC_setMaxIterations(PyObject *self, PyObject *args) 
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setMaxIterations" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setMaxIterations" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setMaxIterations" "', argument " "2"" of type '" "int""'");
@@ -5073,17 +5357,29 @@ SWIGINTERN PyObject *_wrap_MAC_setMinFreeSamples(PyObject *self, PyObject *args)
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setMinFreeSamples" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setMinFreeSamples" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setMinFreeSamples" "', argument " "2"" of type '" "int""'");
@@ -5103,17 +5399,29 @@ SWIGINTERN PyObject *_wrap_MAC_setRxtxDelay(PyObject *self, PyObject *args) {
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setRxtxDelay" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setRxtxDelay" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setRxtxDelay" "', argument " "2"" of type '" "int""'");
@@ -5133,17 +5441,29 @@ SWIGINTERN PyObject *_wrap_MAC_setAckTime(PyObject *self, PyObject *args) {
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< MAC > tempshared1 ;
+  std::shared_ptr< MAC > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_MAC, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setAckTime" "', argument " "1"" of type '" "MAC *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_MAC_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MAC_setAckTime" "', argument " "1"" of type '" "MAC *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  MAC > * >(argp1);
+      arg1 = const_cast< MAC * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< MAC * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MAC_setAckTime" "', argument " "2"" of type '" "int""'");
@@ -5163,7 +5483,10 @@ SWIGINTERN int _wrap_new_Radio(PyObject *self, PyObject *args) {
   
   if (!SWIG_Python_UnpackTuple(args,"new_Radio",0,0,0)) SWIG_fail;
   result = (Radio *)new Radio();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Radio, SWIG_BUILTIN_INIT |  0 );
+  {
+    std::shared_ptr<  Radio > *smartresult = result ? new std::shared_ptr<  Radio >(result SWIG_NO_NULL_DELETER_SWIG_BUILTIN_INIT) : 0;
+    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_Radio_t, SWIG_BUILTIN_INIT | SWIG_POINTER_OWN);
+  }
   return resultobj == Py_None ? -1 : 0;
 fail:
   return -1;
@@ -5175,15 +5498,27 @@ SWIGINTERN PyObject *_wrap_delete_Radio(PyObject *self, PyObject *args) {
   Radio *arg1 = (Radio *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Radio > tempshared1 ;
+  std::shared_ptr< Radio > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   
   if (!SWIG_Python_UnpackTuple(args,"delete_Radio",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Radio, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Radio" "', argument " "1"" of type '" "Radio *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Radio_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Radio" "', argument " "1"" of type '" "Radio *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      arg1 = const_cast< Radio * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      arg1 = const_cast< Radio * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Radio * >(argp1);
-  delete arg1;
+  (void)arg1; delete smartarg1;
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5199,6 +5534,8 @@ SWIGINTERN PyObject *_wrap_Radio_add(PyObject *self, PyObject *args) {
   double arg4 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Radio > tempshared1 ;
+  std::shared_ptr< Radio > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   int val3 ;
@@ -5208,11 +5545,21 @@ SWIGINTERN PyObject *_wrap_Radio_add(PyObject *self, PyObject *args) {
   PyObject *swig_obj[4] ;
   
   if (!SWIG_Python_UnpackTuple(args,"Radio_add",3,3,swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_add" "', argument " "1"" of type '" "Radio *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Radio_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_add" "', argument " "1"" of type '" "Radio *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      arg1 = const_cast< Radio * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      arg1 = const_cast< Radio * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Radio * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Radio_add" "', argument " "2"" of type '" "int""'");
@@ -5243,6 +5590,8 @@ SWIGINTERN PyObject *_wrap_Radio_gain(PyObject *self, PyObject *args) {
   int arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Radio > tempshared1 ;
+  std::shared_ptr< Radio > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   int val3 ;
@@ -5251,11 +5600,21 @@ SWIGINTERN PyObject *_wrap_Radio_gain(PyObject *self, PyObject *args) {
   double result;
   
   if (!SWIG_Python_UnpackTuple(args,"Radio_gain",2,2,swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_gain" "', argument " "1"" of type '" "Radio *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Radio_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_gain" "', argument " "1"" of type '" "Radio *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      arg1 = const_cast< Radio * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      arg1 = const_cast< Radio * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Radio * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Radio_gain" "', argument " "2"" of type '" "int""'");
@@ -5281,6 +5640,8 @@ SWIGINTERN PyObject *_wrap_Radio_connected(PyObject *self, PyObject *args) {
   int arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Radio > tempshared1 ;
+  std::shared_ptr< Radio > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   int val3 ;
@@ -5289,11 +5650,21 @@ SWIGINTERN PyObject *_wrap_Radio_connected(PyObject *self, PyObject *args) {
   bool result;
   
   if (!SWIG_Python_UnpackTuple(args,"Radio_connected",2,2,swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_connected" "', argument " "1"" of type '" "Radio *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Radio_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_connected" "', argument " "1"" of type '" "Radio *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      arg1 = const_cast< Radio * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      arg1 = const_cast< Radio * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Radio * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Radio_connected" "', argument " "2"" of type '" "int""'");
@@ -5319,6 +5690,8 @@ SWIGINTERN PyObject *_wrap_Radio_remove(PyObject *self, PyObject *args) {
   int arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Radio > tempshared1 ;
+  std::shared_ptr< Radio > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   int val3 ;
@@ -5326,11 +5699,21 @@ SWIGINTERN PyObject *_wrap_Radio_remove(PyObject *self, PyObject *args) {
   PyObject *swig_obj[3] ;
   
   if (!SWIG_Python_UnpackTuple(args,"Radio_remove",2,2,swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_remove" "', argument " "1"" of type '" "Radio *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Radio_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_remove" "', argument " "1"" of type '" "Radio *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      arg1 = const_cast< Radio * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      arg1 = const_cast< Radio * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Radio * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Radio_remove" "', argument " "2"" of type '" "int""'");
@@ -5357,6 +5740,8 @@ SWIGINTERN PyObject *_wrap_Radio_setNoise(PyObject *self, PyObject *args) {
   double arg4 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Radio > tempshared1 ;
+  std::shared_ptr< Radio > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   double val3 ;
@@ -5366,11 +5751,21 @@ SWIGINTERN PyObject *_wrap_Radio_setNoise(PyObject *self, PyObject *args) {
   PyObject *swig_obj[4] ;
   
   if (!SWIG_Python_UnpackTuple(args,"Radio_setNoise",3,3,swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_setNoise" "', argument " "1"" of type '" "Radio *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Radio_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_setNoise" "', argument " "1"" of type '" "Radio *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      arg1 = const_cast< Radio * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      arg1 = const_cast< Radio * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Radio * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Radio_setNoise" "', argument " "2"" of type '" "int""'");
@@ -5400,17 +5795,29 @@ SWIGINTERN PyObject *_wrap_Radio_setSensitivity(PyObject *self, PyObject *args) 
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Radio > tempshared1 ;
+  std::shared_ptr< Radio > *smartarg1 = 0 ;
   double val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Radio, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_setSensitivity" "', argument " "1"" of type '" "Radio *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Radio_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Radio_setSensitivity" "', argument " "1"" of type '" "Radio *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      arg1 = const_cast< Radio * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Radio > * >(argp1);
+      arg1 = const_cast< Radio * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Radio * >(argp1);
   ecode2 = SWIG_AsVal_double(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Radio_setSensitivity" "', argument " "2"" of type '" "double""'");
@@ -5430,7 +5837,10 @@ SWIGINTERN int _wrap_new_Packet(PyObject *self, PyObject *args) {
   
   if (!SWIG_Python_UnpackTuple(args,"new_Packet",0,0,0)) SWIG_fail;
   result = (Packet *)new Packet();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Packet, SWIG_BUILTIN_INIT |  0 );
+  {
+    std::shared_ptr<  Packet > *smartresult = result ? new std::shared_ptr<  Packet >(result SWIG_NO_NULL_DELETER_SWIG_BUILTIN_INIT) : 0;
+    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_Packet_t, SWIG_BUILTIN_INIT | SWIG_POINTER_OWN);
+  }
   return resultobj == Py_None ? -1 : 0;
 fail:
   return -1;
@@ -5442,15 +5852,27 @@ SWIGINTERN PyObject *_wrap_delete_Packet(PyObject *self, PyObject *args) {
   Packet *arg1 = (Packet *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   
   if (!SWIG_Python_UnpackTuple(args,"delete_Packet",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Packet" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Packet" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
-  delete arg1;
+  (void)arg1; delete smartarg1;
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5464,17 +5886,29 @@ SWIGINTERN PyObject *_wrap_Packet_setSource(PyObject *self, PyObject *args) {
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setSource" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setSource" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Packet_setSource" "', argument " "2"" of type '" "int""'");
@@ -5493,15 +5927,27 @@ SWIGINTERN PyObject *_wrap_Packet_source(PyObject *self, PyObject *args) {
   Packet *arg1 = (Packet *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"Packet_source",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_source" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_source" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
   result = (int)(arg1)->source();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -5516,17 +5962,29 @@ SWIGINTERN PyObject *_wrap_Packet_setDestination(PyObject *self, PyObject *args)
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setDestination" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setDestination" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Packet_setDestination" "', argument " "2"" of type '" "int""'");
@@ -5545,15 +6003,27 @@ SWIGINTERN PyObject *_wrap_Packet_destination(PyObject *self, PyObject *args) {
   Packet *arg1 = (Packet *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"Packet_destination",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_destination" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_destination" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
   result = (int)(arg1)->destination();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -5568,17 +6038,29 @@ SWIGINTERN PyObject *_wrap_Packet_setLength(PyObject *self, PyObject *args) {
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setLength" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setLength" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Packet_setLength" "', argument " "2"" of type '" "int""'");
@@ -5597,15 +6079,27 @@ SWIGINTERN PyObject *_wrap_Packet_length(PyObject *self, PyObject *args) {
   Packet *arg1 = (Packet *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"Packet_length",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_length" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_length" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
   result = (int)(arg1)->length();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -5620,17 +6114,29 @@ SWIGINTERN PyObject *_wrap_Packet_setType(PyObject *self, PyObject *args) {
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setType" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setType" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Packet_setType" "', argument " "2"" of type '" "int""'");
@@ -5649,15 +6155,27 @@ SWIGINTERN PyObject *_wrap_Packet_type(PyObject *self, PyObject *args) {
   Packet *arg1 = (Packet *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"Packet_type",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_type" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_type" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
   result = (int)(arg1)->type();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -5671,15 +6189,27 @@ SWIGINTERN PyObject *_wrap_Packet_data(PyObject *self, PyObject *args) {
   Packet *arg1 = (Packet *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   char *result = 0 ;
   
   if (!SWIG_Python_UnpackTuple(args,"Packet_data",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_data" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_data" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
   result = (char *)(arg1)->data();
   resultobj = SWIG_FromCharPtr((const char *)result);
   return resultobj;
@@ -5695,6 +6225,8 @@ SWIGINTERN PyObject *_wrap_Packet_setData(PyObject *self, PyObject *args) {
   int arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   int res2 ;
   char *buf2 = 0 ;
   size_t size2 = 0 ;
@@ -5703,11 +6235,21 @@ SWIGINTERN PyObject *_wrap_Packet_setData(PyObject *self, PyObject *args) {
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setData" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setData" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
   res2 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf2, &size2, &alloc2);
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Packet_setData" "', argument " "2"" of type '" "char *""'");
@@ -5729,15 +6271,27 @@ SWIGINTERN PyObject *_wrap_Packet_maxLength(PyObject *self, PyObject *args) {
   Packet *arg1 = (Packet *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   int result;
   
   if (!SWIG_Python_UnpackTuple(args,"Packet_maxLength",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_maxLength" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_maxLength" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
   result = (int)(arg1)->maxLength();
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
@@ -5752,17 +6306,29 @@ SWIGINTERN PyObject *_wrap_Packet_setStrength(PyObject *self, PyObject *args) {
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setStrength" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_setStrength" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Packet_setStrength" "', argument " "2"" of type '" "int""'");
@@ -5783,6 +6349,8 @@ SWIGINTERN PyObject *_wrap_Packet_deliver(PyObject *self, PyObject *args) {
   long long arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   long long val3 ;
@@ -5790,11 +6358,21 @@ SWIGINTERN PyObject *_wrap_Packet_deliver(PyObject *self, PyObject *args) {
   PyObject *swig_obj[3] ;
   
   if (!SWIG_Python_UnpackTuple(args,"Packet_deliver",2,2,swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_deliver" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_deliver" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Packet_deliver" "', argument " "2"" of type '" "int""'");
@@ -5819,17 +6397,29 @@ SWIGINTERN PyObject *_wrap_Packet_deliverNow(PyObject *self, PyObject *args) {
   int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Packet > tempshared1 ;
+  std::shared_ptr< Packet > *smartarg1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Packet, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_deliverNow" "', argument " "1"" of type '" "Packet *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Packet_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Packet_deliverNow" "', argument " "1"" of type '" "Packet *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Packet > * >(argp1);
+      arg1 = const_cast< Packet * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Packet * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[0], &val2);
   if (!SWIG_IsOK(ecode2)) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Packet_deliverNow" "', argument " "2"" of type '" "int""'");
@@ -6623,7 +7213,10 @@ SWIGINTERN int _wrap_new_Variable(PyObject *self, PyObject *args) {
   } 
   arg4 = static_cast< int >(val4);
   result = (Variable *)new Variable((char const *)arg1,(char const *)arg2,arg3,arg4);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Variable, SWIG_BUILTIN_INIT |  0 );
+  {
+    std::shared_ptr<  Variable > *smartresult = result ? new std::shared_ptr<  Variable >(result SWIG_NO_NULL_DELETER_SWIG_BUILTIN_INIT) : 0;
+    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_Variable_t, SWIG_BUILTIN_INIT | SWIG_POINTER_OWN);
+  }
   if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
   return resultobj == Py_None ? -1 : 0;
@@ -6639,15 +7232,27 @@ SWIGINTERN PyObject *_wrap_delete_Variable(PyObject *self, PyObject *args) {
   Variable *arg1 = (Variable *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Variable > tempshared1 ;
+  std::shared_ptr< Variable > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   
   if (!SWIG_Python_UnpackTuple(args,"delete_Variable",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Variable, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Variable" "', argument " "1"" of type '" "Variable *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Variable_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Variable" "', argument " "1"" of type '" "Variable *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
+      arg1 = const_cast< Variable * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
+      arg1 = const_cast< Variable * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Variable * >(argp1);
-  delete arg1;
+  (void)arg1; delete smartarg1;
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -6660,15 +7265,27 @@ SWIGINTERN PyObject *_wrap_Variable_getData(PyObject *self, PyObject *args) {
   Variable *arg1 = (Variable *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  std::shared_ptr< Variable > tempshared1 ;
+  std::shared_ptr< Variable > *smartarg1 = 0 ;
   PyObject *swig_obj[1] ;
   variable_string_t result;
   
   if (!SWIG_Python_UnpackTuple(args,"Variable_getData",0,0,0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Variable, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Variable_getData" "', argument " "1"" of type '" "Variable *""'"); 
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Variable_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Variable_getData" "', argument " "1"" of type '" "Variable *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
+      arg1 = const_cast< Variable * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
+      arg1 = const_cast< Variable * >((smartarg1 ? smartarg1->get() : 0));
+    }
   }
-  arg1 = reinterpret_cast< Variable * >(argp1);
   result = (arg1)->getData();
   {
     if ((&result)->isArray) {
@@ -7006,7 +7623,7 @@ SWIGINTERN PyObject *_wrap_Mote_getVariable(PyObject *self, PyObject *args) {
   char *buf2 = 0 ;
   int alloc2 = 0 ;
   PyObject *swig_obj[2] ;
-  Variable *result = 0 ;
+  std::shared_ptr< Variable > result;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -7020,8 +7637,11 @@ SWIGINTERN PyObject *_wrap_Mote_getVariable(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Mote_getVariable" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
-  result = (Variable *)(arg1)->getVariable((char const *)arg2);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Variable, 0 |  0 );
+  result = (arg1)->getVariable((char const *)arg2);
+  {
+    std::shared_ptr<  Variable > *smartresult = result ? new std::shared_ptr<  Variable >(result) : 0;
+    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_Variable_t, SWIG_POINTER_OWN);
+  }
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
   return resultobj;
 fail:
@@ -7804,7 +8424,7 @@ SWIGINTERN PyObject *_wrap_Tossim_mac(PyObject *self, PyObject *args) {
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  MAC *result = 0 ;
+  std::shared_ptr< MAC > result;
   
   if (!SWIG_Python_UnpackTuple(args,"Tossim_mac",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
@@ -7812,8 +8432,11 @@ SWIGINTERN PyObject *_wrap_Tossim_mac(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_mac" "', argument " "1"" of type '" "Tossim *""'"); 
   }
   arg1 = reinterpret_cast< Tossim * >(argp1);
-  result = (MAC *)(arg1)->mac();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MAC, 0 |  0 );
+  result = (arg1)->mac();
+  {
+    std::shared_ptr<  MAC > *smartresult = result ? new std::shared_ptr<  MAC >(result) : 0;
+    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_MAC_t, SWIG_POINTER_OWN);
+  }
   return resultobj;
 fail:
   return NULL;
@@ -7826,7 +8449,7 @@ SWIGINTERN PyObject *_wrap_Tossim_radio(PyObject *self, PyObject *args) {
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  Radio *result = 0 ;
+  std::shared_ptr< Radio > result;
   
   if (!SWIG_Python_UnpackTuple(args,"Tossim_radio",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
@@ -7834,8 +8457,11 @@ SWIGINTERN PyObject *_wrap_Tossim_radio(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_radio" "', argument " "1"" of type '" "Tossim *""'"); 
   }
   arg1 = reinterpret_cast< Tossim * >(argp1);
-  result = (Radio *)(arg1)->radio();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Radio, 0 |  0 );
+  result = (arg1)->radio();
+  {
+    std::shared_ptr<  Radio > *smartresult = result ? new std::shared_ptr<  Radio >(result) : 0;
+    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_Radio_t, SWIG_POINTER_OWN);
+  }
   return resultobj;
 fail:
   return NULL;
@@ -7848,7 +8474,7 @@ SWIGINTERN PyObject *_wrap_Tossim_newPacket(PyObject *self, PyObject *args) {
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  Packet *result = 0 ;
+  std::shared_ptr< Packet > result;
   
   if (!SWIG_Python_UnpackTuple(args,"Tossim_newPacket",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
@@ -7856,8 +8482,11 @@ SWIGINTERN PyObject *_wrap_Tossim_newPacket(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_newPacket" "', argument " "1"" of type '" "Tossim *""'"); 
   }
   arg1 = reinterpret_cast< Tossim * >(argp1);
-  result = (Packet *)(arg1)->newPacket();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Packet, 0 |  0 );
+  result = (arg1)->newPacket();
+  {
+    std::shared_ptr<  Packet > *smartresult = result ? new std::shared_ptr<  Packet >(result) : 0;
+    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_Packet_t, SWIG_POINTER_OWN);
+  }
   return resultobj;
 fail:
   return NULL;
@@ -9983,6 +10612,10 @@ static swig_type_info _swigt__p_std__functionT_bool_fF_t = {"_p_std__functionT_b
 static swig_type_info _swigt__p_std__functionT_bool_fdoubleF_t = {"_p_std__functionT_bool_fdoubleF_t", "std::function< bool (double) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_void_fchar_const_p_size_tF_t = {"_p_std__functionT_void_fchar_const_p_size_tF_t", "std::function< void (char const *,size_t) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__functionT_void_flong_longF_t = {"_p_std__functionT_void_flong_longF_t", "std::function< void (long long) > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__shared_ptrT_MAC_t = {"_p_std__shared_ptrT_MAC_t", "std::shared_ptr< MAC > *", 0, 0, (void*)&SwigPyBuiltin__MAC_clientdata, 0};
+static swig_type_info _swigt__p_std__shared_ptrT_Packet_t = {"_p_std__shared_ptrT_Packet_t", "std::shared_ptr< Packet > *", 0, 0, (void*)&SwigPyBuiltin__Packet_clientdata, 0};
+static swig_type_info _swigt__p_std__shared_ptrT_Radio_t = {"_p_std__shared_ptrT_Radio_t", "std::shared_ptr< Radio > *", 0, 0, (void*)&SwigPyBuiltin__Radio_clientdata, 0};
+static swig_type_info _swigt__p_std__shared_ptrT_Variable_t = {"_p_std__shared_ptrT_Variable_t", "std::shared_ptr< Variable > *", 0, 0, (void*)&SwigPyBuiltin__Variable_clientdata, 0};
 static swig_type_info _swigt__p_std__vectorT_bool_t = {"_p_std__vectorT_bool_t", "std::vector< bool > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_std__string_t = {"_p_std__vectorT_std__string_t", "std::vector< std::string > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_variable_string = {"_p_variable_string", "variable_string *|variable_string_t *", 0, 0, (void*)&SwigPyBuiltin__variable_string_clientdata, 0};
@@ -10003,6 +10636,10 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__functionT_bool_fdoubleF_t,
   &_swigt__p_std__functionT_void_fchar_const_p_size_tF_t,
   &_swigt__p_std__functionT_void_flong_longF_t,
+  &_swigt__p_std__shared_ptrT_MAC_t,
+  &_swigt__p_std__shared_ptrT_Packet_t,
+  &_swigt__p_std__shared_ptrT_Radio_t,
+  &_swigt__p_std__shared_ptrT_Variable_t,
   &_swigt__p_std__vectorT_bool_t,
   &_swigt__p_std__vectorT_std__string_t,
   &_swigt__p_variable_string,
@@ -10023,6 +10660,10 @@ static swig_cast_info _swigc__p_std__functionT_bool_fF_t[] = {  {&_swigt__p_std_
 static swig_cast_info _swigc__p_std__functionT_bool_fdoubleF_t[] = {  {&_swigt__p_std__functionT_bool_fdoubleF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_void_fchar_const_p_size_tF_t[] = {  {&_swigt__p_std__functionT_void_fchar_const_p_size_tF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__functionT_void_flong_longF_t[] = {  {&_swigt__p_std__functionT_void_flong_longF_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__shared_ptrT_MAC_t[] = {  {&_swigt__p_std__shared_ptrT_MAC_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__shared_ptrT_Packet_t[] = {  {&_swigt__p_std__shared_ptrT_Packet_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__shared_ptrT_Radio_t[] = {  {&_swigt__p_std__shared_ptrT_Radio_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__shared_ptrT_Variable_t[] = {  {&_swigt__p_std__shared_ptrT_Variable_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_bool_t[] = {  {&_swigt__p_std__vectorT_bool_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_std__string_t[] = {  {&_swigt__p_std__vectorT_std__string_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_variable_string[] = {  {&_swigt__p_variable_string, 0, 0, 0},{0, 0, 0, 0}};
@@ -10043,6 +10684,10 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__functionT_bool_fdoubleF_t,
   _swigc__p_std__functionT_void_fchar_const_p_size_tF_t,
   _swigc__p_std__functionT_void_flong_longF_t,
+  _swigc__p_std__shared_ptrT_MAC_t,
+  _swigc__p_std__shared_ptrT_Packet_t,
+  _swigc__p_std__shared_ptrT_Radio_t,
+  _swigc__p_std__shared_ptrT_Variable_t,
   _swigc__p_std__vectorT_bool_t,
   _swigc__p_std__vectorT_std__string_t,
   _swigc__p_variable_string,
@@ -10743,6 +11388,7 @@ SWIG_init(void) {
   
   SWIG_InstallConstants(d,swig_const_table);
   
+  SWIG_Python_SetConstant(d, d == md ? public_interface : NULL, "SHARED_PTR_DISOWN",SWIG_From_int(static_cast< int >(0)));
   
   /* type '::MAC' */
   builtin_pytype = (PyTypeObject *)&SwigPyBuiltin__MAC_type;

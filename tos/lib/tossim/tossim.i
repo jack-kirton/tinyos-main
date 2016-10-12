@@ -42,6 +42,12 @@
 
 %module TOSSIM
 
+%include <std_shared_ptr.i>
+%shared_ptr(MAC)
+%shared_ptr(Radio)
+%shared_ptr(Packet)
+%shared_ptr(Variable)
+
 %{
 #include <memory.h>
 #include <tossim.h>
@@ -410,7 +416,7 @@ class Mote {
     bool isOn();
     void turnOff();
     void turnOn();
-    Variable* getVariable(const char* name_cstr);
+    std::shared_ptr<Variable> getVariable(const char* name_cstr);
 
     void reserveNoiseTraces(size_t num_traces);
     void addNoiseTraceReading(int val);
@@ -547,7 +553,7 @@ class Tossim {
         std::function<bool()> continue_events,
         std::function<void(long long int)> callback);
 
-    MAC* mac();
-    Radio* radio();
-    Packet* newPacket();
+    std::shared_ptr<MAC> mac();
+    std::shared_ptr<Radio> radio();
+    std::shared_ptr<Packet> newPacket();
 };
