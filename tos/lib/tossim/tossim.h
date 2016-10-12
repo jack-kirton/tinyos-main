@@ -172,12 +172,9 @@ class Tossim {
   std::shared_ptr<Radio> radio();
   std::shared_ptr<Packet> newPacket();
 
-private:
-  void free_motes();
-
  private:
   std::unique_ptr<const NescApp> app;
-  std::vector<Mote*> motes;
+  std::vector<std::unique_ptr<Mote>> motes;
   char timeBuf[128];
 
   bool duration_started;

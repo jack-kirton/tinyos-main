@@ -224,22 +224,13 @@ int Mote::generateNoise(int when) {
 
 Tossim::Tossim(const NescApp* n)
   : app(n) // Take ownership
-  , motes(TOSSIM_MAX_NODES, nullptr)
+  , motes(TOSSIM_MAX_NODES)
   , duration_started(false)
 {
   init();
 }
 
-void Tossim::free_motes()
-{
-  for (auto iter = motes.begin(), end = motes.end(); iter != end; ++iter)
-  {
-    delete *iter;
-  }
-}
-
 Tossim::~Tossim() {
-  free_motes();
   sim_end();
 }
 
@@ -278,15 +269,15 @@ Mote* Tossim::getNode(unsigned long nodeID) noexcept {
   }
 
   if (motes[nodeID] == nullptr) {
-    motes[nodeID] = new Mote(app.get());
+    motes[nodeID].reset(new Mote(app.get()));
+
     if (nodeID == TOSSIM_MAX_NODES) {
-      motes[nodeID]->setID(0xffff);
+      nodeID = 0xFFFF;
     }
-    else {
-      motes[nodeID]->setID(nodeID);
-    }
+
+    motes[nodeID]->setID(nodeID);
   }
-  return motes[nodeID];
+  return motes[nodeID].get();
 }
 
 void Tossim::setCurrentNode(unsigned long nodeID) noexcept {
