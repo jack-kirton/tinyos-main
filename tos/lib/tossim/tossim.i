@@ -485,10 +485,10 @@ class Mote {
         }
     }
 
-    PyObject* runAllEventsWithMaxTime(double end_time, PyObject *continue_events) {
+    PyObject* runAllEventsWithTriggeredMaxTime(double end_time, PyObject *continue_events) {
         try
         {
-            long long int result = $self->runAllEventsWithMaxTime(end_time, PyCallback(continue_events));
+            long long int result = $self->runAllEventsWithTriggeredMaxTime(end_time, PyCallback(continue_events));
             return PyLong_FromLongLong(result);
         }
         catch (std::runtime_error ex)
@@ -497,10 +497,10 @@ class Mote {
         }
     }
 
-    PyObject* runAllEventsWithMaxTimeAndCallback(double end_time, PyObject *continue_events, PyObject *callback) {
+    PyObject* runAllEventsWithTriggeredMaxTimeAndCallback(double end_time, PyObject *continue_events, PyObject *callback) {
         try
         {
-            long long int result = $self->runAllEventsWithMaxTimeAndCallback(end_time, PyCallback(continue_events), PyCallback(callback));
+            long long int result = $self->runAllEventsWithTriggeredMaxTimeAndCallback(end_time, PyCallback(continue_events), PyCallback(callback));
             return PyLong_FromLongLong(result);
         }
         catch (std::runtime_error ex)
@@ -536,8 +536,16 @@ class Tossim {
     void register_event_callback(std::function<bool(double)> callback, double current_time);
 
     bool runNextEvent();
-    long long int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events);
-    long long int runAllEventsWithMaxTimeAndCallback(double end_time, std::function<bool()> continue_events, std::function<void(long long int)> callback);
+
+    void triggerRunDurationStart();
+
+    long long int runAllEventsWithTriggeredMaxTime(
+        double duration,
+        std::function<bool()> continue_events);
+    long long int runAllEventsWithTriggeredMaxTimeAndCallback(
+        double duration,
+        std::function<bool()> continue_events,
+        std::function<void(long long int)> callback);
 
     MAC* mac();
     Radio* radio();

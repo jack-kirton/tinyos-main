@@ -157,8 +157,16 @@ class Tossim {
   void register_event_callback(std::function<void(double)> callback, double time);
   
   bool runNextEvent();
-  long long int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events);
-  long long int runAllEventsWithMaxTimeAndCallback(double end_time, std::function<bool()> continue_events, std::function<void(long long int)> callback);
+
+  void triggerRunDurationStart();
+
+  long long int runAllEventsWithTriggeredMaxTime(
+    double duration,
+    std::function<bool()> continue_events);
+  long long int runAllEventsWithTriggeredMaxTimeAndCallback(
+    double duration,
+    std::function<bool()> continue_events,
+    std::function<void(long long int)> callback);
 
   MAC* mac();
   Radio* radio();
@@ -171,6 +179,9 @@ private:
   std::unique_ptr<const NescApp> app;
   std::vector<Mote*> motes;
   char timeBuf[128];
+
+  bool duration_started;
+  long long int duration_started_at;
 };
 
 #endif // TOSSIM_H_INCLUDED

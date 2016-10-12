@@ -228,6 +228,7 @@ int Mote::generateNoise(int when) {
 Tossim::Tossim(const NescApp* n)
   : app(n) // Take ownership
   , motes(TOSSIM_MAX_NODES, nullptr)
+  , duration_started(false)
 {
   init();
 }
@@ -367,13 +368,27 @@ bool Tossim::runNextEvent() {
   return sim_run_next_event();
 }
 
-long long int Tossim::runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events) {
-  const long long int end_time_ticks = (long long int)ceil(end_time * ticksPerSecond());
+void Tossim::triggerRunDurationStart() {
+  if (!duration_started)
+  {
+    duration_started = true;
+    duration_started_at = sim_time();
+  }
+}
+
+long long int Tossim::runAllEventsWithTriggeredMaxTime(
+  double duration,
+  std::function<bool()> continue_events)
+{
+  const long long int duration_ticks = (long long int)ceil(duration * ticksPerSecond());
   long long int event_count = 0;
   bool process_callback = true;
 
   // We can skip calling the continue_events predicate if no log info was outputted, or no python callback occurred
-  while (sim_time() < end_time_ticks && ((!process_callback && !python_event_called) || continue_events()))
+  while (
+      (!duration_started || sim_time() < (duration_started_at + duration_ticks)) &&
+      ((!process_callback && !python_event_called) || continue_events())
+    )
   {
     // Reset the python event called flag as we have no handled it
     python_event_called = false;
@@ -393,13 +408,20 @@ long long int Tossim::runAllEventsWithMaxTime(double end_time, std::function<boo
   return event_count;
 }
 
-long long int Tossim::runAllEventsWithMaxTimeAndCallback(double end_time, std::function<bool()> continue_events, std::function<void(long long int)> callback) {
-  const long long int end_time_ticks = (long long int)ceil(end_time * ticksPerSecond());
+long long int Tossim::runAllEventsWithTriggeredMaxTimeAndCallback(
+    double duration,
+    std::function<bool()> continue_events,
+    std::function<void(long long int)> callback)
+{
+  const long long int duration_ticks = (long long int)ceil(duration * ticksPerSecond());
   long long int event_count = 0;
   bool process_callback = true;
 
   // We can skip calling the continue_events predicate if no log info was outputted, or no python callback occurred
-  while (sim_time() < end_time_ticks && ((!process_callback && !python_event_called) || continue_events()))
+  while (
+      (!duration_started || sim_time() < (duration_started_at + duration_ticks)) &&
+      ((!process_callback && !python_event_called) || continue_events())
+    )
   {
     // Reset the python event called flag as we have no handled it
     python_event_called = false;
