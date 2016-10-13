@@ -210,7 +210,7 @@ void Mote::reserveNoiseTraces(size_t num_traces) {
 }
 
 void Mote::addNoiseTraceReading(int val) {
-  sim_noise_trace_add(nodeID, (char)val);
+  sim_noise_trace_add(nodeID, static_cast<char>(val));
 }
 
 void Mote::createNoiseModel() {
@@ -366,7 +366,7 @@ long long int Tossim::runAllEventsWithTriggeredMaxTime(
   double duration,
   std::function<bool()> continue_events)
 {
-  const long long int duration_ticks = (long long int)ceil(duration * ticksPerSecond());
+  const long long int duration_ticks = static_cast<long long int>(ceil(duration * ticksPerSecond()));
   long long int event_count = 0;
   bool process_callback = true;
 
@@ -399,7 +399,7 @@ long long int Tossim::runAllEventsWithTriggeredMaxTimeAndCallback(
     std::function<bool()> continue_events,
     std::function<void(long long int)> callback)
 {
-  const long long int duration_ticks = (long long int)ceil(duration * ticksPerSecond());
+  const long long int duration_ticks = static_cast<long long int>(ceil(duration * ticksPerSecond()));
   long long int event_count = 0;
   bool process_callback = true;
 
