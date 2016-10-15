@@ -133,24 +133,32 @@ class PyCallback
 {
 private:
     PyObject *func;
+private:
     PyCallback& operator=(const PyCallback&) = delete; // Not allowed
 public:
-    PyCallback(PyCallback&& o) : func(o.func) {
+    PyCallback(PyCallback&& o) noexcept : func(o.func)
+    {
         o.func = NULL;
     }
-    PyCallback(const PyCallback& o) : func(o.func) {
+    PyCallback(const PyCallback& o) noexcept : func(o.func)
+    {
         Py_XINCREF(func);
     }
-    PyCallback(PyObject *pfunc) {
+    PyCallback(PyCallback&& o) noexcept : func(o.func)
+    {
+        o.func = NULL
+    }
+    PyCallback(PyObject *pfunc) : func(pfunc)
+    {
         if (!pfunc || Py_None == pfunc || !PyCallable_Check(pfunc))
         {
             PyErr_SetString(PyExc_TypeError, "Requires a callable as a parameter.");
             throw std::runtime_error("Python exception occurred");
         }
-        func = pfunc;
         Py_INCREF(func);
     }
-    ~PyCallback() {
+    ~PyCallback() noexcept
+    {
         Py_XDECREF(func);
     }
 
