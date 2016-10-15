@@ -144,10 +144,6 @@ public:
     {
         Py_XINCREF(func);
     }
-    PyCallback(PyCallback&& o) noexcept : func(o.func)
-    {
-        o.func = NULL
-    }
     PyCallback(PyObject *pfunc) : func(pfunc)
     {
         if (!pfunc || Py_None == pfunc || !PyCallable_Check(pfunc))
