@@ -495,10 +495,15 @@ class Mote {
         }
     }
 
-    PyObject* runAllEventsWithTriggeredMaxTime(double end_time, PyObject *continue_events) {
+    PyObject* runAllEventsWithTriggeredMaxTime(
+        double duration,
+        double duration_upper_bound,
+        PyObject *continue_events)
+    {
         try
         {
-            long long int result = $self->runAllEventsWithTriggeredMaxTime(end_time, PyCallback(continue_events));
+            long long int result = $self->runAllEventsWithTriggeredMaxTime(
+                duration, duration_upper_bound, PyCallback(continue_events));
             return PyLong_FromLongLong(result);
         }
         catch (std::runtime_error ex)
@@ -507,10 +512,16 @@ class Mote {
         }
     }
 
-    PyObject* runAllEventsWithTriggeredMaxTimeAndCallback(double end_time, PyObject *continue_events, PyObject *callback) {
+    PyObject* runAllEventsWithTriggeredMaxTimeAndCallback(
+        double duration,
+        double duration_upper_bound,
+        PyObject *continue_events,
+        PyObject *callback)
+    {
         try
         {
-            long long int result = $self->runAllEventsWithTriggeredMaxTimeAndCallback(end_time, PyCallback(continue_events), PyCallback(callback));
+            long long int result = $self->runAllEventsWithTriggeredMaxTimeAndCallback(
+                duration, duration_upper_bound, PyCallback(continue_events), PyCallback(callback));
             return PyLong_FromLongLong(result);
         }
         catch (std::runtime_error ex)
@@ -551,9 +562,11 @@ class Tossim {
 
     long long int runAllEventsWithTriggeredMaxTime(
         double duration,
+        double duration_upper_bound,
         std::function<bool()> continue_events);
     long long int runAllEventsWithTriggeredMaxTimeAndCallback(
         double duration,
+        double duration_upper_bound,
         std::function<bool()> continue_events,
         std::function<void(long long int)> callback);
 

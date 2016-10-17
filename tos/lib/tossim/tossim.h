@@ -162,9 +162,11 @@ class Tossim {
 
   long long int runAllEventsWithTriggeredMaxTime(
     double duration,
+    double duration_upper_bound,
     std::function<bool()> continue_events);
   long long int runAllEventsWithTriggeredMaxTimeAndCallback(
     double duration,
+    double duration_upper_bound,
     std::function<bool()> continue_events,
     std::function<void(long long int)> callback);
 

@@ -364,15 +364,18 @@ void Tossim::triggerRunDurationStart() {
 
 long long int Tossim::runAllEventsWithTriggeredMaxTime(
   double duration,
+  double duration_upper_bound,
   std::function<bool()> continue_events)
 {
   const long long int duration_ticks = static_cast<long long int>(ceil(duration * ticksPerSecond()));
+  const long long int duration_upper_bound_ticks = static_cast<long long int>(ceil(duration_upper_bound * ticksPerSecond()));
   long long int event_count = 0;
   bool process_callback = true;
 
   // We can skip calling the continue_events predicate if no log info was outputted, or no python callback occurred
   while (
       (!duration_started || sim_time() < (duration_started_at + duration_ticks)) &&
+      (sim_time() < duration_upper_bound_ticks) &&
       ((!process_callback && !python_event_called) || continue_events())
     )
   {
@@ -396,16 +399,19 @@ long long int Tossim::runAllEventsWithTriggeredMaxTime(
 
 long long int Tossim::runAllEventsWithTriggeredMaxTimeAndCallback(
     double duration,
+    double duration_upper_bound,
     std::function<bool()> continue_events,
     std::function<void(long long int)> callback)
 {
   const long long int duration_ticks = static_cast<long long int>(ceil(duration * ticksPerSecond()));
+  const long long int duration_upper_bound_ticks = static_cast<long long int>(ceil(duration_upper_bound * ticksPerSecond()));
   long long int event_count = 0;
   bool process_callback = true;
 
   // We can skip calling the continue_events predicate if no log info was outputted, or no python callback occurred
   while (
       (!duration_started || sim_time() < (duration_started_at + duration_ticks)) &&
+      (sim_time() < duration_upper_bound_ticks) &&
       ((!process_callback && !python_event_called) || continue_events())
     )
   {

@@ -4571,10 +4571,11 @@ SWIGINTERN PyObject *Tossim_register_event_callback__SWIG_1(Tossim *self,PyObjec
             return NULL;
         }
     }
-SWIGINTERN PyObject *Tossim_runAllEventsWithTriggeredMaxTime__SWIG_1(Tossim *self,double end_time,PyObject *continue_events){
+SWIGINTERN PyObject *Tossim_runAllEventsWithTriggeredMaxTime__SWIG_1(Tossim *self,double duration,double duration_upper_bound,PyObject *continue_events){
         try
         {
-            long long int result = self->runAllEventsWithTriggeredMaxTime(end_time, PyCallback(continue_events));
+            long long int result = self->runAllEventsWithTriggeredMaxTime(
+                duration, duration_upper_bound, PyCallback(continue_events));
             return PyLong_FromLongLong(result);
         }
         catch (std::runtime_error ex)
@@ -4582,10 +4583,11 @@ SWIGINTERN PyObject *Tossim_runAllEventsWithTriggeredMaxTime__SWIG_1(Tossim *sel
             return NULL;
         }
     }
-SWIGINTERN PyObject *Tossim_runAllEventsWithTriggeredMaxTimeAndCallback__SWIG_1(Tossim *self,double end_time,PyObject *continue_events,PyObject *callback){
+SWIGINTERN PyObject *Tossim_runAllEventsWithTriggeredMaxTimeAndCallback__SWIG_1(Tossim *self,double duration,double duration_upper_bound,PyObject *continue_events,PyObject *callback){
         try
         {
-            long long int result = self->runAllEventsWithTriggeredMaxTimeAndCallback(end_time, PyCallback(continue_events), PyCallback(callback));
+            long long int result = self->runAllEventsWithTriggeredMaxTimeAndCallback(
+                duration, duration_upper_bound, PyCallback(continue_events), PyCallback(callback));
             return PyLong_FromLongLong(result);
         }
         catch (std::runtime_error ex)
@@ -8396,16 +8398,19 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEventsWithTriggeredMaxTime__SWIG_0(PyObj
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   double arg2 ;
-  std::function< bool () > arg3 ;
+  double arg3 ;
+  std::function< bool () > arg4 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   double val2 ;
   int ecode2 = 0 ;
-  void *argp3 ;
-  int res3 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  void *argp4 ;
+  int res4 = 0 ;
   long long result;
   
-  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_runAllEventsWithTriggeredMaxTime" "', argument " "1"" of type '" "Tossim *""'"); 
@@ -8416,20 +8421,25 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEventsWithTriggeredMaxTime__SWIG_0(PyObj
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tossim_runAllEventsWithTriggeredMaxTime" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Tossim_runAllEventsWithTriggeredMaxTime" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
   {
-    res3 = SWIG_ConvertPtr(swig_obj[2], &argp3, SWIGTYPE_p_std__functionT_bool_fF_t,  0  | 0);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Tossim_runAllEventsWithTriggeredMaxTime" "', argument " "3"" of type '" "std::function< bool () >""'"); 
+    res4 = SWIG_ConvertPtr(swig_obj[3], &argp4, SWIGTYPE_p_std__functionT_bool_fF_t,  0  | 0);
+    if (!SWIG_IsOK(res4)) {
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "Tossim_runAllEventsWithTriggeredMaxTime" "', argument " "4"" of type '" "std::function< bool () >""'"); 
     }  
-    if (!argp3) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Tossim_runAllEventsWithTriggeredMaxTime" "', argument " "3"" of type '" "std::function< bool () >""'");
+    if (!argp4) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Tossim_runAllEventsWithTriggeredMaxTime" "', argument " "4"" of type '" "std::function< bool () >""'");
     } else {
-      std::function< bool () > * temp = reinterpret_cast< std::function< bool () > * >(argp3);
-      arg3 = *temp;
-      if (SWIG_IsNewObj(res3)) delete temp;
+      std::function< bool () > * temp = reinterpret_cast< std::function< bool () > * >(argp4);
+      arg4 = *temp;
+      if (SWIG_IsNewObj(res4)) delete temp;
     }
   }
-  result = (long long)(arg1)->runAllEventsWithTriggeredMaxTime(arg2,arg3);
+  result = (long long)(arg1)->runAllEventsWithTriggeredMaxTime(arg2,arg3,arg4);
   resultobj = SWIG_From_long_SS_long(static_cast< long long >(result));
   return resultobj;
 fail:
@@ -8441,19 +8451,22 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEventsWithTriggeredMaxTimeAndCallback__S
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   double arg2 ;
-  std::function< bool () > arg3 ;
-  std::function< void (long long) > arg4 ;
+  double arg3 ;
+  std::function< bool () > arg4 ;
+  std::function< void (long long) > arg5 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   double val2 ;
   int ecode2 = 0 ;
-  void *argp3 ;
-  int res3 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
   void *argp4 ;
   int res4 = 0 ;
+  void *argp5 ;
+  int res5 = 0 ;
   long long result;
   
-  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
+  if ((nobjs < 5) || (nobjs > 5)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_runAllEventsWithTriggeredMaxTimeAndCallback" "', argument " "1"" of type '" "Tossim *""'"); 
@@ -8464,33 +8477,38 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEventsWithTriggeredMaxTimeAndCallback__S
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tossim_runAllEventsWithTriggeredMaxTimeAndCallback" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Tossim_runAllEventsWithTriggeredMaxTimeAndCallback" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
   {
-    res3 = SWIG_ConvertPtr(swig_obj[2], &argp3, SWIGTYPE_p_std__functionT_bool_fF_t,  0  | 0);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Tossim_runAllEventsWithTriggeredMaxTimeAndCallback" "', argument " "3"" of type '" "std::function< bool () >""'"); 
-    }  
-    if (!argp3) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Tossim_runAllEventsWithTriggeredMaxTimeAndCallback" "', argument " "3"" of type '" "std::function< bool () >""'");
-    } else {
-      std::function< bool () > * temp = reinterpret_cast< std::function< bool () > * >(argp3);
-      arg3 = *temp;
-      if (SWIG_IsNewObj(res3)) delete temp;
-    }
-  }
-  {
-    res4 = SWIG_ConvertPtr(swig_obj[3], &argp4, SWIGTYPE_p_std__functionT_void_flong_longF_t,  0  | 0);
+    res4 = SWIG_ConvertPtr(swig_obj[3], &argp4, SWIGTYPE_p_std__functionT_bool_fF_t,  0  | 0);
     if (!SWIG_IsOK(res4)) {
-      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "Tossim_runAllEventsWithTriggeredMaxTimeAndCallback" "', argument " "4"" of type '" "std::function< void (long long) >""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "Tossim_runAllEventsWithTriggeredMaxTimeAndCallback" "', argument " "4"" of type '" "std::function< bool () >""'"); 
     }  
     if (!argp4) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Tossim_runAllEventsWithTriggeredMaxTimeAndCallback" "', argument " "4"" of type '" "std::function< void (long long) >""'");
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Tossim_runAllEventsWithTriggeredMaxTimeAndCallback" "', argument " "4"" of type '" "std::function< bool () >""'");
     } else {
-      std::function< void (long long) > * temp = reinterpret_cast< std::function< void (long long) > * >(argp4);
+      std::function< bool () > * temp = reinterpret_cast< std::function< bool () > * >(argp4);
       arg4 = *temp;
       if (SWIG_IsNewObj(res4)) delete temp;
     }
   }
-  result = (long long)(arg1)->runAllEventsWithTriggeredMaxTimeAndCallback(arg2,arg3,arg4);
+  {
+    res5 = SWIG_ConvertPtr(swig_obj[4], &argp5, SWIGTYPE_p_std__functionT_void_flong_longF_t,  0  | 0);
+    if (!SWIG_IsOK(res5)) {
+      SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "Tossim_runAllEventsWithTriggeredMaxTimeAndCallback" "', argument " "5"" of type '" "std::function< void (long long) >""'"); 
+    }  
+    if (!argp5) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Tossim_runAllEventsWithTriggeredMaxTimeAndCallback" "', argument " "5"" of type '" "std::function< void (long long) >""'");
+    } else {
+      std::function< void (long long) > * temp = reinterpret_cast< std::function< void (long long) > * >(argp5);
+      arg5 = *temp;
+      if (SWIG_IsNewObj(res5)) delete temp;
+    }
+  }
+  result = (long long)(arg1)->runAllEventsWithTriggeredMaxTimeAndCallback(arg2,arg3,arg4,arg5);
   resultobj = SWIG_From_long_SS_long(static_cast< long long >(result));
   return resultobj;
 fail:
@@ -8706,14 +8724,17 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEventsWithTriggeredMaxTime__SWIG_1(PyObj
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   double arg2 ;
-  PyObject *arg3 = (PyObject *) 0 ;
+  double arg3 ;
+  PyObject *arg4 = (PyObject *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   double val2 ;
   int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
   PyObject *result = 0 ;
   
-  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_runAllEventsWithTriggeredMaxTime" "', argument " "1"" of type '" "Tossim *""'"); 
@@ -8724,8 +8745,13 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEventsWithTriggeredMaxTime__SWIG_1(PyObj
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tossim_runAllEventsWithTriggeredMaxTime" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
-  arg3 = swig_obj[2];
-  result = (PyObject *)Tossim_runAllEventsWithTriggeredMaxTime__SWIG_1(arg1,arg2,arg3);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Tossim_runAllEventsWithTriggeredMaxTime" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  arg4 = swig_obj[3];
+  result = (PyObject *)Tossim_runAllEventsWithTriggeredMaxTime__SWIG_1(arg1,arg2,arg3,arg4);
   resultobj = result;
   return resultobj;
 fail:
@@ -8735,16 +8761,16 @@ fail:
 
 SWIGINTERN PyObject *_wrap_Tossim_runAllEventsWithTriggeredMaxTime(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
-  PyObject *argv[4] = {
+  PyObject *argv[5] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args,"Tossim_runAllEventsWithTriggeredMaxTime",0,3,argv+1))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args,"Tossim_runAllEventsWithTriggeredMaxTime",0,4,argv+1))) SWIG_fail;
   argv[0] = self;
-  if (argc == 3) {
+  if (argc == 4) {
     int _v = 0;
     {
-      int res = SWIG_ConvertPtr(argv[2], 0, SWIGTYPE_p_std__functionT_bool_fF_t, 0);
+      int res = SWIG_ConvertPtr(argv[3], 0, SWIGTYPE_p_std__functionT_bool_fF_t, 0);
       _v = SWIG_CheckState(res);
     }
     if (!_v) goto check_1;
@@ -8752,15 +8778,15 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEventsWithTriggeredMaxTime(PyObject *sel
   }
 check_1:
   
-  if (argc == 3) {
+  if (argc == 4) {
     return _wrap_Tossim_runAllEventsWithTriggeredMaxTime__SWIG_1(self, argc, argv);
   }
   
 fail:
   SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Tossim_runAllEventsWithTriggeredMaxTime'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    Tossim::runAllEventsWithTriggeredMaxTime(double,std::function< bool () >)\n"
-    "    Tossim::runAllEventsWithTriggeredMaxTime(double,PyObject *)\n");
+    "    Tossim::runAllEventsWithTriggeredMaxTime(double,double,std::function< bool () >)\n"
+    "    Tossim::runAllEventsWithTriggeredMaxTime(double,double,PyObject *)\n");
   return 0;
 }
 
@@ -8769,15 +8795,18 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEventsWithTriggeredMaxTimeAndCallback__S
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
   double arg2 ;
-  PyObject *arg3 = (PyObject *) 0 ;
+  double arg3 ;
   PyObject *arg4 = (PyObject *) 0 ;
+  PyObject *arg5 = (PyObject *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   double val2 ;
   int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
   PyObject *result = 0 ;
   
-  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
+  if ((nobjs < 5) || (nobjs > 5)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_runAllEventsWithTriggeredMaxTimeAndCallback" "', argument " "1"" of type '" "Tossim *""'"); 
@@ -8788,9 +8817,14 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEventsWithTriggeredMaxTimeAndCallback__S
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Tossim_runAllEventsWithTriggeredMaxTimeAndCallback" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
-  arg3 = swig_obj[2];
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Tossim_runAllEventsWithTriggeredMaxTimeAndCallback" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
   arg4 = swig_obj[3];
-  result = (PyObject *)Tossim_runAllEventsWithTriggeredMaxTimeAndCallback__SWIG_1(arg1,arg2,arg3,arg4);
+  arg5 = swig_obj[4];
+  result = (PyObject *)Tossim_runAllEventsWithTriggeredMaxTimeAndCallback__SWIG_1(arg1,arg2,arg3,arg4,arg5);
   resultobj = result;
   return resultobj;
 fail:
@@ -8800,21 +8834,21 @@ fail:
 
 SWIGINTERN PyObject *_wrap_Tossim_runAllEventsWithTriggeredMaxTimeAndCallback(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
-  PyObject *argv[5] = {
+  PyObject *argv[6] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args,"Tossim_runAllEventsWithTriggeredMaxTimeAndCallback",0,4,argv+1))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args,"Tossim_runAllEventsWithTriggeredMaxTimeAndCallback",0,5,argv+1))) SWIG_fail;
   argv[0] = self;
-  if (argc == 4) {
+  if (argc == 5) {
     int _v = 0;
     {
-      int res = SWIG_ConvertPtr(argv[2], 0, SWIGTYPE_p_std__functionT_bool_fF_t, 0);
+      int res = SWIG_ConvertPtr(argv[3], 0, SWIGTYPE_p_std__functionT_bool_fF_t, 0);
       _v = SWIG_CheckState(res);
     }
     if (!_v) goto check_1;
     {
-      int res = SWIG_ConvertPtr(argv[3], 0, SWIGTYPE_p_std__functionT_void_flong_longF_t, 0);
+      int res = SWIG_ConvertPtr(argv[4], 0, SWIGTYPE_p_std__functionT_void_flong_longF_t, 0);
       _v = SWIG_CheckState(res);
     }
     if (!_v) goto check_1;
@@ -8822,15 +8856,15 @@ SWIGINTERN PyObject *_wrap_Tossim_runAllEventsWithTriggeredMaxTimeAndCallback(Py
   }
 check_1:
   
-  if (argc == 4) {
+  if (argc == 5) {
     return _wrap_Tossim_runAllEventsWithTriggeredMaxTimeAndCallback__SWIG_1(self, argc, argv);
   }
   
 fail:
   SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Tossim_runAllEventsWithTriggeredMaxTimeAndCallback'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    Tossim::runAllEventsWithTriggeredMaxTimeAndCallback(double,std::function< bool () >,std::function< void (long long) >)\n"
-    "    Tossim::runAllEventsWithTriggeredMaxTimeAndCallback(double,PyObject *,PyObject *)\n");
+    "    Tossim::runAllEventsWithTriggeredMaxTimeAndCallback(double,double,std::function< bool () >,std::function< void (long long) >)\n"
+    "    Tossim::runAllEventsWithTriggeredMaxTimeAndCallback(double,double,PyObject *,PyObject *)\n");
   return 0;
 }
 
