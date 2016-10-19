@@ -5,21 +5,25 @@ typedef struct sim_gain_noise {
   double range;
 } sim_gain_noise_t;
 
+typedef struct sim_gain_list {
+  gain_entry_t* entries;
+  size_t size;
+  size_t capacity;
+} sim_gain_list_t;
 
-static gain_entry_t* connectivity[TOSSIM_MAX_NODES + 1];
+
+static sim_gain_list_t connectivity[TOSSIM_MAX_NODES + 1];
 static sim_gain_noise_t localNoise[TOSSIM_MAX_NODES + 1];
 static double sensitivity = 4.0;
-
-static gain_entry_t* sim_gain_allocate_link(int mote);
-static void sim_gain_deallocate_link(gain_entry_t* linkToDelete);
-static void sim_gain_deallocate_links(gain_entry_t* linkToDelete);
 
 void sim_gain_init(void) __attribute__ ((C, spontaneous)) {
   size_t i;
 
   for (i = 0; i != TOSSIM_MAX_NODES + 1; ++i)
   {
-    connectivity[i] = NULL;
+    connectivity[i].capacity = 16;
+    connectivity[i].entries = (gain_entry_t*)malloc(sizeof(gain_entry_t) * connectivity[i].capacity);
+    connectivity[i].size = 0;
     localNoise[i].mean = 0.0;
     localNoise[i].range = 0.0;
   }
@@ -32,74 +36,101 @@ void sim_gain_free(void) __attribute__ ((C, spontaneous)) {
 
   for (i = 0; i != TOSSIM_MAX_NODES + 1; ++i)
   {
-    if (connectivity[i] != NULL) {
-      sim_gain_deallocate_links(connectivity[i]);
-      connectivity[i] = NULL;
+    if (connectivity[i].entries != NULL)
+    {
+      free(connectivity[i].entries);
+      connectivity[i].entries = NULL;
+      connectivity[i].size = 0;
+      connectivity[i].capacity = 0;
     }
   }
 }
 
+// To maintain backwards compatibility we need to iterate in reverse
 
-
-gain_entry_t* sim_gain_first(int src) __attribute__ ((C, spontaneous)) {
+gain_entry_t* sim_gain_begin(int src) __attribute__ ((C, spontaneous)) {
   if (src > TOSSIM_MAX_NODES) {
-    return connectivity[TOSSIM_MAX_NODES];
+    return connectivity[TOSSIM_MAX_NODES].entries;
   } 
-  return connectivity[src];
+  return connectivity[src].entries + (connectivity[src].size - 1);
 }
 
-gain_entry_t* sim_gain_next(gain_entry_t* currentLink) __attribute__ ((C, spontaneous)) {
-  return currentLink->next;
+gain_entry_t* sim_gain_end(int src) __attribute__ ((C, spontaneous)) {
+  if (src > TOSSIM_MAX_NODES) {
+    return connectivity[TOSSIM_MAX_NODES].entries + connectivity[TOSSIM_MAX_NODES].size;
+  } 
+  return connectivity[src].entries - 1;
+}
+
+static gain_entry_t* sim_gain_append(int src) {
+  if (connectivity[src].size == connectivity[src].capacity) {
+    connectivity[src].capacity *= 2;
+    connectivity[src].entries = (gain_entry_t*)realloc(connectivity[src].entries, sizeof(gain_entry_t) * connectivity[src].capacity);
+  }
+
+  connectivity[src].size += 1;
+
+  return connectivity[src].entries + (connectivity[src].size - 1);
 }
 
 void sim_gain_add(int src, int dest, double gain) __attribute__ ((C, spontaneous))  {
-  gain_entry_t* current;
+  gain_entry_t* iter;
+  gain_entry_t* end;
+
   int temp = sim_node();
   if (src > TOSSIM_MAX_NODES) {
     src = TOSSIM_MAX_NODES;
   }
   sim_set_node(src);
 
-  for (current = sim_gain_first(src); current != NULL; current = current->next) {
-    if (current->mote == dest) {
+  for (iter = sim_gain_begin(src), end = sim_gain_end(src); iter != end; iter = sim_gain_next(iter)) {
+    if (iter->mote == dest) {
       sim_set_node(temp);
       break;
     }
   }
 
-  if (current == NULL) {
-    current = sim_gain_allocate_link(dest);
-    current->next = connectivity[src];
-    connectivity[src] = current;
+  if (iter == end) {
+    iter = sim_gain_append(src);
   }
-  current->mote = dest;
-  current->gain = gain;
+
+  iter->mote = dest;
+  iter->gain = gain;
+
   dbg("Gain", "Adding link from %i to %i with gain %f\n", src, dest, gain);
+
   sim_set_node(temp);
 }
 
 double sim_gain_value(int src, int dest) __attribute__ ((C, spontaneous))  {
-  gain_entry_t* current;
+  gain_entry_t* iter;
+  gain_entry_t* end;
+
   int temp = sim_node();
+
   sim_set_node(src);
-  for (current = sim_gain_first(src); current != NULL; current = current->next) {
-    if (current->mote == dest) {
+
+  for (iter = sim_gain_begin(src), end = sim_gain_end(src); iter != end; iter = sim_gain_next(iter)) {
+    if (iter->mote == dest) {
       sim_set_node(temp);
-      dbg("Gain", "Getting link from %i to %i with gain %f\n", src, dest, current->gain);
-      return current->gain;
+      dbg("Gain", "Getting link from %i to %i with gain %f\n", src, dest, iter->gain);
+      return iter->gain;
     }
   }
+
   sim_set_node(temp);
   dbg("Gain", "Getting default link from %i to %i with gain %f\n", src, dest, 1.0);
   return 1.0;
 }
 
 bool sim_gain_connected(int src, int dest) __attribute__ ((C, spontaneous)) {
-  gain_entry_t* current;
+  gain_entry_t* iter;
+  gain_entry_t* end;
+
   int temp = sim_node();
   sim_set_node(src);
-  for (current = sim_gain_first(src); current != NULL; current = current->next) {
-    if (current->mote == dest) {
+  for (iter = sim_gain_begin(src), end = sim_gain_end(src); iter != end; iter = sim_gain_next(iter)) {
+    if (iter->mote == dest) {
       sim_set_node(temp);
       return TRUE;
     }
@@ -109,8 +140,9 @@ bool sim_gain_connected(int src, int dest) __attribute__ ((C, spontaneous)) {
 }
   
 void sim_gain_remove(int src, int dest) __attribute__ ((C, spontaneous))  {
-  gain_entry_t* current;
-  gain_entry_t* prevLink;
+  gain_entry_t* iter;
+  gain_entry_t* end;
+
   int temp = sim_node();
   
   if (src > TOSSIM_MAX_NODES) {
@@ -119,27 +151,18 @@ void sim_gain_remove(int src, int dest) __attribute__ ((C, spontaneous))  {
 
   sim_set_node(src);
     
-  current = sim_gain_first(src);
-  prevLink = NULL;
-    
-  while (current != NULL) {
-    gain_entry_t* tmp;
-    if (current->mote == dest) {
-      if (prevLink == NULL) {
-        connectivity[src] = current->next;
-      }
-      else {
-        prevLink->next = current->next;
-      }
-      tmp = current->next;
-      sim_gain_deallocate_link(current);
-      current = tmp;
-    }
-    else {
-      prevLink = current;
-      current = current->next;
+  iter = sim_gain_begin(src);
+  end = sim_gain_end(src);
+
+  for (iter = connectivity[src].entries, end = connectivity[src].entries + connectivity[src].size; iter != end; ++iter) {
+    if (iter->mote == dest) {
+
+      memcpy(iter, iter + 1, end - (iter + 1));
+
+      connectivity[src].size -= 1;
     }
   }
+
   sim_set_node(temp);
 }
 
@@ -178,26 +201,6 @@ double sim_gain_sample_noise(int node)  __attribute__ ((C, spontaneous)) {
   adjust -= 1.0;
   adjust *= localNoise[node].range;
   return val + adjust;
-}
-
-static gain_entry_t* sim_gain_allocate_link(int mote) {
-  gain_entry_t* newLink = (gain_entry_t*)malloc(sizeof(gain_entry_t));
-  newLink->next = NULL;
-  newLink->mote = mote;
-  newLink->gain = -10000000.0;
-  return newLink;
-}
-
-static void sim_gain_deallocate_link(gain_entry_t* linkToDelete) {
-  free(linkToDelete);
-}
-
-static void sim_gain_deallocate_links(gain_entry_t* linkToDelete) {
-  gain_entry_t* next = linkToDelete->next;
-  sim_gain_deallocate_link(linkToDelete);
-  if (next != NULL) {
-    sim_gain_deallocate_link(next);
-  }
 }
 
 void sim_gain_set_sensitivity(double s) __attribute__ ((C, spontaneous)) {

@@ -88,20 +88,21 @@ implementation {
   double checkPrr(receive_message_t* msg);
   
   double timeInMs()   {
+    const sim_time_t ticks_per_sec = sim_ticks_per_sec();
     sim_time_t ftime = sim_time();
     int hours, minutes, seconds;
     sim_time_t secondBillionths;
     int temp_time;
     double ms_time;
 
-    secondBillionths = (ftime % sim_ticks_per_sec());
-    if (sim_ticks_per_sec() > (sim_time_t)1000000000LL) {
-      secondBillionths /= (sim_ticks_per_sec() / (sim_time_t)1000000000LL);
+    secondBillionths = ftime % ticks_per_sec;
+    if (ticks_per_sec > 1000000000LL) {
+      secondBillionths /= (ticks_per_sec / 1000000000LL);
     }
     else {
-      secondBillionths *= ((sim_time_t)1000000000LL / sim_ticks_per_sec());
+      secondBillionths *= (1000000000LL / ticks_per_sec);
     }
-    temp_time = (int)(secondBillionths/10000);
+    temp_time = (int)(secondBillionths/10000LL);
     
     if (temp_time % 10 >= 5) {
       temp_time += (10-(temp_time%10));
@@ -109,9 +110,9 @@ implementation {
     else {
       temp_time -= (temp_time%10);
     }
-    ms_time = (float)(temp_time/100.0);
+    ms_time = temp_time / 100.0;
 
-    seconds = (int)(ftime / sim_ticks_per_sec());
+    seconds = (int)(ftime / ticks_per_sec);
     minutes = seconds / 60;
     hours = minutes / 60;
     seconds %= 60;
@@ -298,11 +299,11 @@ implementation {
     receive_message_t* list = outstandingReceptionHead;
 
     dbg("CpmModelC", "Handling reception event @ %s.\n", sim_time_string());
-    while (list != NULL) {
+    for (; list != NULL; list = list->next) {
       if (list->next == mine) {
         predecessor = list;
+        break;
       }
-      list = list->next;
     }
     if (predecessor) {
       predecessor->next = mine->next;
@@ -433,23 +434,22 @@ implementation {
 
   command void Model.putOnAirTo(int dest, message_t* msg, bool ack, sim_time_t endTime, double power, double reversePower) {
     receive_message_t* list;
-    gain_entry_t* neighborEntry = sim_gain_first(sim_node());
+    gain_entry_t* neighborEntryIter = sim_gain_begin(sim_node());
+    gain_entry_t* neighborEntryEnd = sim_gain_end(sim_node());
     requestAck = ack;
     outgoing = msg;
     transmissionEndTime = endTime;
     dbg("CpmModelC", "Node %i transmitting to %i, finishes at %llu.\n", sim_node(), dest, endTime);
 
-    while (neighborEntry != NULL) {
-      int other = neighborEntry->mote;
-      sim_gain_put(other, msg, endTime, ack, power + sim_gain_value(sim_node(), other), reversePower + sim_gain_value(other, sim_node()));
-      neighborEntry = sim_gain_next(neighborEntry);
+    for (; neighborEntryIter != neighborEntryEnd; neighborEntryIter = sim_gain_next(neighborEntryIter)) {
+      const int other = neighborEntryIter->mote;
+      const double other_gain = neighborEntryIter->gain;
+      sim_gain_put(other, msg, endTime, ack, power + other_gain, reversePower + sim_gain_value(other, sim_node()));
     }
 
-    list = outstandingReceptionHead;
-    while (list != NULL) {    
+    for (list = outstandingReceptionHead; list != NULL; list = list->next) {    
       list->lost = 1;
       dbg("CpmModelC,SNRLoss", "Lost packet from %i because %i has outstanding reception, startTime %llu endTime %llu\n", list->source, sim_node(), list->start, list->end);
-      list = list->next;
     }
   }
     
