@@ -74,7 +74,7 @@ implementation {
     for (i = 0; i < count; i++) {
       dbg_clear("Cache", " %04x %02x %02x %02x", cache[i].origin, cache[i].seqno, cache[i].type, cache[i].thl);
       if (i == first)
-	dbg_clear("Cache","*");
+        dbg_clear("Cache","*");
     } 
     dbg_clear("Cache","\n");
 #endif
@@ -87,10 +87,10 @@ implementation {
     for (i = 0; i < count; i++) {
       idx = (i + first) % size;
       if (call CtpPacket.getOrigin(m)         == cache[idx].origin &&
-	  call CtpPacket.getSequenceNumber(m) == cache[idx].seqno &&
-	  call CtpPacket.getThl(m)            == cache[idx].thl &&
-	  call CtpPacket.getType(m)           == cache[idx].type) {
-	break;
+          call CtpPacket.getSequenceNumber(m) == cache[idx].seqno &&
+          call CtpPacket.getThl(m)            == cache[idx].thl &&
+          call CtpPacket.getType(m)           == cache[idx].type) {
+        break;
       }
     }
     return i;
@@ -107,8 +107,8 @@ implementation {
         } else {
             //shift everyone down
             for (j = i; j < count; j++) {
-	      memcpy(&cache[(j + first) % size], &cache[(j + first + 1) % size], sizeof(ctp_packet_sig_t));
-	    }
+              memcpy(&cache[(j + first) % size], &cache[(j + first + 1) % size], sizeof(ctp_packet_sig_t));
+            }
         }
         count--;
     }
@@ -121,14 +121,14 @@ implementation {
             //otherwise remove the item temporarily for
             //reinsertion. This moves the item up in the
             //LRU stack.
-	  i = lookup(m);
-	  remove(i % count);
+          i = lookup(m);
+          remove(i % count);
         }
         //now count < size
         cache[(first + count) % size].origin = call CtpPacket.getOrigin(m);
-	cache[(first + count) % size].seqno  = call CtpPacket.getSequenceNumber(m);
-	cache[(first + count) % size].thl    = call CtpPacket.getThl(m);
-	cache[(first + count) % size].type   = call CtpPacket.getType(m);
+        cache[(first + count) % size].seqno  = call CtpPacket.getSequenceNumber(m);
+        cache[(first + count) % size].thl    = call CtpPacket.getThl(m);
+        cache[(first + count) % size].type   = call CtpPacket.getType(m);
         count++;
     }
 
