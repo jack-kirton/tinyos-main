@@ -222,8 +222,8 @@ int Mote::generateNoise(int when) {
 }
 
 
-Tossim::Tossim(const NescApp* n)
-  : app(n) // Take ownership
+Tossim::Tossim(NescApp n)
+  : app(std::move(n))
   , motes(TOSSIM_MAX_NODES)
   , duration_started(false)
 {
@@ -269,7 +269,7 @@ Mote* Tossim::getNode(unsigned long nodeID) noexcept {
   }
 
   if (motes[nodeID] == nullptr) {
-    motes[nodeID].reset(new Mote(app.get()));
+    motes[nodeID].reset(new Mote(&app));
 
     if (nodeID == TOSSIM_MAX_NODES) {
       nodeID = 0xFFFF;

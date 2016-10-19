@@ -338,39 +338,39 @@ bool fill_nesc_app(NescApp* app, int i, PyObject* name, PyObject* array, PyObjec
 
 %}
 
-%typemap(in) NescApp* {
+%typemap(in) NescApp {
     if (!PyList_Check($input)) {
         PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
-        return NULL;
+        goto fail;
     }
     else {
         Py_ssize_t size = PyList_Size($input);
         Py_ssize_t i = 0;
-        NescApp* app;
 
         if (size < 0 || size % 3 != 0) {
             PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
-            return NULL;
+            goto fail;
         }
 
-        app = new NescApp(static_cast<unsigned int>(size) / 3);
+        NescApp app(static_cast<unsigned int>(size) / 3);
 
-        for (i = 0; i < app->numVariables; i++) {
+        for (i = 0; i < app.numVariables; i++) {
             PyObject* name = PyList_GET_ITEM($input, 3 * i);
             PyObject* array = PyList_GET_ITEM($input, (3 * i) + 1);
             PyObject* format = PyList_GET_ITEM($input, (3 * i) + 2);
-            if (!fill_nesc_app(app, i, name, array, format))
+            if (!fill_nesc_app(&app, i, name, array, format))
             {
-                delete app;
-                return NULL;
+                goto fail;
             }
         }
 
-        $1 = app;
+        $1 = std::move(app);
     }
 }
 #endif
 
+%ignore variable_string;
+%ignore variable_string_t;
 typedef struct variable_string {
     const char* type;
     void* ptr;
@@ -378,6 +378,7 @@ typedef struct variable_string {
     bool isArray;
 } variable_string_t;
 
+%ignore NescApp;
 class NescApp {
 public:
     NescApp(unsigned int size)
@@ -402,10 +403,11 @@ class Variable {
 };
 
 class Mote {
- public:
+ protected:
     Mote(const NescApp* app);
     ~Mote();
 
+ public:
     unsigned long id() const noexcept;
   
     long long int euid() const noexcept;
@@ -533,7 +535,7 @@ class Mote {
 
 class Tossim {
  public:
-    Tossim(const NescApp* app);
+    Tossim(NescApp app);
     ~Tossim();
     
     void init();

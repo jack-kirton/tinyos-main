@@ -133,7 +133,7 @@ class Mote {
 
 class Tossim {
  public:
-  Tossim(const NescApp* app);
+  Tossim(NescApp app);
   ~Tossim();
   
   void init();
@@ -175,7 +175,7 @@ class Tossim {
   std::shared_ptr<Packet> newPacket();
 
  private:
-  std::unique_ptr<const NescApp> app;
+  const NescApp app;
   std::vector<std::unique_ptr<Mote>> motes;
   char timeBuf[128];
 
