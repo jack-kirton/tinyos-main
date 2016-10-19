@@ -115,4 +115,8 @@ implementation {
       return SUCCESS;
     }
   }
+
+  command bool Pool.from(const pool_t* val) {
+    return val >= pool && val < (pool + size);
+  }
 }

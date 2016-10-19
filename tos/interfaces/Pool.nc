@@ -95,4 +95,13 @@ interface Pool<t> {
     * the pool is empty.
     */
   command t* get();
+
+  /**
+    * Check if the provided value is within the memory range
+    * from which items are allocated in this pool.
+    *
+    * @return whether the value was obtained from this pool.
+    */
+
+  command bool from(const t* val);
 }

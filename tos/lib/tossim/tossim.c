@@ -45,6 +45,7 @@
 #include <stdint.h>
 
 #include <algorithm>
+#include <stdexcept>
 
 #include <tossim.h>
 #include <sim_tossim.h>
@@ -67,7 +68,18 @@ Variable::Variable(const std::string& name, const char* formatStr, bool array, i
   , mote(which)
   , isArray(array)
 {
-  std::replace(realName.begin(), realName.end(), '.', '$');
+  // Names can come in two formats:
+  // nongeneric: "ActiveMessageAddressC$addr"
+  // generic: "/*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm128AlarmAsyncP*/Atm128AlarmAsyncP$0$set"
+  // We need to change the "." to "$" in parts after the /*...*/ part
+
+  size_t last_slash_pos = realName.find_last_of('/');
+  if (last_slash_pos == std::string::npos)
+  {
+    last_slash_pos = 0;
+  }
+
+  std::replace(realName.begin() + last_slash_pos, realName.end(), '.', '$');
 
   if (sim_mote_get_variable_info(mote, realName.c_str(), &ptr, &len) == 0) {
     data.reset(new uint8_t[len + 1]);
@@ -111,11 +123,7 @@ variable_string_t Variable::getData() {
 Mote::Mote(const NescApp* n) : app(n) {
 }
 
-Mote::~Mote(){
-  for (auto iter = varTable.begin(), end = varTable.end(); iter != end; ++iter)
-  {
-    delete iter->second;
-  }
+Mote::~Mote() {
 }
 
 unsigned long Mote::id() const noexcept {
@@ -163,8 +171,8 @@ void Mote::setID(unsigned long val) noexcept {
   nodeID = val;
 }
 
-Variable* Mote::getVariable(const char* name_cstr) {
-  Variable* var;
+std::shared_ptr<Variable> Mote::getVariable(const char* name_cstr) {
+  std::shared_ptr<Variable> var;
 
   std::string name(name_cstr);
 
@@ -186,7 +194,7 @@ Variable* Mote::getVariable(const char* name_cstr) {
       }
     }
 
-    var = new Variable(name, typeStr, isArray, nodeID);
+    var = std::make_shared<Variable>(name, typeStr, isArray, nodeID);
 
     varTable.emplace(std::move(name), var);
   }
@@ -202,7 +210,7 @@ void Mote::reserveNoiseTraces(size_t num_traces) {
 }
 
 void Mote::addNoiseTraceReading(int val) {
-  sim_noise_trace_add(nodeID, (char)val);
+  sim_noise_trace_add(nodeID, static_cast<char>(val));
 }
 
 void Mote::createNoiseModel() {
@@ -214,23 +222,15 @@ int Mote::generateNoise(int when) {
 }
 
 
-Tossim::Tossim(const NescApp* n)
-  : app(n) // Take ownership
-  , motes(TOSSIM_MAX_NODES, nullptr)
+Tossim::Tossim(NescApp n)
+  : app(std::move(n))
+  , motes(TOSSIM_MAX_NODES)
+  , duration_started(false)
 {
   init();
 }
 
-void Tossim::free_motes()
-{
-  for (auto iter = motes.begin(), end = motes.end(); iter != end; ++iter)
-  {
-    delete *iter;
-  }
-}
-
 Tossim::~Tossim() {
-  free_motes();
   sim_end();
 }
 
@@ -265,21 +265,19 @@ Mote* Tossim::currentNode() noexcept {
 
 Mote* Tossim::getNode(unsigned long nodeID) noexcept {
   if (nodeID >= TOSSIM_MAX_NODES) {
-    // TODO: log an error, asked for an invalid node
-    return nullptr;
+    throw std::runtime_error("Asked for an invalid node id. You may need to increase the maximum number of nodes.");
   }
-  else {
-    if (motes[nodeID] == nullptr) {
-      motes[nodeID] = new Mote(app.get());
-      if (nodeID == TOSSIM_MAX_NODES) {
-        motes[nodeID]->setID(0xffff);
-      }
-      else {
-        motes[nodeID]->setID(nodeID);
-      }
+
+  if (motes[nodeID] == nullptr) {
+    motes[nodeID].reset(new Mote(&app));
+
+    if (nodeID == TOSSIM_MAX_NODES) {
+      nodeID = 0xFFFF;
     }
-    return motes[nodeID];
+
+    motes[nodeID]->setID(nodeID);
   }
+  return motes[nodeID].get();
 }
 
 void Tossim::setCurrentNode(unsigned long nodeID) noexcept {
@@ -356,13 +354,30 @@ bool Tossim::runNextEvent() {
   return sim_run_next_event();
 }
 
-long long int Tossim::runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events) {
-  const long long int end_time_ticks = (long long int)ceil(end_time * ticksPerSecond());
+void Tossim::triggerRunDurationStart() {
+  if (!duration_started)
+  {
+    duration_started = true;
+    duration_started_at = sim_time();
+  }
+}
+
+long long int Tossim::runAllEventsWithTriggeredMaxTime(
+  double duration,
+  double duration_upper_bound,
+  std::function<bool()> continue_events)
+{
+  const long long int duration_ticks = static_cast<long long int>(ceil(duration * ticksPerSecond()));
+  const long long int duration_upper_bound_ticks = static_cast<long long int>(ceil(duration_upper_bound * ticksPerSecond()));
   long long int event_count = 0;
   bool process_callback = true;
 
   // We can skip calling the continue_events predicate if no log info was outputted, or no python callback occurred
-  while (sim_time() < end_time_ticks && ((!process_callback && !python_event_called) || continue_events()))
+  while (
+      (!duration_started || sim_time() < (duration_started_at + duration_ticks)) &&
+      (sim_time() < duration_upper_bound_ticks) &&
+      ((!process_callback && !python_event_called) || continue_events())
+    )
   {
     // Reset the python event called flag as we have no handled it
     python_event_called = false;
@@ -382,13 +397,23 @@ long long int Tossim::runAllEventsWithMaxTime(double end_time, std::function<boo
   return event_count;
 }
 
-long long int Tossim::runAllEventsWithMaxTimeAndCallback(double end_time, std::function<bool()> continue_events, std::function<void(long long int)> callback) {
-  const long long int end_time_ticks = (long long int)ceil(end_time * ticksPerSecond());
+long long int Tossim::runAllEventsWithTriggeredMaxTimeAndCallback(
+    double duration,
+    double duration_upper_bound,
+    std::function<bool()> continue_events,
+    std::function<void(long long int)> callback)
+{
+  const long long int duration_ticks = static_cast<long long int>(ceil(duration * ticksPerSecond()));
+  const long long int duration_upper_bound_ticks = static_cast<long long int>(ceil(duration_upper_bound * ticksPerSecond()));
   long long int event_count = 0;
   bool process_callback = true;
 
   // We can skip calling the continue_events predicate if no log info was outputted, or no python callback occurred
-  while (sim_time() < end_time_ticks && ((!process_callback && !python_event_called) || continue_events()))
+  while (
+      (!duration_started || sim_time() < (duration_started_at + duration_ticks)) &&
+      (sim_time() < duration_upper_bound_ticks) &&
+      ((!process_callback && !python_event_called) || continue_events())
+    )
   {
     // Reset the python event called flag as we have no handled it
     python_event_called = false;
@@ -412,14 +437,14 @@ long long int Tossim::runAllEventsWithMaxTimeAndCallback(double end_time, std::f
   return event_count;
 }
 
-MAC* Tossim::mac() {
-  return new MAC();
+std::shared_ptr<MAC> Tossim::mac() {
+  return std::make_shared<MAC>();
 }
 
-Radio* Tossim::radio() {
-  return new Radio();
+std::shared_ptr<Radio> Tossim::radio() {
+  return std::make_shared<Radio>();
 }
 
-Packet* Tossim::newPacket() {
-  return new Packet();
+std::shared_ptr<Packet> Tossim::newPacket() {
+  return std::make_shared<Packet>();
 }

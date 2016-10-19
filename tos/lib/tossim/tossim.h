@@ -123,17 +123,17 @@ class Mote {
   void createNoiseModel();
   int generateNoise(int when);
   
-  Variable* getVariable(const char* name_cstr);
+  std::shared_ptr<Variable> getVariable(const char* name_cstr);
 
  private:
   unsigned long nodeID;
   const NescApp* app;
-  std::unordered_map<std::string, Variable*> varTable;
+  std::unordered_map<std::string, std::shared_ptr<Variable>> varTable;
 };
 
 class Tossim {
  public:
-  Tossim(const NescApp* app);
+  Tossim(NescApp app);
   ~Tossim();
   
   void init();
@@ -157,20 +157,30 @@ class Tossim {
   void register_event_callback(std::function<void(double)> callback, double time);
   
   bool runNextEvent();
-  long long int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events);
-  long long int runAllEventsWithMaxTimeAndCallback(double end_time, std::function<bool()> continue_events, std::function<void(long long int)> callback);
 
-  MAC* mac();
-  Radio* radio();
-  Packet* newPacket();
+  void triggerRunDurationStart();
 
-private:
-  void free_motes();
+  long long int runAllEventsWithTriggeredMaxTime(
+    double duration,
+    double duration_upper_bound,
+    std::function<bool()> continue_events);
+  long long int runAllEventsWithTriggeredMaxTimeAndCallback(
+    double duration,
+    double duration_upper_bound,
+    std::function<bool()> continue_events,
+    std::function<void(long long int)> callback);
+
+  std::shared_ptr<MAC> mac();
+  std::shared_ptr<Radio> radio();
+  std::shared_ptr<Packet> newPacket();
 
  private:
-  std::unique_ptr<const NescApp> app;
-  std::vector<Mote*> motes;
+  const NescApp app;
+  std::vector<std::unique_ptr<Mote>> motes;
   char timeBuf[128];
+
+  bool duration_started;
+  long long int duration_started_at;
 };
 
 #endif // TOSSIM_H_INCLUDED

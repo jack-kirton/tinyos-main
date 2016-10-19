@@ -42,6 +42,12 @@
 
 %module TOSSIM
 
+%include <std_shared_ptr.i>
+%shared_ptr(MAC)
+%shared_ptr(Radio)
+%shared_ptr(Packet)
+%shared_ptr(Variable)
+
 %{
 #include <memory.h>
 #include <tossim.h>
@@ -127,24 +133,28 @@ class PyCallback
 {
 private:
     PyObject *func;
+private:
     PyCallback& operator=(const PyCallback&) = delete; // Not allowed
 public:
-    PyCallback(PyCallback&& o) : func(o.func) {
+    PyCallback(PyCallback&& o) noexcept : func(o.func)
+    {
         o.func = NULL;
     }
-    PyCallback(const PyCallback& o) : func(o.func) {
+    PyCallback(const PyCallback& o) noexcept : func(o.func)
+    {
         Py_XINCREF(func);
     }
-    PyCallback(PyObject *pfunc) {
+    PyCallback(PyObject *pfunc) : func(pfunc)
+    {
         if (!pfunc || Py_None == pfunc || !PyCallable_Check(pfunc))
         {
             PyErr_SetString(PyExc_TypeError, "Requires a callable as a parameter.");
             throw std::runtime_error("Python exception occurred");
         }
-        func = pfunc;
         Py_INCREF(func);
     }
-    ~PyCallback() {
+    ~PyCallback() noexcept
+    {
         Py_XDECREF(func);
     }
 
@@ -328,39 +338,39 @@ bool fill_nesc_app(NescApp* app, int i, PyObject* name, PyObject* array, PyObjec
 
 %}
 
-%typemap(in) NescApp* {
+%typemap(in) NescApp {
     if (!PyList_Check($input)) {
         PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
-        return NULL;
+        goto fail;
     }
     else {
         Py_ssize_t size = PyList_Size($input);
         Py_ssize_t i = 0;
-        NescApp* app;
 
         if (size < 0 || size % 3 != 0) {
             PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
-            return NULL;
+            goto fail;
         }
 
-        app = new NescApp(static_cast<unsigned int>(size) / 3);
+        NescApp app(static_cast<unsigned int>(size) / 3);
 
-        for (i = 0; i < app->numVariables; i++) {
+        for (i = 0; i < app.numVariables; i++) {
             PyObject* name = PyList_GET_ITEM($input, 3 * i);
             PyObject* array = PyList_GET_ITEM($input, (3 * i) + 1);
             PyObject* format = PyList_GET_ITEM($input, (3 * i) + 2);
-            if (!fill_nesc_app(app, i, name, array, format))
+            if (!fill_nesc_app(&app, i, name, array, format))
             {
-                delete app;
-                return NULL;
+                goto fail;
             }
         }
 
-        $1 = app;
+        $1 = std::move(app);
     }
 }
 #endif
 
+%ignore variable_string;
+%ignore variable_string_t;
 typedef struct variable_string {
     const char* type;
     void* ptr;
@@ -368,6 +378,7 @@ typedef struct variable_string {
     bool isArray;
 } variable_string_t;
 
+%ignore NescApp;
 class NescApp {
 public:
     NescApp(unsigned int size)
@@ -392,10 +403,11 @@ class Variable {
 };
 
 class Mote {
- public:
+ protected:
     Mote(const NescApp* app);
     ~Mote();
 
+ public:
     unsigned long id() const noexcept;
   
     long long int euid() const noexcept;
@@ -410,7 +422,7 @@ class Mote {
     bool isOn();
     void turnOff();
     void turnOn();
-    Variable* getVariable(const char* name_cstr);
+    std::shared_ptr<Variable> getVariable(const char* name_cstr);
 
     void reserveNoiseTraces(size_t num_traces);
     void addNoiseTraceReading(int val);
@@ -485,10 +497,15 @@ class Mote {
         }
     }
 
-    PyObject* runAllEventsWithMaxTime(double end_time, PyObject *continue_events) {
+    PyObject* runAllEventsWithTriggeredMaxTime(
+        double duration,
+        double duration_upper_bound,
+        PyObject *continue_events)
+    {
         try
         {
-            long long int result = $self->runAllEventsWithMaxTime(end_time, PyCallback(continue_events));
+            long long int result = $self->runAllEventsWithTriggeredMaxTime(
+                duration, duration_upper_bound, PyCallback(continue_events));
             return PyLong_FromLongLong(result);
         }
         catch (std::runtime_error ex)
@@ -497,10 +514,16 @@ class Mote {
         }
     }
 
-    PyObject* runAllEventsWithMaxTimeAndCallback(double end_time, PyObject *continue_events, PyObject *callback) {
+    PyObject* runAllEventsWithTriggeredMaxTimeAndCallback(
+        double duration,
+        double duration_upper_bound,
+        PyObject *continue_events,
+        PyObject *callback)
+    {
         try
         {
-            long long int result = $self->runAllEventsWithMaxTimeAndCallback(end_time, PyCallback(continue_events), PyCallback(callback));
+            long long int result = $self->runAllEventsWithTriggeredMaxTimeAndCallback(
+                duration, duration_upper_bound, PyCallback(continue_events), PyCallback(callback));
             return PyLong_FromLongLong(result);
         }
         catch (std::runtime_error ex)
@@ -512,7 +535,7 @@ class Mote {
 
 class Tossim {
  public:
-    Tossim(const NescApp* app);
+    Tossim(NescApp app);
     ~Tossim();
     
     void init();
@@ -536,10 +559,20 @@ class Tossim {
     void register_event_callback(std::function<bool(double)> callback, double current_time);
 
     bool runNextEvent();
-    long long int runAllEventsWithMaxTime(double end_time, std::function<bool()> continue_events);
-    long long int runAllEventsWithMaxTimeAndCallback(double end_time, std::function<bool()> continue_events, std::function<void(long long int)> callback);
 
-    MAC* mac();
-    Radio* radio();
-    Packet* newPacket();
+    void triggerRunDurationStart();
+
+    long long int runAllEventsWithTriggeredMaxTime(
+        double duration,
+        double duration_upper_bound,
+        std::function<bool()> continue_events);
+    long long int runAllEventsWithTriggeredMaxTimeAndCallback(
+        double duration,
+        double duration_upper_bound,
+        std::function<bool()> continue_events,
+        std::function<void(long long int)> callback);
+
+    std::shared_ptr<MAC> mac();
+    std::shared_ptr<Radio> radio();
+    std::shared_ptr<Packet> newPacket();
 };

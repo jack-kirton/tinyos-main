@@ -701,10 +701,10 @@ implementation {
       if ((nidx != INVALID_RVAL) && (num_entries > 0)) {
 	uint8_t payloadLen = call SubPacket.payloadLength(msg);
 	void* COUNT_NOK(payloadLen) subPayload = call SubPacket.getPayload(msg, payloadLen);
-	void* payloadEnd = subPayload + payloadLen;
+	void* payloadEnd = (char*)subPayload + payloadLen;
 	dbg("LI", "Number of footer entries: %d\n", num_entries);
 	
-	footer = TCAST(linkest_footer_t* COUNT(num_entries), (payloadEnd - (num_entries*sizeof(linkest_footer_t))));
+	footer = TCAST(linkest_footer_t* COUNT(num_entries), ((char*)payloadEnd - (num_entries*sizeof(linkest_footer_t))));
 	{
 	  uint8_t i;
 	  am_addr_t my_ll_addr;
@@ -771,7 +771,7 @@ implementation {
 
   // application payload pointer is just past the link estimation header
   command void* Packet.getPayload(message_t* msg, uint8_t len) {
-    void* payload = call SubPacket.getPayload(msg, len +  sizeof(linkest_header_t));
+    char* payload = (char*)call SubPacket.getPayload(msg, len +  sizeof(linkest_header_t));
     if (payload != NULL) {
       payload += sizeof(linkest_header_t);
     }
