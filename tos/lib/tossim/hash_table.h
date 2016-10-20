@@ -54,10 +54,11 @@ typedef struct hash_table {
 	uint32_t deleted_entries;
 } hash_table_t;
 
-struct hash_table *
-hash_table_create(uint32_t (*hash_function)(const void *key),
-		  int (*key_equals_function)(const void *a,
-					     const void *b));
+bool
+hash_table_create(
+	        struct hash_table *ht,
+		    uint32_t (*hash_function)(const void *key),
+		    int (*key_equals_function)(const void *a, const void *b));
 void
 hash_table_destroy(struct hash_table *ht,
 		   void (*delete_function)(struct hash_entry *entry));

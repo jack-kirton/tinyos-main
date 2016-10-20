@@ -69,7 +69,7 @@ typedef struct sim_noise_node_t {
   char lastNoiseVal;
   bool generated;
   uint32_t noiseGenTime;
-  struct hash_table *noiseTable;
+  struct hash_table noiseTable;
   char* noiseTrace;
   uint32_t noiseTraceLen;
   uint32_t noiseTraceIndex;
@@ -95,7 +95,7 @@ void sim_noise_init(void) __attribute__ ((C, spontaneous))
   FreqKeyNum = 0;
   
   for (j = 0; j < TOSSIM_MAX_NODES; j++) {
-    noiseData[j].noiseTable = hash_table_create(sim_noise_hash, sim_noise_eq);
+    hash_table_create(&noiseData[j].noiseTable, sim_noise_hash, sim_noise_eq);
     noiseData[j].noiseGenTime = 0;
     noiseData[j].noiseTrace = (char*)malloc(sizeof(char) * NOISE_MIN_TRACE);
     noiseData[j].noiseTraceLen = NOISE_MIN_TRACE;
@@ -112,8 +112,7 @@ static void noise_table_entry_free(struct hash_entry* entry)
 void sim_noise_free(void) __attribute__ ((C, spontaneous)) {
   int j;
   for (j = 0; j < TOSSIM_MAX_NODES; j++) {
-    hash_table_destroy(noiseData[j].noiseTable, &noise_table_entry_free);
-    noiseData[j].noiseTable = NULL;
+    hash_table_destroy(&noiseData[j].noiseTable, &noise_table_entry_free);
 
     noiseData[j].noiseGenTime = 0;
 
@@ -202,7 +201,7 @@ void sim_noise_add(uint16_t node_id, char noise)__attribute__ ((C, spontaneous))
 {
   int i;
 
-  struct hash_table * const pnoiseTable = noiseData[node_id].noiseTable;
+  struct hash_table * const pnoiseTable = &noiseData[node_id].noiseTable;
   const char * const key = noiseData[node_id].key;
   sim_noise_hash_t *noise_hash = (sim_noise_hash_t *)hash_table_search_data(pnoiseTable, key);
 
@@ -251,7 +250,7 @@ void sim_noise_dist(uint16_t node_id)__attribute__ ((C, spontaneous))
   size_t i;
   int bin;
   float cmf = 0.0f;
-  struct hash_table * const pnoiseTable = noiseData[node_id].noiseTable;
+  struct hash_table * const pnoiseTable = &noiseData[node_id].noiseTable;
   char * __restrict const key = noiseData[node_id].key;
   char * __restrict const freqKey = noiseData[node_id].freqKey;
   sim_noise_hash_t * const noise_hash = (sim_noise_hash_t *)hash_table_search_data(pnoiseTable, key);
@@ -357,7 +356,7 @@ char sim_noise_gen(uint16_t node_id)__attribute__ ((C, spontaneous))
   int i;
   //int noiseIndex = 0;
   char noise = 0;
-  struct hash_table * const pnoiseTable = noiseData[node_id].noiseTable;
+  struct hash_table * const pnoiseTable = &noiseData[node_id].noiseTable;
   char * __restrict const pKey = noiseData[node_id].key;
   const char * __restrict const fKey = noiseData[node_id].freqKey;
   const double ranNum = RandomUniform();

@@ -35,6 +35,7 @@
 // from: https://raw.githubusercontent.com/anholt/hash_table/master/hash_table.c
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "hash_table.h"
 
@@ -103,16 +104,15 @@ entry_is_present(const struct hash_entry *entry)
 	return entry->key != NULL && entry->key != deleted_key;
 }
 
-struct hash_table *
-hash_table_create(uint32_t (*hash_function)(const void *key),
-		  int (*key_equals_function)(const void *a,
+bool
+hash_table_create(
+			struct hash_table *ht,
+			uint32_t (*hash_function)(const void *key),
+		  	int (*key_equals_function)(const void *a,
 					     const void *b))
 {
-	struct hash_table *ht;
-
-	ht = (struct hash_table *)malloc(sizeof(*ht));
 	if (ht == NULL)
-		return NULL;
+		return false;
 
 	ht->size_index = 0;
 	ht->size = hash_sizes[ht->size_index].size;
@@ -125,11 +125,10 @@ hash_table_create(uint32_t (*hash_function)(const void *key),
 	ht->deleted_entries = 0;
 
 	if (ht->table == NULL) {
-		free(ht);
-		return NULL;
+		return false;
 	}
 
-	return ht;
+	return true;
 }
 
 /**
@@ -153,7 +152,7 @@ hash_table_destroy(struct hash_table *ht,
 		}
 	}
 	free(ht->table);
-	free(ht);
+	memset(ht, 0, sizeof(*ht));
 }
 
 /**
