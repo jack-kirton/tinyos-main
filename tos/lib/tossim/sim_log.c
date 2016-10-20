@@ -41,7 +41,7 @@
 #include <sim_log.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <hashtable.h>
+#include <hash_table.h>
 #include <string.h>
 
 enum {
@@ -79,7 +79,7 @@ enum {
 };
 
 static sim_log_output_t outputs[SIM_LOG_OUTPUT_COUNT];
-static struct hashtable* channelTable = NULL;
+static struct hash_table* channelTable = NULL;
 
 static bool write_performed = FALSE;
 
@@ -130,7 +130,7 @@ static void fillInOutput(int id, const char* name) {
       newName[termination - namePos] = '\0';
     }
     
-    channel = hashtable_search(channelTable, newName);
+    channel = hash_table_search_data(channelTable, newName);
     if (channel != NULL) {
       count_outputs += channel->num_outputs;
       count_callbacks += channel->num_callbacks;
@@ -164,7 +164,7 @@ static void fillInOutput(int id, const char* name) {
       newName[termination - namePos] = 0;
     }
     
-    channel = hashtable_search(channelTable, newName);
+    channel = hash_table_search_data(channelTable, newName);
     if (channel != NULL) {
       int i, j;
       for (i = 0; i < channel->num_outputs; i++) {
@@ -197,7 +197,7 @@ static void fillInOutput(int id, const char* name) {
 void sim_log_init(void) {
   int i;
 
-  channelTable = create_hashtable(128, sim_log_hash, sim_log_eq);
+  channelTable = hash_table_create(sim_log_hash, sim_log_eq);
   
   for (i = 0; i < SIM_LOG_OUTPUT_COUNT; i++) {
     outputs[i].num_files = 1;
@@ -226,13 +226,13 @@ void sim_log_free(void) {
     outputs[i].num_callbacks = 0;
   }
 
-  hashtable_destroy(channelTable, &free);
+  hash_table_destroy(channelTable, &free);
   channelTable = NULL;
 }
 
 void sim_log_add_channel(const char* name, FILE* file) {
   sim_log_channel_t* channel;
-  channel = (sim_log_channel_t*)hashtable_search(channelTable, name);
+  channel = (sim_log_channel_t*)hash_table_search_data(channelTable, name);
   
   // If there's no current entry, allocate one, initialize it,
   // and insert it.
@@ -250,7 +250,7 @@ void sim_log_add_channel(const char* name, FILE* file) {
     channel->size_callbacks = DEFAULT_CALLBACKS_SIZE;
     channel->callbacks = (sim_log_callback_t**)calloc(channel->size_callbacks, sizeof(sim_log_callback_t*));
 
-    hashtable_insert(channelTable, newName, channel);
+    hash_table_insert(channelTable, newName, channel);
   }
 
   // If the channel output table is full, double the size of
@@ -269,7 +269,7 @@ void sim_log_add_channel(const char* name, FILE* file) {
 bool sim_log_remove_channel(const char* output, FILE* file) {
   sim_log_channel_t* channel;
   int i;
-  channel = (sim_log_channel_t*)hashtable_search(channelTable, output);  
+  channel = (sim_log_channel_t*)hash_table_search_data(channelTable, output);  
 
   if (channel == NULL) {
     return FALSE;
@@ -292,7 +292,7 @@ void sim_log_add_callback(const char* name, void (*handle)(void* data, const cha
   sim_log_channel_t* channel;
   sim_log_callback_t* callback;
 
-  channel = (sim_log_channel_t*)hashtable_search(channelTable, name);
+  channel = (sim_log_channel_t*)hash_table_search_data(channelTable, name);
   
   // If there's no current entry, allocate one, initialize it,
   // and insert it.
@@ -310,7 +310,7 @@ void sim_log_add_callback(const char* name, void (*handle)(void* data, const cha
     channel->size_callbacks = DEFAULT_CALLBACKS_SIZE;
     channel->callbacks = (sim_log_callback_t**)calloc(channel->size_callbacks, sizeof(sim_log_callback_t*));
 
-    hashtable_insert(channelTable, newName, channel);
+    hash_table_insert(channelTable, newName, channel);
   }
 
   // If the channel output table is full, double the size of

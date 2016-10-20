@@ -61,27 +61,6 @@ enum {
   NOISE_NUM_VALUES = NOISE_MAX - NOISE_MIN + 1,    //TODO check the + 1, also in NOISE_BIN_SIZE above in the inner parens
 };
 
-typedef struct sim_noise_hash_t {
-  char key[NOISE_HISTORY];
-  unsigned int numElements;
-  unsigned int size;
-  char flag;
-  char *elements;
-  float dist[NOISE_NUM_VALUES];
-} sim_noise_hash_t;
-
-typedef struct sim_noise_node_t {
-  char key[NOISE_HISTORY];
-  char freqKey[NOISE_HISTORY];
-  char lastNoiseVal;
-  bool generated;
-  uint32_t noiseGenTime;
-  struct hashtable *noiseTable;
-  char* noiseTrace;
-  uint32_t noiseTraceLen;
-  uint32_t noiseTraceIndex;
-} sim_noise_node_t;
-
 void sim_noise_init(void);
 void sim_noise_free(void);
 char sim_real_noise(uint16_t node_id, uint32_t cur_t);
