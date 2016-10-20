@@ -140,7 +140,7 @@ hash_table_create(uint32_t (*hash_function)(const void *key),
  */
 void
 hash_table_destroy(struct hash_table *ht,
-		   void (*delete_function)(void* data))
+		   void (*delete_function)(struct hash_entry* entry))
 {
 	if (!ht)
 		return;
@@ -149,10 +149,7 @@ hash_table_destroy(struct hash_table *ht,
 		struct hash_entry *entry;
 
 		hash_table_foreach(ht, entry) {
-			free((void*)entry->key);
-			if (delete_function) {
-				delete_function(entry->data);
-			}
+			delete_function(entry);
 		}
 	}
 	free(ht->table);

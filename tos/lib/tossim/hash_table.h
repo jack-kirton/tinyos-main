@@ -60,7 +60,7 @@ hash_table_create(uint32_t (*hash_function)(const void *key),
 					     const void *b));
 void
 hash_table_destroy(struct hash_table *ht,
-		   void (*delete_function)(void *data));
+		   void (*delete_function)(struct hash_entry *entry));
 
 struct hash_entry *
 hash_table_insert(struct hash_table *ht, const void *key, void *data);

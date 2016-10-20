@@ -211,6 +211,12 @@ void sim_log_init(void) {
   write_performed = FALSE;
 }
 
+static void channel_table_entry_free(struct hash_entry* entry)
+{
+  free((void*)entry->key);
+  free(entry->data);
+}
+
 void sim_log_free(void) {
   int i;
 
@@ -226,7 +232,7 @@ void sim_log_free(void) {
     outputs[i].num_callbacks = 0;
   }
 
-  hash_table_destroy(channelTable, &free);
+  hash_table_destroy(channelTable, &channel_table_entry_free);
   channelTable = NULL;
 }
 
@@ -237,7 +243,7 @@ void sim_log_add_channel(const char* name, FILE* file) {
   // If there's no current entry, allocate one, initialize it,
   // and insert it.
   if (channel == NULL) {
-    char* newName = strdup(name);
+    const char* newName = strdup(name);
     
     channel = (sim_log_channel_t*)malloc(sizeof(sim_log_channel_t));
     channel->name = newName;

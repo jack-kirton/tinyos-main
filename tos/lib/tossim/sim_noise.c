@@ -104,10 +104,15 @@ void sim_noise_init(void) __attribute__ ((C, spontaneous))
   //printf("Done with sim_noise_init()\n");
 }
 
+static void noise_table_entry_free(struct hash_entry* entry)
+{
+  free(entry->data);
+}
+
 void sim_noise_free(void) __attribute__ ((C, spontaneous)) {
   int j;
   for (j = 0; j < TOSSIM_MAX_NODES; j++) {
-    //hashtable_destroy(noiseData[j].noiseTable, NULL);
+    hash_table_destroy(noiseData[j].noiseTable, &noise_table_entry_free);
     noiseData[j].noiseTable = NULL;
 
     noiseData[j].noiseGenTime = 0;
@@ -354,7 +359,7 @@ char sim_noise_gen(uint16_t node_id)__attribute__ ((C, spontaneous))
   char noise = 0;
   struct hash_table * const pnoiseTable = noiseData[node_id].noiseTable;
   char * __restrict const pKey = noiseData[node_id].key;
-  char * __restrict const fKey = noiseData[node_id].freqKey;
+  const char * __restrict const fKey = noiseData[node_id].freqKey;
   const double ranNum = RandomUniform();
   sim_noise_hash_t *noise_hash;
 
