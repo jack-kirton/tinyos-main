@@ -340,16 +340,18 @@ void arrangeKey(uint16_t node_id)__attribute__ ((C, spontaneous))
 #endif
 }
 
+#ifdef DEBUG
 int dummy;
 void sim_noise_alarm() {
   dummy = 5;
 }
+#endif
 
 char sim_noise_gen(uint16_t node_id)__attribute__ ((C, spontaneous))
 {
   int i;
   //int noiseIndex = 0;
-  char noise;
+  char noise = 0;
   struct hash_table * const pnoiseTable = noiseData[node_id].noiseTable;
   char * __restrict const pKey = noiseData[node_id].key;
   char * __restrict const fKey = noiseData[node_id].freqKey;
@@ -363,10 +365,7 @@ char sim_noise_gen(uint16_t node_id)__attribute__ ((C, spontaneous))
     //Tal Debug
     dbg("Noise_c", "Did not pattern match");
     //End Tal Debug
-#endif
     sim_noise_alarm();
-    noise = 0;
-#ifdef DEBUG
     dbg_clear("HASH", "(N)Noise\n");
     dbg("HashZeroDebug", "Defaulting to common hash.\n");
 #endif
@@ -413,15 +412,14 @@ char sim_noise_gen(uint16_t node_id)__attribute__ ((C, spontaneous))
  
   for (i = 0; i < NOISE_NUM_VALUES - 1; i++) {
     //dbg("HASH", "IN:for i=%d\n", i);
-    if (i == 0) {	
+    if (i == 0) {
       if (ranNum <= noise_hash->dist[i]) {
         //noiseIndex = i;
         //dbg_clear("HASH", "Selected Bin = %d -> ", i+1);
         break;
       }
     }
-    else if ( (noise_hash->dist[i-1] < ranNum) && 
-	      (ranNum <= noise_hash->dist[i])   ) {
+    else if ((noise_hash->dist[i-1] < ranNum) && (ranNum <= noise_hash->dist[i])) {
       //noiseIndex = i;
       //dbg_clear("HASH", "Selected Bin = %d -> ", i+1);
       break;
