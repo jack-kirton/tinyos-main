@@ -114,10 +114,10 @@ implementation
       adjustment = clock_to_sim(adjustment);
 
       if (newVal < curVal) {
-	lastZero += adjustment;
+        lastZero += adjustment;
       }
       else { // newVal > curVal
-	lastZero -= adjustment;
+        lastZero -= adjustment;
       }
 
       schedule_new_overflow();
@@ -315,16 +315,18 @@ implementation
       return;
     }
     else {
+#ifdef DEBUG
       char time[128];
       sim_print_now(time, 128);
+#endif
       if (READ_BIT(ATM128_TIMSK, TOIE2)) {
-	CLR_BIT(ATM128_TIFR, TOV2);
-	dbg("HplAtm128Counter2C", "Overflow interrupt at %s\n", time);
-	SIG_OVERFLOW2();
+        CLR_BIT(ATM128_TIFR, TOV2);
+        dbg("HplAtm128Counter2C", "Overflow interrupt at %s\n", time);
+        SIG_OVERFLOW2();
       }
       else {
-	dbg("HplAtm128Counter2C", "Setting overflow bit at %s\n", time);
-	SET_BIT(ATM128_TIFR, TOV2);
+        dbg("HplAtm128Counter2C", "Setting overflow bit at %s\n", time);
+        SET_BIT(ATM128_TIFR, TOV2);
       }
       configure_overflow(evt);
       sim_queue_insert(evt);
