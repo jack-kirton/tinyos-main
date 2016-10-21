@@ -60,6 +60,7 @@ implementation {
   bool receiving = 0;  // Whether or not I think I'm receiving a packet
   bool transmitting = 0; // Whether or not I think I'm transmitting a packet
   sim_time_t transmissionEndTime; // to check pending transmission
+
   struct receive_message;
   typedef struct receive_message receive_message_t;
 
@@ -364,8 +365,8 @@ implementation {
   void enqueue_receive_event(int source, sim_time_t endTime, message_t* msg, bool receive, double power, double reversePower) {
     sim_event_t* evt;
     receive_message_t* list;
-    receive_message_t* rcv = allocate_receive_message();
-    double noiseStr = packetNoise(rcv);
+    receive_message_t* const rcv = allocate_receive_message();
+    const double noiseStr = packetNoise(rcv);
     rcv->source = source;
     rcv->start = sim_time();
     rcv->end = endTime;
@@ -429,7 +430,7 @@ implementation {
   command void Model.putOnAirTo(int dest, message_t* msg, bool ack, sim_time_t endTime, double power, double reversePower) {
     receive_message_t* list;
     gain_entry_t* neighborEntryIter = sim_gain_begin(sim_node());
-    gain_entry_t* neighborEntryEnd = sim_gain_end(sim_node());
+    gain_entry_t* const neighborEntryEnd = sim_gain_end(sim_node());
     requestAck = ack;
     outgoing = msg;
     transmissionEndTime = endTime;
@@ -446,14 +447,13 @@ implementation {
       dbg("CpmModelC,SNRLoss", "Lost packet from %i because %i has outstanding reception, startTime %llu endTime %llu\n", list->source, sim_node(), list->start, list->end);
     }
   }
-    
+
 
   command void Model.setPendingTransmission() {
     transmitting = TRUE;
     dbg("CpmModelC", "setPendingTransmission: transmitting %i @ %s\n", transmitting, sim_time_string());
   }
 
-  
  default event void Model.receive(message_t* msg) {}
 
  sim_event_t* allocate_receive_event(sim_time_t endTime, receive_message_t* msg) {

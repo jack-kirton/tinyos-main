@@ -108,8 +108,7 @@ bool
 hash_table_create(
 			struct hash_table *ht,
 			uint32_t (*hash_function)(const void *key),
-		  	int (*key_equals_function)(const void *a,
-					     const void *b))
+		  	int (*key_equals_function)(const void *a, const void *b))
 {
 	if (ht == NULL)
 		return false;

@@ -68,7 +68,7 @@ double sim_gain_noise_mean(int node);
 double sim_gain_noise_range(int node);
 
 void sim_gain_set_sensitivity(double value);
-double sim_gain_sensitivity();
+double sim_gain_sensitivity(void);
   
 gain_entry_t* sim_gain_begin(int src);
 gain_entry_t* sim_gain_end(int src);

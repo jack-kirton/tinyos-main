@@ -228,6 +228,6 @@ void sim_gain_set_sensitivity(double s) __attribute__ ((C, spontaneous)) {
   sensitivity = s;
 }
 
-double sim_gain_sensitivity() __attribute__ ((C, spontaneous)) {
+double sim_gain_sensitivity(void) __attribute__ ((C, spontaneous)) {
   return sensitivity;
 }

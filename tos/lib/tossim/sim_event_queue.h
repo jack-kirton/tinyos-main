@@ -51,15 +51,15 @@ struct sim_event;
 typedef struct sim_event sim_event_t;
 
 struct sim_event {
-  sim_time_t time;
-  unsigned long mote;
-  bool force; // Whether this event type should always be executed
-              // even if a mote is "turned off"
-  bool cancelled; // Whether this event has been cancelled
-  void* data;
+    sim_time_t time;
+    unsigned long mote;
+    bool force; // Whether this event type should always be executed
+                // even if a mote is "turned off"
+    bool cancelled; // Whether this event has been cancelled
+    void* data;
   
-  void (*handle)(sim_event_t* e);
-  void (*cleanup)(sim_event_t* e);
+    void (*handle)(sim_event_t* e);
+    void (*cleanup)(sim_event_t* e);
 };
 
 sim_event_t* sim_queue_allocate_event(void);
