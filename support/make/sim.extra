@@ -6,7 +6,7 @@ GPP=g++ -std=gnu++11
 OPTFLAGS = -O2 -msse4.2 -maes -mpclmul -flto
 #-march=westmere
 LIBS = -lm
-PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc=$(GCC) -DTOSSIM_NO_DEBUG
+PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc="$(GCC)" -DTOSSIM_NO_DEBUG
 WFLAGS = -Wno-nesc-data-race
 PYTHON_VERSION ?= $(shell python --version 2>&1 | sed 's/Python \([0-9]\)\.\([0-9]\)\.[0-9]+\{0,1\}.*/\1.\2/')
 
@@ -15,7 +15,7 @@ CFILE    = $(BUILDDIR)/sim.c
 OBJFILE    = $(BUILDDIR)/sim.o
 CXXFILE    = $(TOSDIR)/lib/tossim/tossim.c
 CXXOBJFILE = $(BUILDDIR)/tossim.o
-HASHFILE    = $(TOSDIR)/lib/tossim/hashtable.c
+HASHFILE    = $(TOSDIR)/lib/tossim/hash_table.c
 HASHOBJFILE = $(BUILDDIR)/c-support.o
 PYFILE     = $(TOSDIR)/lib/tossim/tossim_wrap.cxx
 PYOBJFILE  = $(BUILDDIR)/pytossim.o

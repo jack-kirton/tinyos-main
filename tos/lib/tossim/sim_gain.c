@@ -1,25 +1,58 @@
 #include <sim_gain.h>
+#include <hash_table.h>
+#include "murmur3hash.h"
 
 typedef struct sim_gain_noise {
   double mean;
   double range;
 } sim_gain_noise_t;
 
+typedef struct sim_gain_list {
+  gain_entry_t* entries;
+  size_t size;
+  size_t capacity;
+  struct hash_table table;
+} sim_gain_list_t;
 
-static gain_entry_t* connectivity[TOSSIM_MAX_NODES + 1];
+typedef struct {
+  int dest;
+  double gain;
+} node_dest_gain_t;
+
+static uint32_t node_pair_hash(const void* key)
+{
+  return *(const int*)key;
+}
+
+static int node_pair_equal(const void* a, const void* b)
+{
+  const int* const desta = (const int*)a;
+  const int* const destb = (const int*)b;
+
+  return *desta == *destb;
+}
+
+static void node_table_free(struct hash_entry *entry)
+{
+  free(entry->data);
+}
+
+
+static sim_gain_list_t connectivity[TOSSIM_MAX_NODES + 1];
 static sim_gain_noise_t localNoise[TOSSIM_MAX_NODES + 1];
 static double sensitivity = 4.0;
-
-static gain_entry_t* sim_gain_allocate_link(int mote);
-static void sim_gain_deallocate_link(gain_entry_t* linkToDelete);
-static void sim_gain_deallocate_links(gain_entry_t* linkToDelete);
 
 void sim_gain_init(void) __attribute__ ((C, spontaneous)) {
   size_t i;
 
   for (i = 0; i != TOSSIM_MAX_NODES + 1; ++i)
   {
-    connectivity[i] = NULL;
+    connectivity[i].capacity = 16;
+    connectivity[i].entries = (gain_entry_t*)malloc(sizeof(gain_entry_t) * connectivity[i].capacity);
+    connectivity[i].size = 0;
+
+    hash_table_create(&connectivity[i].table, &node_pair_hash, &node_pair_equal);
+
     localNoise[i].mean = 0.0;
     localNoise[i].range = 0.0;
   }
@@ -32,85 +65,103 @@ void sim_gain_free(void) __attribute__ ((C, spontaneous)) {
 
   for (i = 0; i != TOSSIM_MAX_NODES + 1; ++i)
   {
-    if (connectivity[i] != NULL) {
-      sim_gain_deallocate_links(connectivity[i]);
-      connectivity[i] = NULL;
+    if (connectivity[i].entries != NULL)
+    {
+      free(connectivity[i].entries);
+      connectivity[i].entries = NULL;
     }
+
+    connectivity[i].size = 0;
+    connectivity[i].capacity = 0;
+
+    hash_table_destroy(&connectivity[i].table, &node_table_free);
   }
 }
 
+// To maintain backwards compatibility we need to iterate in reverse
 
-
-gain_entry_t* sim_gain_first(int src) __attribute__ ((C, spontaneous)) {
+gain_entry_t* sim_gain_begin(int src) __attribute__ ((C, spontaneous)) {
   if (src > TOSSIM_MAX_NODES) {
-    return connectivity[TOSSIM_MAX_NODES];
+    return connectivity[TOSSIM_MAX_NODES].entries;
   } 
-  return connectivity[src];
+  return connectivity[src].entries + (connectivity[src].size - 1);
 }
 
-gain_entry_t* sim_gain_next(gain_entry_t* currentLink) __attribute__ ((C, spontaneous)) {
-  return currentLink->next;
+gain_entry_t* sim_gain_end(int src) __attribute__ ((C, spontaneous)) {
+  if (src > TOSSIM_MAX_NODES) {
+    return connectivity[TOSSIM_MAX_NODES].entries + connectivity[TOSSIM_MAX_NODES].size;
+  } 
+  return connectivity[src].entries - 1;
+}
+
+static gain_entry_t* sim_gain_append(int src) {
+  if (connectivity[src].size == connectivity[src].capacity) {
+    connectivity[src].capacity *= 2;
+    connectivity[src].entries = (gain_entry_t*)realloc(connectivity[src].entries, sizeof(gain_entry_t) * connectivity[src].capacity);
+  }
+
+  connectivity[src].size += 1;
+
+  return connectivity[src].entries + (connectivity[src].size - 1);
 }
 
 void sim_gain_add(int src, int dest, double gain) __attribute__ ((C, spontaneous))  {
-  gain_entry_t* current;
+  gain_entry_t* iter;
+  gain_entry_t* end;
+
   int temp = sim_node();
   if (src > TOSSIM_MAX_NODES) {
     src = TOSSIM_MAX_NODES;
   }
   sim_set_node(src);
 
-  for (current = sim_gain_first(src); current != NULL; current = current->next) {
-    if (current->mote == dest) {
+  for (iter = sim_gain_begin(src), end = sim_gain_end(src); iter != end; iter = sim_gain_next(iter)) {
+    if (iter->mote == dest) {
       sim_set_node(temp);
       break;
     }
   }
 
-  if (current == NULL) {
-    current = sim_gain_allocate_link(dest);
-    current->next = connectivity[src];
-    connectivity[src] = current;
+  if (iter == end) {
+    node_dest_gain_t* item = malloc(sizeof(node_dest_gain_t));
+    item->dest = dest;
+    item->gain = gain;
+
+    hash_table_insert(&connectivity[src].table, &item->dest, item);
+
+    iter = sim_gain_append(src);
   }
-  current->mote = dest;
-  current->gain = gain;
+  else {
+    node_dest_gain_t* item = (node_dest_gain_t*)hash_table_search_data(&connectivity[src].table, &dest);
+    item->gain = gain;
+  }
+
+  iter->mote = dest;
+  iter->gain = gain;
+
   dbg("Gain", "Adding link from %i to %i with gain %f\n", src, dest, gain);
+
   sim_set_node(temp);
 }
 
 double sim_gain_value(int src, int dest) __attribute__ ((C, spontaneous))  {
-  gain_entry_t* current;
-  int temp = sim_node();
-  sim_set_node(src);
-  for (current = sim_gain_first(src); current != NULL; current = current->next) {
-    if (current->mote == dest) {
-      sim_set_node(temp);
-      dbg("Gain", "Getting link from %i to %i with gain %f\n", src, dest, current->gain);
-      return current->gain;
-    }
-  }
-  sim_set_node(temp);
-  dbg("Gain", "Getting default link from %i to %i with gain %f\n", src, dest, 1.0);
-  return 1.0;
+  const node_dest_gain_t* const item = (node_dest_gain_t*)hash_table_search_data(&connectivity[src].table, &dest);
+  const double result = item == NULL ? 1.0 : item->gain;
+
+  dbg("Gain", "Getting default link from %i to %i with gain %f\n", src, dest, result);
+
+  return result;
 }
 
 bool sim_gain_connected(int src, int dest) __attribute__ ((C, spontaneous)) {
-  gain_entry_t* current;
-  int temp = sim_node();
-  sim_set_node(src);
-  for (current = sim_gain_first(src); current != NULL; current = current->next) {
-    if (current->mote == dest) {
-      sim_set_node(temp);
-      return TRUE;
-    }
-  }
-  sim_set_node(temp);
-  return FALSE;
+  const node_dest_gain_t* const item = (node_dest_gain_t*)hash_table_search_data(&connectivity[src].table, &dest);
+  return item != NULL;
 }
   
 void sim_gain_remove(int src, int dest) __attribute__ ((C, spontaneous))  {
-  gain_entry_t* current;
-  gain_entry_t* prevLink;
+  gain_entry_t* iter;
+  gain_entry_t* end;
+
   int temp = sim_node();
   
   if (src > TOSSIM_MAX_NODES) {
@@ -118,28 +169,21 @@ void sim_gain_remove(int src, int dest) __attribute__ ((C, spontaneous))  {
   }
 
   sim_set_node(src);
-    
-  current = sim_gain_first(src);
-  prevLink = NULL;
-    
-  while (current != NULL) {
-    gain_entry_t* tmp;
-    if (current->mote == dest) {
-      if (prevLink == NULL) {
-        connectivity[src] = current->next;
-      }
-      else {
-        prevLink->next = current->next;
-      }
-      tmp = current->next;
-      sim_gain_deallocate_link(current);
-      current = tmp;
-    }
-    else {
-      prevLink = current;
-      current = current->next;
+
+  for (iter = connectivity[src].entries, end = connectivity[src].entries + connectivity[src].size; iter != end; ++iter) {
+    if (iter->mote == dest) {
+      struct hash_entry* entry = hash_table_search(&connectivity[src].table, &dest);
+      node_table_free(entry);
+      hash_table_remove_entry(&connectivity[src].table, entry);
+
+      memcpy(iter, iter + 1, end - (iter + 1));
+
+      connectivity[src].size -= 1;
+
+      break;
     }
   }
+
   sim_set_node(temp);
 }
 
@@ -180,30 +224,10 @@ double sim_gain_sample_noise(int node)  __attribute__ ((C, spontaneous)) {
   return val + adjust;
 }
 
-static gain_entry_t* sim_gain_allocate_link(int mote) {
-  gain_entry_t* newLink = (gain_entry_t*)malloc(sizeof(gain_entry_t));
-  newLink->next = NULL;
-  newLink->mote = mote;
-  newLink->gain = -10000000.0;
-  return newLink;
-}
-
-static void sim_gain_deallocate_link(gain_entry_t* linkToDelete) {
-  free(linkToDelete);
-}
-
-static void sim_gain_deallocate_links(gain_entry_t* linkToDelete) {
-  gain_entry_t* next = linkToDelete->next;
-  sim_gain_deallocate_link(linkToDelete);
-  if (next != NULL) {
-    sim_gain_deallocate_link(next);
-  }
-}
-
 void sim_gain_set_sensitivity(double s) __attribute__ ((C, spontaneous)) {
   sensitivity = s;
 }
 
-double sim_gain_sensitivity() __attribute__ ((C, spontaneous)) {
+double sim_gain_sensitivity(void) __attribute__ ((C, spontaneous)) {
   return sensitivity;
 }

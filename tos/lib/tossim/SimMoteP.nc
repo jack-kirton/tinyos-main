@@ -52,6 +52,7 @@ implementation {
   long long int tag; // An arbitrary tag supplied by the developer, use to customise simulation actions.
   bool isOn;
   sim_event_t* bootEvent;
+  sim_event_t bootEventStore;
   
   async command long long int SimMote.getEuid() {
     return euid;
@@ -209,16 +210,15 @@ implementation {
       }
     }
     
-    bootEvent = sim_queue_allocate_raw_event();
+    bootEvent = &bootEventStore;
     bootEvent->time = startTime;
     bootEvent->mote = mote;
     bootEvent->force = TRUE;
     bootEvent->data = NULL;
     bootEvent->handle = sim_mote_boot_handle;
-    bootEvent->cleanup = sim_queue_cleanup_event;
+    bootEvent->cleanup = sim_queue_cleanup_none;
     sim_queue_insert(bootEvent);
     
     sim_set_node(tmp);
   }
-
 }

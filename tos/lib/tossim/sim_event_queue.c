@@ -57,8 +57,7 @@ void sim_queue_insert(sim_event_t* event) __attribute__ ((C, spontaneous)) {
 }
 
 sim_event_t* sim_queue_pop(void) __attribute__ ((C, spontaneous)) {
-  long long int key;
-  return (sim_event_t*)heap_pop_min_data(&eventHeap, &key);
+  return (sim_event_t*)heap_pop_min_data(&eventHeap, NULL);
 }
 
 bool sim_queue_is_empty(void) __attribute__ ((C, spontaneous)) {

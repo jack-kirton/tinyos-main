@@ -116,7 +116,7 @@ implementation {
   void notify_changed() {
     uint8_t newScale = call Timer0.getScale();
     if (newScale != AVR_CLOCK_OFF &&
-	oldScale == AVR_CLOCK_OFF) {
+        oldScale == AVR_CLOCK_OFF) {
       lastZero = sim_time();
     }
     oldScale = newScale;
@@ -190,32 +190,34 @@ implementation {
       return;
     }
     else {
+#ifdef DEBUG
       char timeStr[128];
       sim_print_now(timeStr, 128);
+#endif
       dbg("HplAtm128Timer0AsyncP", "Handling compare at 0x%p @ %s\n", evt, sim_time_string());
       
       if (READ_BIT(ATM128_TCCR0, WGM01) && !READ_BIT(ATM128_TCCR0, WGM00)) {
-	dbg("HplAtm128Timer0AsyncP", "%s: CTC is set, clear timer.\n", __FUNCTION__);
-	call Timer0.set(0);
+        dbg("HplAtm128Timer0AsyncP", "%s: CTC is set, clear timer.\n", __FUNCTION__);
+        call Timer0.set(0);
       }
       else {
-	dbg("HplAtm128Timer0AsyncP", "%s: TCCR is 0x%hhx, %i, %i\n", __FUNCTION__, TCCR0, (int)READ_BIT(ATM128_TCCR0, WGM01), (int)READ_BIT(ATM128_TCCR0, WGM00));
+        dbg("HplAtm128Timer0AsyncP", "%s: TCCR is 0x%hhx, %i, %i\n", __FUNCTION__, TCCR0, (int)READ_BIT(ATM128_TCCR0, WGM01), (int)READ_BIT(ATM128_TCCR0, WGM00));
       }
       
       if (READ_BIT(ATM128_TIMSK, OCIE0)) {
-	dbg("HplAtm128Timer0AsyncP", "TIFR is %hhx\n", TIFR);
-	CLR_BIT(ATM128_TIFR, OCF0);
-	dbg("HplAtm128Timer0AsyncP", "TIFR is %hhx\n", TIFR);
-	dbg("HplAtm128Timer0AsyncP", "Compare interrupt @ %s\n", timeStr);
-	SIG_OUTPUT_COMPARE0();
+        dbg("HplAtm128Timer0AsyncP", "TIFR is %hhx\n", TIFR);
+        CLR_BIT(ATM128_TIFR, OCF0);
+        dbg("HplAtm128Timer0AsyncP", "TIFR is %hhx\n", TIFR);
+        dbg("HplAtm128Timer0AsyncP", "Compare interrupt @ %s\n", timeStr);
+        SIG_OUTPUT_COMPARE0();
       }
       else {
-	SET_BIT(ATM128_TIFR, OCF0);
+        SET_BIT(ATM128_TIFR, OCF0);
       }
       // If we haven't been cancelled
       if (!evt->cancelled) {
-	configure_compare(evt);
-	sim_queue_insert(evt);
+        configure_compare(evt);
+        sim_queue_insert(evt);
       }
     }
   }
@@ -306,10 +308,10 @@ implementation {
       adjustment = clock_to_sim(adjustment);
 
       if (newVal < curVal) {
-	lastZero += adjustment;
+        lastZero += adjustment;
       }
       else { // newVal > curVal
-	lastZero -= adjustment;
+        lastZero -= adjustment;
       }
 
       schedule_new_overflow();
@@ -463,16 +465,16 @@ implementation {
   async command void Compare.set(uint8_t t)   {
     dbg("HplAtm128Timer0AsyncP", "HplAtm128Timer0AsyncP: Setting compare: %hhu\n", t);
     atomic {
-	/* Re the comment above: it's a bad idea to wake up at time 0, as
-	   we'll just spin when setting the next deadline. Try and reduce
-	   the likelihood by delaying the interrupt...
-	*/
+        /* Re the comment above: it's a bad idea to wake up at time 0, as
+           we'll just spin when setting the next deadline. Try and reduce
+           the likelihood by delaying the interrupt...
+        */
       if (t == 0 || t >= 0xfe)
-	t = 1;
+        t = 1;
       
       if (t != OCR0) {
-	OCR0 = t;
-	schedule_new_compare();
+        OCR0 = t;
+        schedule_new_compare();
       }
     }
   }
@@ -484,13 +486,13 @@ implementation {
     }
     else {
       if (READ_BIT(ATM128_TIMSK, TOIE0)) {
-	CLR_BIT(ATM128_TIFR, TOV0);
-	dbg("HplAtm128Timer0AsyncP", "Overflow interrupt at %s\n", sim_time_string());
-	SIG_OVERFLOW0();
+        CLR_BIT(ATM128_TIFR, TOV0);
+        dbg("HplAtm128Timer0AsyncP", "Overflow interrupt at %s\n", sim_time_string());
+        SIG_OVERFLOW0();
       }
       else {
-	dbg("HplAtm128Timer0AsyncP", "Setting overflow bit at %s\n", sim_time_string());
-	SET_BIT(ATM128_TIFR, TOV0);
+        dbg("HplAtm128Timer0AsyncP", "Setting overflow bit at %s\n", sim_time_string());
+        SET_BIT(ATM128_TIFR, TOV0);
       }
       configure_overflow(evt);
       sim_queue_insert(evt);
