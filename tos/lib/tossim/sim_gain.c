@@ -15,8 +15,8 @@ typedef struct sim_gain_list {
 } sim_gain_list_t;
 
 typedef struct {
-  int dest;
   double gain;
+  int dest;
 } node_dest_gain_t;
 
 static uint32_t node_pair_hash(const void* key)
@@ -65,11 +65,8 @@ void sim_gain_free(void) __attribute__ ((C, spontaneous)) {
 
   for (i = 0; i != TOSSIM_MAX_NODES + 1; ++i)
   {
-    if (connectivity[i].entries != NULL)
-    {
-      free(connectivity[i].entries);
-      connectivity[i].entries = NULL;
-    }
+    free(connectivity[i].entries);
+    connectivity[i].entries = NULL;
 
     connectivity[i].size = 0;
     connectivity[i].capacity = 0;

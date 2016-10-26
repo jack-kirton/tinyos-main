@@ -51,8 +51,8 @@ extern "C" {
 #endif
 
 typedef struct gain_entry {
-  int mote;
   double gain;
+  int mote;
 } gain_entry_t;
 
 void sim_gain_init(void);
