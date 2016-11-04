@@ -159,21 +159,20 @@ public:
     }
 
     bool operator()() const {
-        PyObject *args = PyTuple_New(0);
+        PyObject *result = PyObject_CallObject(func, NULL);
 
-        PyObject *result = PyObject_Call(func, args, NULL);
+        if (result != NULL)
+        {
+            const bool bool_result = PyObject_IsTrue(result);
 
-        bool bool_result = result != NULL && PyObject_IsTrue(result);
+            Py_DECREF(result);
 
-        Py_DECREF(args);
-        Py_XDECREF(result);
-
-        if (PyErr_Occurred() != NULL)
+            return bool_result;
+        }
+        else
         {
             throw std::runtime_error("Python exception occurred");
         }
-
-        return bool_result;
     }
 
     void operator()(double t) const {
@@ -183,9 +182,12 @@ public:
         PyObject *result = PyObject_CallObject(func, args);
 
         Py_DECREF(args);
-        Py_XDECREF(result);
 
-        if (PyErr_Occurred() != NULL)
+        if (result != NULL)
+        {
+            Py_DECREF(result);
+        }
+        else
         {
             throw std::runtime_error("Python exception occurred");
         }
@@ -198,37 +200,39 @@ public:
         PyObject *result = PyObject_CallObject(func, args);
 
         Py_DECREF(args);
-        Py_XDECREF(result);
 
-        if (PyErr_Occurred() != NULL)
+        if (result != NULL)
+        {
+            Py_DECREF(result);
+        }
+        else
         {
             throw std::runtime_error("Python exception occurred");
         }
     }
 
     void operator()(const char* str, size_t length) const {
-        PyObject *args = PyTuple_New(1);
-
 #if PY_VERSION_HEX < 0x03000000
         PyObject *pystring = PyString_FromStringAndSize(str, length);
-        if (pystring == NULL) {
-            throw std::runtime_error("Bad string");
-        }
 #else
         PyObject *pystring = PyUnicode_FromStringAndSize(str, length);
+#endif
         if (pystring == NULL) {
             throw std::runtime_error("Bad string");
         }
-#endif
 
+        PyObject *args = PyTuple_New(1);
         PyTuple_SetItem(args, 0, pystring);
 
         PyObject *result = PyObject_CallObject(func, args);
 
         Py_DECREF(args);
-        Py_XDECREF(result);
 
-        if (PyErr_Occurred() != NULL)
+        if (result != NULL)
+        {
+            Py_DECREF(result);
+        }
+        else
         {
             throw std::runtime_error("Python exception occurred");
         }
@@ -318,6 +322,16 @@ bool fill_nesc_app(NescApp* app, int i, PyObject* name, PyObject* array, PyObjec
         PyObject* name_ascii = PyUnicode_AsASCIIString(name);
         PyObject* format_ascii = PyUnicode_AsASCIIString(format);
         PyObject* array_ascii = PyUnicode_AsASCIIString(array);
+
+        if (name_ascii == NULL || format_ascii == NULL || array_ascii == NULL)
+        {
+            Py_XDECREF(name_ascii);
+            Py_XDECREF(format_ascii);
+            Py_XDECREF(array_ascii);
+
+            PyErr_SetString(PyExc_RuntimeError, "bad string not ascii");
+            return false;
+        }
 
         app->variableNames[i] = PyBytes_AsString(name_ascii);
         app->variableTypes[i] = PyBytes_AsString(format_ascii);
