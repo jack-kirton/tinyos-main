@@ -341,7 +341,7 @@ bool fill_nesc_app(NescApp* app, int i, PyObject* name, PyObject* array, PyObjec
 %typemap(in) NescApp {
     if (!PyList_Check($input)) {
         PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
-        goto fail;
+        SWIG_fail;
     }
     else {
         Py_ssize_t size = PyList_Size($input);
@@ -349,7 +349,7 @@ bool fill_nesc_app(NescApp* app, int i, PyObject* name, PyObject* array, PyObjec
 
         if (size < 0 || size % 3 != 0) {
             PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
-            goto fail;
+            SWIG_fail;
         }
 
         NescApp app(static_cast<unsigned int>(size) / 3);
@@ -360,7 +360,7 @@ bool fill_nesc_app(NescApp* app, int i, PyObject* name, PyObject* array, PyObjec
             PyObject* format = PyList_GET_ITEM($input, (3 * i) + 2);
             if (!fill_nesc_app(&app, i, name, array, format))
             {
-                goto fail;
+                SWIG_fail;
             }
         }
 
