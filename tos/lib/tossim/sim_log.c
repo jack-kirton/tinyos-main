@@ -302,7 +302,7 @@ void sim_log_add_callback(const char* name, void (*handle)(void* data, const cha
   // If there's no current entry, allocate one, initialize it,
   // and insert it.
   if (channel == NULL) {
-    char* newName = strdup(name);
+    const char* newName = strdup(name);
     
     channel = (sim_log_channel_t*)malloc(sizeof(sim_log_channel_t));
     channel->name = newName;
