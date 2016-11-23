@@ -45,6 +45,7 @@
 #include "hash_table.h"
 #include "murmur3hash.h"
 #include "sim_noise.h"
+#include "StaticAssert.h"
 
 #ifdef DEBUG
 //Tal Debug, to count how often simulation hits the one match case
@@ -180,10 +181,11 @@ char search_noise_from_bin_num(int i)__attribute__ ((C, spontaneous))
   return noise;
 }
 
+STATIC_ASSERT_MSG(NOISE_HISTORY == 20, NOISE_HISTORY_must_be_20_bytes_long);
+
 static unsigned int sim_noise_hash(const void *key) {
   const uint32_t* data = (const uint32_t*)key;
   register uint32_t h = _MURMUR_SEED;
-  _Static_assert(NOISE_HISTORY == 20, "NOISE_HISTORY must be 20 bytes long. If you change this please update sim_noise_hash.");
   _ROUND32(data[0])
   _ROUND32(data[1])
   _ROUND32(data[2])
@@ -194,6 +196,10 @@ static unsigned int sim_noise_hash(const void *key) {
 }
 
 static int sim_noise_eq(const void *key1, const void *key2) {
+
+  //key1 = (const void *)__builtin_assume_aligned(key1, __alignof(sim_noise_hash_t));
+  //key2 = (const void *)__builtin_assume_aligned(key2, __alignof(sim_noise_hash_t));
+
   return memcmp(key1, key2, NOISE_HISTORY) == 0;
 }
 
@@ -359,7 +365,7 @@ char sim_noise_gen(uint16_t node_id)__attribute__ ((C, spontaneous))
   struct hash_table * const pnoiseTable = &noiseData[node_id].noiseTable;
   char * __restrict const pKey = noiseData[node_id].key;
   const char * __restrict const fKey = noiseData[node_id].freqKey;
-  const double ranNum = RandomUniform();
+  const double ranNum = RandomUniform(); // TODO: PERFORMANCE: Move after if
   sim_noise_hash_t *noise_hash;
 
   noise_hash = (sim_noise_hash_t *)hash_table_search_data(pnoiseTable, pKey);
@@ -438,11 +444,9 @@ char sim_noise_gen(uint16_t node_id)__attribute__ ((C, spontaneous))
 
 char sim_noise_generate(uint16_t node_id, uint32_t cur_t)__attribute__ ((C, spontaneous)) {
   uint32_t i;
-  uint32_t prev_t;
+  const uint32_t prev_t = noiseData[node_id].noiseGenTime;
   uint32_t delta_t;
   char noise;
-
-  prev_t = noiseData[node_id].noiseGenTime;
 
   if (!noiseData[node_id].generated) {
     dbgerror("TOSSIM", "Tried to generate noise from an uninitialized radio model of node %hu.\n", node_id);
