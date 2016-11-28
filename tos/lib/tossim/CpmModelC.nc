@@ -57,8 +57,8 @@ implementation {
   
   message_t* outgoing; // If I'm sending, this is my outgoing packet
   bool requestAck;
-  bool receiving = 0;  // Whether or not I think I'm receiving a packet
-  bool transmitting = 0; // Whether or not I think I'm transmitting a packet
+  bool receiving = FALSE;  // Whether or not I think I'm receiving a packet
+  bool transmitting = FALSE; // Whether or not I think I'm transmitting a packet
   sim_time_t transmissionEndTime; // to check pending transmission
 
   struct receive_message;
@@ -69,6 +69,7 @@ implementation {
     sim_time_t end;
     double power;
     double reversePower;
+    double pow10power_10; // cached pow(10, power / 10)
     int source;
     int8_t strength;
     bool lost;
@@ -163,7 +164,7 @@ implementation {
   
   int shouldAckReceive(double snr) {
     double prr = arr_estimate_from_snr(snr);
-    const double coin = RandomUniform();
+    const double coin = RandomUniform(); // TODO: PERFORMANCE: Move inside if
     if ( (prr >= 0) && (prr <= 1) ) {
       if (coin < prr)
         prr = 1.0;
@@ -212,7 +213,7 @@ implementation {
   }
 
   void sim_gain_schedule_ack(int source, sim_time_t t, receive_message_t* r) {
-    sim_event_t* ackEvent = sim_queue_allocate_raw_event();
+    sim_event_t* const ackEvent = sim_queue_allocate_raw_event();
     
     ackEvent->mote = source;
     ackEvent->force = 1;
@@ -245,7 +246,7 @@ implementation {
 
   bool shouldReceive(double SNR) {
     double prr = prr_estimate_from_snr(SNR);
-    const double coin = RandomUniform();
+    const double coin = RandomUniform(); // TODO: PERFORMANCE: Move inside if
     if ( (prr >= 0) && (prr <= 1) ) {
       if (coin < prr)
         prr = 1.0;
@@ -261,7 +262,7 @@ implementation {
     noise = pow(10.0, noise / 10.0);
     for (list = outstandingReceptionHead; list != NULL; list = list->next) {
       if (list != msg) {
-        noise += pow(10.0, list->power / 10.0);
+        noise += list->pow10power_10;
       }
     }
     noise = 10.0 * log10(noise);
@@ -274,7 +275,7 @@ implementation {
     noise = pow(10.0, noise / 10.0);
     for (list = outstandingReceptionHead; list != NULL; list = list->next) {
       if (list != msg) {
-        noise += pow(10.0, list->power / 10.0);
+        noise += list->pow10power_10;
       }
     }
     noise = 10.0 * log10(noise);
@@ -290,7 +291,7 @@ implementation {
      pass the corresponding receive_message_t* to the ack handler,
      otherwise free it. */
   void sim_gain_receive_handle(sim_event_t* evt) {
-    receive_message_t* mine = (receive_message_t*)evt->data;
+    receive_message_t* const mine = (receive_message_t*)evt->data;
     receive_message_t* predecessor = NULL;
     receive_message_t* list;
 
@@ -372,11 +373,12 @@ implementation {
     rcv->end = endTime;
     rcv->power = power;
     rcv->reversePower = reversePower;
+    rcv->pow10power_10 = pow(10.0, power / 10.0);
     // The strength of a packet is the sum of the signal and noise. In most cases, this means
     // the signal. By sampling this here, it assumes that the packet RSSI is sampled at
     // the beginning of the packet. This is true for the CC2420, but is not true for all
     // radios. But generalizing seems like complexity for minimal gain at this point.
-    rcv->strength = (int8_t)floor(10.0 * log10(pow(10.0, power/10.0) + pow(10.0, noiseStr/10.0)));
+    rcv->strength = (int8_t)floor(10.0 * log10(rcv->pow10power_10 + pow(10.0, noiseStr/10.0)));
     rcv->msg = msg;
     rcv->lost = 0;
     rcv->ack = receive;

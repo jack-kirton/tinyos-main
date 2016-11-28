@@ -42,17 +42,17 @@
 
 Packet::Packet() {
   msgPtr = sim_packet_allocate();
-  allocated = 1;
+  allocated = true;
 }
 
 Packet::Packet(sim_packet_t* m) {
   if (m != NULL) {
     msgPtr = m;
-    allocated = 0;
+    allocated = false;
   }
   else {
     msgPtr = sim_packet_allocate();
-    allocated = 1;
+    allocated = true;
   }
 }
 

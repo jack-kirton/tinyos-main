@@ -73,7 +73,7 @@ class Packet {
     
  private:
     sim_packet_t* msgPtr;
-    int allocated;
+    bool allocated;
 };
 
 #endif

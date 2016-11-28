@@ -37,9 +37,9 @@ extern "C" {
 #include <inttypes.h>
 
 typedef struct hash_entry {
-	uint32_t hash;
 	const void *key;
 	void *data;
+	uint32_t hash;
 } hash_entry_t;
 
 typedef struct hash_table {

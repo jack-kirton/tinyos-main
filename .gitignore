@@ -4,4 +4,7 @@
 simbuild
 app.xml
 *.class
+apps/*/build
+apps/*/TOSSIM.py
+tests/*/build
 
