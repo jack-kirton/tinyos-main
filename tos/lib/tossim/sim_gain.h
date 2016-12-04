@@ -70,9 +70,9 @@ double sim_gain_noise_range(int node);
 void sim_gain_set_sensitivity(double value);
 double sim_gain_sensitivity(void);
   
-gain_entry_t* sim_gain_begin(int src);
-gain_entry_t* sim_gain_end(int src);
-inline gain_entry_t* sim_gain_next(gain_entry_t* iter) { return iter - 1; }
+const void* sim_gain_iter(int src);
+const void* sim_gain_next(int src, const void* iter);
+const gain_entry_t* sim_gain_iter_get(const void* iter);
   
 #ifdef __cplusplus
 }
