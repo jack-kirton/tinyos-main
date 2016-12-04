@@ -69,7 +69,7 @@ implementation {
     sim_time_t end;
     double power;
     double reversePower;
-    double pow10power_10; // cached pow(10, power / 10)
+    double pow10power_10; // cached pow(10.0, power / 10.0)
     int source;
     int8_t strength;
     bool lost;
@@ -88,59 +88,49 @@ implementation {
   bool checkReceive(const receive_message_t* msg);
   double packetNoise(const receive_message_t* msg);
   double checkPrr(const receive_message_t* msg);
-  
-  double timeInMs() {
+
+  sim_time_t timeInMs(void) {
     const sim_time_t ticks_per_sec = sim_ticks_per_sec();
     const sim_time_t ftime = sim_time();
-    int hours, minutes, seconds;
-    sim_time_t secondBillionths;
-    int temp_time, temp_time_mod10;
-    double ms_time;
 
-    secondBillionths = ftime % ticks_per_sec;
-    if (ticks_per_sec > 1000000000LL) {
-      secondBillionths /= (ticks_per_sec / 1000000000LL);
-    }
-    else {
-      secondBillionths *= (1000000000LL / ticks_per_sec);
-    }
-    temp_time = (int)(secondBillionths/10000LL);
-    temp_time_mod10 = temp_time % 10;
-    
-    if (temp_time_mod10 >= 5) {
-      temp_time += (10 - temp_time_mod10);
-    }
-    else {
-      temp_time -= temp_time_mod10;
-    }
-    ms_time = temp_time / 100.0;
+    sim_time_t ms_time = ftime / (ticks_per_sec / (1000ULL * 100));
+    const sim_time_t ms_time_mod100 = ms_time % 100;
 
-    seconds = (int)(ftime / ticks_per_sec);
-    minutes = seconds / 60;
-    hours = minutes / 60;
-    seconds %= 60;
-    minutes %= 60;
-        
-    ms_time += (hours*3600+minutes*60+seconds)*1000;
+    // Forwarding old rounding a rounded number bug
+    if (ms_time_mod100 >= 45)
+    {
+      ms_time += (100 - ms_time_mod100);
+    }
+    else
+    {
+      ms_time -= ms_time_mod100;
+    }
+
+    ms_time /= 100;
 
     return ms_time;
   }
-        
+
   //Generate a CPM noise reading
-  double noise_hash_generation()   {
-    const sim_time_t CT10 = (sim_time_t)(timeInMs() * 10); 
-    uint32_t quotient = CT10 / 10;
-    const uint8_t remain = CT10 % 10;
+  double noise_hash_generation(void)   {
+    const sim_time_t CT = timeInMs();
+    
+    //const sim_time_t CT10 = (sim_time_t)(oldtimeInMs() * 10); 
+    //uint32_t quotient = CT10 / 10;
+    //const uint8_t remain = CT10 % 10;
+
+
     const uint16_t node_id = sim_node();
     double noise_val;
 
     dbg("CpmModelC", "IN: noise_hash_generation()\n");
 
-    if (5 <= remain && remain < 10) {
-      quotient += 1;
-    }
+    //if (5 <= remain && remain < 10) {
+    //  quotient += 1;
+    //}
 
-    noise_val = (double)sim_noise_generate(node_id, quotient);
+    noise_val = (double)sim_noise_generate(node_id, CT);
+    //noise_val = (double)sim_noise_generate(node_id, quotient);
 
     dbg("CpmModelC,Tal", "%s: OUT: noise_hash_generation(): %lf\n", sim_time_string(), noise_val);
 
@@ -320,7 +310,7 @@ implementation {
       // Copy this receiver's packet signal strength to the metadata region
       // of the packet. Note that this packet is actually shared across all
       // receivers: a higher layer performs the copy.
-      tossim_metadata_t* meta = (tossim_metadata_t*)(&mine->msg->metadata);
+      tossim_metadata_t* const meta = (tossim_metadata_t*)&mine->msg->metadata;
       meta->strength = mine->strength;
       
       dbg_clear("CpmModelC,SNRLoss", "  -signaling reception\n");
