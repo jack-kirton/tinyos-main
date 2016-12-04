@@ -105,6 +105,4 @@ implementation {
   
   AM.SubBackoff -> CsmaC;
 
-  components LedsC;
-  AM.Leds -> LedsC;
 }

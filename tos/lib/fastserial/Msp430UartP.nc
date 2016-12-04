@@ -36,7 +36,7 @@
  * @version $Revision: 1.1 $ $Date: 2010-07-03 21:58:18 $
  */
 
-#include<Timer.h>
+#include <Timer.h>
 
 generic module Msp430UartP() {
 
@@ -50,7 +50,6 @@ generic module Msp430UartP() {
   uses interface HplMsp430Usart as Usart;
   uses interface HplMsp430UsartInterrupts as UsartInterrupts[ uint8_t id ];
   uses interface Counter<T32khz,uint16_t>;
-  uses interface Leds;
 
 }
 
@@ -123,7 +122,7 @@ implementation {
       return FAIL;
     atomic {
       if ( m_rx_buf )
-	return EBUSY;
+        return EBUSY;
       m_rx_buf = buf;
       m_rx_len = len;
       m_rx_pos = 0;
@@ -137,9 +136,9 @@ implementation {
     else {
       m_rx_buf[ m_rx_pos++ ] = data;
       if ( m_rx_pos >= m_rx_len ) {
-	uint8_t* buf = m_rx_buf;
-	m_rx_buf = NULL;
-	signal UartStream.receiveDone[id]( buf, m_rx_len, SUCCESS );
+        uint8_t* buf = m_rx_buf;
+        m_rx_buf = NULL;
+        signal UartStream.receiveDone[id]( buf, m_rx_len, SUCCESS );
       }
     }
   }
@@ -178,7 +177,7 @@ implementation {
     start = call Counter.get();
     while( !call Usart.isRxIntrPending() ) {
       if ( ( call Counter.get() - start ) >= timeout_micro )
-				return FAIL;
+        return FAIL;
     }
     *byte = call Usart.rx();
     

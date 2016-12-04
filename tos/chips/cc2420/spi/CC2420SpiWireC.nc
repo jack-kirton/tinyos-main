@@ -63,7 +63,4 @@ implementation {
   SpiP.SpiByte -> HplCC2420SpiC;
   SpiP.SpiPacket -> HplCC2420SpiC;
 
-  components LedsC;
-  SpiP.Leds -> LedsC;
-
 }

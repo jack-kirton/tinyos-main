@@ -97,7 +97,4 @@ implementation {
   components HplMsp430Usart0C as UsartC;
   SpiP.Usart -> UsartC;
 
-  components LedsC as Leds;
-  SpiP.Leds -> Leds;
-
 }

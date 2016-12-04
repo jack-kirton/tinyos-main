@@ -81,7 +81,10 @@ module CC2420TransmitP @safe() {
   uses interface CC2420Ram as TXNONCE;
 
   uses interface CC2420Receive;
+
+#ifdef CC2420_HW_SECURITY
   uses interface Leds;
+#endif
 }
 
 implementation {
