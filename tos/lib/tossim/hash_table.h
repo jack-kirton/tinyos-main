@@ -73,8 +73,7 @@ inline
 void *
 hash_table_search_data(struct hash_table *ht, const void *key)
 {
-	struct hash_entry * entry;
-	entry = hash_table_search(ht, key);
+	struct hash_entry * const entry = hash_table_search(ht, key);
 	return entry == NULL ? NULL : entry->data;
 }
 
@@ -101,7 +100,9 @@ hash_table_next_entry_reverse(struct hash_table *ht, struct hash_entry *entry);
 	     entry = hash_table_next_entry(ht, entry))
 
 #define hash_table_reverse_foreach(ht, entry) \
-		(void)0
+	for (entry = hash_table_next_entry_reverse(ht, NULL);		\
+	     entry != NULL;					\
+	     entry = hash_table_next_entry_reverse(ht, entry))
 
 /* Alternate interfaces to reduce repeated calls to hash function. */
 struct hash_entry *

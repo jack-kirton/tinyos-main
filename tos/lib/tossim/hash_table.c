@@ -48,7 +48,7 @@
  */
 
 static const uint32_t deleted_key_value = 0;
-static const void *deleted_key = &deleted_key_value;
+static const void * const deleted_key = &deleted_key_value;
 
 static const struct {
    uint32_t max_entries, size, rehash;
@@ -185,7 +185,10 @@ struct hash_entry *
 hash_table_search_pre_hashed(struct hash_table *ht, uint32_t hash,
 			     const void *key)
 {
-	const uint32_t start_hash_address = hash % ht->size;
+	const uint32_t rehash = ht->rehash;
+	const uint32_t size = ht->size;
+
+	const uint32_t start_hash_address = hash % size;
 	uint32_t hash_address = start_hash_address;
 
 	do {
@@ -205,9 +208,9 @@ hash_table_search_pre_hashed(struct hash_table *ht, uint32_t hash,
 			}
 		}
 
-		const uint32_t double_hash = (1 + hash) % ht->rehash;
+		const uint32_t double_hash = 1 + hash % rehash;
 
-		hash_address = (hash_address + double_hash) % ht->size;
+		hash_address = (hash_address + double_hash) % size;
 	} while (hash_address != start_hash_address);
 
 	return NULL;
@@ -283,31 +286,31 @@ hash_table_insert_pre_hashed(struct hash_table *ht, uint32_t hash,
 		hash_table_rehash(ht, ht->size_index + 1);
 	}
 
-	start_hash_address = hash % ht->size;
+	const uint32_t rehash = ht->rehash;
+	const uint32_t size = ht->size;
+
+	start_hash_address = hash % size;
 	hash_address = start_hash_address;
 	do {
 		index = ht->indexes[hash_address];
 
-		if (index == 0xFFFF)
-			break;
+		if (index == 0xFFFF) {
+			struct hash_entry * const available_entry = ht->table + ht->entries;
+			ht->indexes[hash_address] = ht->entries;
 
-		const uint32_t double_hash = 1 + hash % ht->rehash;
+			available_entry->hash = hash;
+			available_entry->key = key;
+			available_entry->data = data;
 
-		hash_address = (hash_address + double_hash) % ht->size;
+			ht->entries++;
+
+			return available_entry;
+		}
+
+		const uint32_t double_hash = 1 + hash % rehash;
+
+		hash_address = (hash_address + double_hash) % size;
 	} while (hash_address != start_hash_address);
-
-	if (index == 0xFFFF) {
-		struct hash_entry * const available_entry = ht->table + ht->entries;
-		ht->indexes[hash_address] = ht->entries;
-
-		available_entry->hash = hash;
-		available_entry->key = key;
-		available_entry->data = data;
-
-		ht->entries++;
-
-		return available_entry;
-	}
 
 	/* We could hit here if a required resize failed. An unchecked-malloc
 	 * application could ignore this result.
@@ -355,6 +358,8 @@ hash_table_remove_entry(struct hash_table *ht, struct hash_entry *entry)
 struct hash_entry *
 hash_table_next_entry(struct hash_table *ht, struct hash_entry *entry)
 {
+	struct hash_entry* const end = ht->table + ht->entries;
+
 	// Start at beginning
 	if (entry == NULL)
 	{
@@ -365,12 +370,12 @@ hash_table_next_entry(struct hash_table *ht, struct hash_entry *entry)
 		++entry;
 	}
 
-	if ((entry - ht->table) >= ht->entries) {
+	if (entry >= end) {
 		return NULL;
 	}
 
 	// Skip over deleted entries
-	while (entry_is_deleted(entry) && entry < ht->table)
+	while (entry_is_deleted(entry) && entry < end)
 	{
 		++entry;
 	}
@@ -391,17 +396,19 @@ hash_table_next_entry(struct hash_table *ht, struct hash_entry *entry)
 struct hash_entry *
 hash_table_next_entry_reverse(struct hash_table *ht, struct hash_entry *entry)
 {
+	struct hash_entry* const end = ht->table + ht->entries;
+
 	// Start at end
 	if (entry == NULL)
 	{
-		entry = ht->table + ht->entries - 1;
+		entry = end - 1;
 	}
 	else
 	{
 		--entry;
 	}
 
-	if (entry < ht->table || (entry - ht->table) >= ht->entries) {
+	if (entry < ht->table || entry >= end) {
 		return NULL;
 	}
 
