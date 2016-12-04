@@ -82,7 +82,6 @@ generic module Msp430SpiNoDmaP() {
   uses interface Msp430SpiConfigure[ uint8_t id ];
   uses interface HplMsp430Usart as Usart;
   uses interface HplMsp430UsartInterrupts as UsartInterrupts;
-  uses interface Leds;
 
 }
 

@@ -73,7 +73,6 @@ module CC2420ReceiveP @safe() {
   uses interface CC2420Ram as RXFIFO_RAM;
   uses interface CC2420Strobe as SNOP;
 
-  uses interface Leds;
 }
 
 implementation {

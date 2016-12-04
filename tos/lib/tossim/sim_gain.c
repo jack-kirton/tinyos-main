@@ -7,18 +7,6 @@ typedef struct sim_gain_noise {
   double range;
 } sim_gain_noise_t;
 
-typedef struct sim_gain_list {
-  gain_entry_t* entries;
-  size_t size;
-  size_t capacity;
-  struct hash_table table;
-} sim_gain_list_t;
-
-typedef struct {
-  double gain;
-  int dest;
-} node_dest_gain_t;
-
 static uint32_t node_pair_hash(const void* key)
 {
   return *(const int*)key;
@@ -38,7 +26,7 @@ static void node_table_free(struct hash_entry *entry)
 }
 
 
-static sim_gain_list_t connectivity[TOSSIM_MAX_NODES + 1];
+static struct hash_table connectivity[TOSSIM_MAX_NODES + 1];
 static sim_gain_noise_t localNoise[TOSSIM_MAX_NODES + 1];
 static double sensitivity = 4.0;
 
@@ -47,11 +35,7 @@ void sim_gain_init(void) __attribute__ ((C, spontaneous)) {
 
   for (i = 0; i != TOSSIM_MAX_NODES + 1; ++i)
   {
-    connectivity[i].capacity = 16;
-    connectivity[i].entries = (gain_entry_t*)malloc(sizeof(gain_entry_t) * connectivity[i].capacity);
-    connectivity[i].size = 0;
-
-    hash_table_create(&connectivity[i].table, &node_pair_hash, &node_pair_equal);
+    hash_table_create(&connectivity[i], &node_pair_hash, &node_pair_equal);
 
     localNoise[i].mean = 0.0;
     localNoise[i].range = 0.0;
@@ -65,84 +49,59 @@ void sim_gain_free(void) __attribute__ ((C, spontaneous)) {
 
   for (i = 0; i != TOSSIM_MAX_NODES + 1; ++i)
   {
-    free(connectivity[i].entries);
-    connectivity[i].entries = NULL;
-
-    connectivity[i].size = 0;
-    connectivity[i].capacity = 0;
-
-    hash_table_destroy(&connectivity[i].table, &node_table_free);
+    hash_table_destroy(&connectivity[i], &node_table_free);
   }
 }
 
 // To maintain backwards compatibility we need to iterate in reverse
 
-gain_entry_t* sim_gain_begin(int src) __attribute__ ((C, spontaneous)) {
+const void* sim_gain_iter(int src) __attribute__ ((C, spontaneous)) {
   if (src > TOSSIM_MAX_NODES) {
-    return connectivity[TOSSIM_MAX_NODES].entries;
-  } 
-  return connectivity[src].entries + (connectivity[src].size - 1);
-}
-
-gain_entry_t* sim_gain_end(int src) __attribute__ ((C, spontaneous)) {
-  if (src > TOSSIM_MAX_NODES) {
-    return connectivity[TOSSIM_MAX_NODES].entries + connectivity[TOSSIM_MAX_NODES].size;
-  } 
-  return connectivity[src].entries - 1;
-}
-
-static gain_entry_t* sim_gain_append(int src) {
-  if (connectivity[src].size == connectivity[src].capacity) {
-    connectivity[src].capacity *= 2;
-    connectivity[src].entries = (gain_entry_t*)realloc(connectivity[src].entries, sizeof(gain_entry_t) * connectivity[src].capacity);
+    return NULL;
   }
 
-  connectivity[src].size += 1;
+  return hash_table_next_entry_reverse(&connectivity[src], NULL);
+}
 
-  return connectivity[src].entries + (connectivity[src].size - 1);
+const void* sim_gain_next(int src, const void* iter) __attribute__ ((C, spontaneous)) {
+  return hash_table_next_entry_reverse(&connectivity[src], (struct hash_entry *)iter);
+}
+
+const gain_entry_t* sim_gain_iter_get(const void* iter) __attribute__ ((C, spontaneous)) {
+  return (const gain_entry_t*)((const struct hash_entry*)iter)->data;
 }
 
 void sim_gain_add(int src, int dest, double gain) __attribute__ ((C, spontaneous))  {
-  gain_entry_t* iter;
-  gain_entry_t* end;
+  gain_entry_t* item;
 
-  int temp = sim_node();
+  const int temp = sim_node();
   if (src > TOSSIM_MAX_NODES) {
-    src = TOSSIM_MAX_NODES;
+    return;
   }
   sim_set_node(src);
 
-  for (iter = sim_gain_begin(src), end = sim_gain_end(src); iter != end; iter = sim_gain_next(iter)) {
-    if (iter->mote == dest) {
-      sim_set_node(temp);
-      break;
-    }
-  }
+  item = (gain_entry_t*)hash_table_search_data(&connectivity[src], &dest);
 
-  if (iter == end) {
-    node_dest_gain_t* item = malloc(sizeof(node_dest_gain_t));
-    item->dest = dest;
+  if (item == NULL) {
+    item = malloc(sizeof(gain_entry_t));
+    item->mote = dest;
     item->gain = gain;
 
-    hash_table_insert(&connectivity[src].table, &item->dest, item);
-
-    iter = sim_gain_append(src);
+    hash_table_insert(&connectivity[src], &item->mote, item);
   }
   else {
-    node_dest_gain_t* item = (node_dest_gain_t*)hash_table_search_data(&connectivity[src].table, &dest);
     item->gain = gain;
   }
-
-  iter->mote = dest;
-  iter->gain = gain;
 
   dbg("Gain", "Adding link from %i to %i with gain %f\n", src, dest, gain);
 
   sim_set_node(temp);
 }
 
-double sim_gain_value(int src, int dest) __attribute__ ((C, spontaneous))  {
-  const node_dest_gain_t* const item = (node_dest_gain_t*)hash_table_search_data(&connectivity[src].table, &dest);
+// Note that these values depend on the hash table iterating in insertion order.
+
+double sim_gain_value(int src, int dest) __attribute__ ((C, spontaneous)) {
+  const gain_entry_t* const item = (gain_entry_t*)hash_table_search_data(&connectivity[src], &dest);
   const double result = item == NULL ? 1.0 : item->gain;
 
   dbg("Gain", "Getting default link from %i to %i with gain %f\n", src, dest, result);
@@ -151,34 +110,25 @@ double sim_gain_value(int src, int dest) __attribute__ ((C, spontaneous))  {
 }
 
 bool sim_gain_connected(int src, int dest) __attribute__ ((C, spontaneous)) {
-  const node_dest_gain_t* const item = (node_dest_gain_t*)hash_table_search_data(&connectivity[src].table, &dest);
+  const gain_entry_t* const item = (gain_entry_t*)hash_table_search_data(&connectivity[src], &dest);
   return item != NULL;
 }
   
-void sim_gain_remove(int src, int dest) __attribute__ ((C, spontaneous))  {
-  gain_entry_t* iter;
-  gain_entry_t* end;
+void sim_gain_remove(int src, int dest) __attribute__ ((C, spontaneous)) {
+  struct hash_entry* entry;
 
-  int temp = sim_node();
+  const int temp = sim_node();
   
   if (src > TOSSIM_MAX_NODES) {
-    src = TOSSIM_MAX_NODES;
+    return;
   }
 
   sim_set_node(src);
 
-  for (iter = connectivity[src].entries, end = connectivity[src].entries + connectivity[src].size; iter != end; ++iter) {
-    if (iter->mote == dest) {
-      struct hash_entry* entry = hash_table_search(&connectivity[src].table, &dest);
-      node_table_free(entry);
-      hash_table_remove_entry(&connectivity[src].table, entry);
-
-      memcpy(iter, iter + 1, end - (iter + 1));
-
-      connectivity[src].size -= 1;
-
-      break;
-    }
+  entry = hash_table_search(&connectivity[src], &dest);
+  if (entry != NULL) {
+    hash_table_remove_entry(&connectivity[src], entry);
+    node_table_free(entry);
   }
 
   sim_set_node(temp);

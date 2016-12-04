@@ -77,8 +77,5 @@ implementation {
 
   components new StateC();
   CsmaP.SplitControlState -> StateC;
-  
-  components LedsC as Leds;
-  CsmaP.Leds -> Leds;
-  
+
 }

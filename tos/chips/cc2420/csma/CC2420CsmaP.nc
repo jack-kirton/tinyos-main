@@ -46,7 +46,6 @@ module CC2420CsmaP @safe() {
   uses interface CC2420Transmit;
   uses interface RadioBackoff as SubBackoff;
   uses interface Random;
-  uses interface Leds;
   uses interface CC2420Packet;
   uses interface CC2420PacketBody;
   uses interface State as SplitControlState;

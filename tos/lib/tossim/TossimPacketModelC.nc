@@ -148,7 +148,7 @@ implementation {
     meta->ack = 0;
     meta->strength = 0;
     meta->time = 0;
-    sending = FALSE;
+    sending = NULL;
     signal Packet.sendDone(msg, running? SUCCESS:EOFF);
   }
 

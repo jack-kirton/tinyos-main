@@ -76,7 +76,7 @@ extern "C" {
   void sim_packet_deliver(int node, sim_packet_t* msg, sim_time_t t);
   uint8_t sim_packet_max_length(sim_packet_t* msg);
 
-  sim_packet_t* sim_packet_allocate();
+  sim_packet_t* sim_packet_allocate(void);
   void sim_packet_free(sim_packet_t* m);
 
 #ifdef __cplusplus

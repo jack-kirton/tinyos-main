@@ -412,7 +412,7 @@ implementation {
   }
   
   void sim_gain_put(int dest, message_t* msg, sim_time_t endTime, bool receive, double power, double reversePower) {
-    int prevNode = sim_node();
+    const int prevNode = sim_node();
     dbg("CpmModelC", "Enqueing reception event for %i at %llu with power %lf.\n", dest, endTime, power);
     sim_set_node(dest);
     enqueue_receive_event(prevNode, endTime, msg, receive, power, reversePower);
@@ -421,16 +421,19 @@ implementation {
 
   command void Model.putOnAirTo(int dest, message_t* msg, bool ack, sim_time_t endTime, double power, double reversePower) {
     receive_message_t* list;
-    gain_entry_t* neighborEntryIter = sim_gain_begin(sim_node());
-    gain_entry_t* const neighborEntryEnd = sim_gain_end(sim_node());
+    const void* neighborEntryIter;
     requestAck = ack;
     outgoing = msg;
     transmissionEndTime = endTime;
     dbg("CpmModelC", "Node %i transmitting to %i, finishes at %llu.\n", sim_node(), dest, endTime);
 
-    for (; neighborEntryIter != neighborEntryEnd; neighborEntryIter = sim_gain_next(neighborEntryIter)) {
-      const int other = neighborEntryIter->mote;
-      const double other_gain = neighborEntryIter->gain;
+    for (neighborEntryIter = sim_gain_iter(sim_node());
+         neighborEntryIter != NULL;
+         neighborEntryIter = sim_gain_next(sim_node(), neighborEntryIter))
+    {
+      const gain_entry_t* gain = sim_gain_iter_get(neighborEntryIter);
+      const int other = gain->mote;
+      const double other_gain = gain->gain;
       sim_gain_put(other, msg, endTime, ack, power + other_gain, reversePower + sim_gain_value(other, sim_node()));
     }
 
