@@ -57,6 +57,8 @@
 #include <TossimRadioMsg.h>
 #include <sim_csma.h>
 
+#include "assert.h"
+
 module TossimPacketModelC { 
   provides {
     interface Init;
@@ -292,16 +294,14 @@ implementation {
       signal Packet.receive(msg);
     }
   }
-
-  uint8_t error = 0;
   
   event void GainRadioModel.acked(message_t* msg) {
     if (running) {
       tossim_metadata_t* metadata = getMetadata(sending);
       metadata->ack = 1;
       if (msg != sending) {
-        error = 1;
-        dbg("TossimPacketModelC", "Requested ack for 0x%x, but outgoing packet is 0x%x.\n", msg, sending);
+        dbgerror("TossimPacketModelC", "Requested ack for 0x%x, but outgoing packet is 0x%x.\n", msg, sending);
+        assert(msg == sending);
       }
     }
   }
