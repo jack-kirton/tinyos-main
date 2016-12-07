@@ -114,23 +114,13 @@ implementation {
   //Generate a CPM noise reading
   double noise_hash_generation(void)   {
     const sim_time_t CT = timeInMs();
-    
-    //const sim_time_t CT10 = (sim_time_t)(oldtimeInMs() * 10); 
-    //uint32_t quotient = CT10 / 10;
-    //const uint8_t remain = CT10 % 10;
-
 
     const uint16_t node_id = sim_node();
     double noise_val;
 
     dbg("CpmModelC", "IN: noise_hash_generation()\n");
 
-    //if (5 <= remain && remain < 10) {
-    //  quotient += 1;
-    //}
-
     noise_val = (double)sim_noise_generate(node_id, CT);
-    //noise_val = (double)sim_noise_generate(node_id, quotient);
 
     dbg("CpmModelC,Tal", "%s: OUT: noise_hash_generation(): %lf\n", sim_time_string(), noise_val);
 
@@ -223,8 +213,8 @@ implementation {
     // at very low SNR. With this function PRR is 0 for SNR <= 3.
     const double beta1 = 0.9794;
     const double beta2 = 2.3851;
-    double X = SNR-beta2;
-    double PSE = 0.5*erfc(beta1*X/M_SQRT2);
+    const double X = SNR-beta2;
+    const double PSE = 0.5*erfc(beta1*X/M_SQRT2);
     double prr_hat = pow(1-PSE, 23*2);
     dbg("CpmModelC,SNR", "SNR is %lf, PRR is %lf\n", SNR, prr_hat);
     if (prr_hat > 1)
