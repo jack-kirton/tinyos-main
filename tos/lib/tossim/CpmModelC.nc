@@ -198,8 +198,9 @@ implementation {
   }
   
   command bool Model.clearChannel() {
-    dbg("CpmModelC", "Checking clear channel @ %s: %f <= %f \n", sim_time_string(), (double)packetNoise(NULL), clearThreshold);
-    return packetNoise(NULL) < clearThreshold;
+    const double noise = packetNoise(NULL);
+    dbg("CpmModelC", "Checking clear channel @ %s: %f <= %f \n", sim_time_string(), noise, clearThreshold);
+    return noise < clearThreshold;
   }
 
   void sim_gain_schedule_ack(int source, sim_time_t t, receive_message_t* r) {
@@ -272,9 +273,9 @@ implementation {
     return noise;
   }
 
-  double checkPrr(const receive_message_t* msg) {
+  /*double checkPrr(const receive_message_t* msg) {
     return prr_estimate_from_snr(msg->power / packetNoise(msg));
-  }
+  }*/
   
 
   /* Handle a packet reception. If the packet is being acked,
@@ -292,6 +293,7 @@ implementation {
         break;
       }
     }
+
     if (predecessor) {
       predecessor->next = mine->next;
     }
@@ -301,6 +303,7 @@ implementation {
     else {
       dbgerror("CpmModelC", "Incoming packet list structure is corrupted: entry is not the head and no entry points to it.\n");
     }
+
     dbg("CpmModelC,SNRLoss", "Packet from %i to %i\n", (int)mine->source, (int)sim_node());
     if (!checkReceive(mine)) {
       dbg("CpmModelC,SNRLoss", " - lost packet from %i as SNR was too low.\n", (int)mine->source);
@@ -313,13 +316,13 @@ implementation {
       tossim_metadata_t* const meta = (tossim_metadata_t*)&mine->msg->metadata;
       meta->strength = mine->strength;
       
-      dbg_clear("CpmModelC,SNRLoss", "  -signaling reception\n");
+      dbg_clear("CpmModelC,SNRLoss", "  -signalling reception\n");
       signal Model.receive(mine->msg);
       if (mine->ack) {
-        dbg_clear("CpmModelC", " acknowledgment requested, ");
+        dbg_clear("CpmModelC", " acknowledgement requested, ");
       }
       else {
-        dbg_clear("CpmModelC", " no acknowledgment requested.\n");
+        dbg_clear("CpmModelC", " no acknowledgement requested.\n");
       }
       // If we scheduled an ack, receiving = 0 when it completes
       if (mine->ack && signal Model.shouldAck(mine->msg)) {
@@ -413,7 +416,7 @@ implementation {
   
   void sim_gain_put(int dest, message_t* msg, sim_time_t endTime, bool receive, double power, double reversePower) {
     const int prevNode = sim_node();
-    dbg("CpmModelC", "Enqueing reception event for %i at %llu with power %lf.\n", dest, endTime, power);
+    dbg("CpmModelC", "Enqueueing reception event for %i at %llu with power %lf.\n", dest, endTime, power);
     sim_set_node(dest);
     enqueue_receive_event(prevNode, endTime, msg, receive, power, reversePower);
     sim_set_node(prevNode);
@@ -439,7 +442,8 @@ implementation {
 
     for (list = outstandingReceptionHead; list != NULL; list = list->next) {    
       list->lost = 1;
-      dbg("CpmModelC,SNRLoss", "Lost packet from %i because %i has outstanding reception, startTime %llu endTime %llu\n", list->source, sim_node(), list->start, list->end);
+      dbg("CpmModelC,SNRLoss", "Lost packet from %i because %i has outstanding reception, startTime %llu endTime %llu\n",
+        list->source, sim_node(), list->start, list->end);
     }
   }
 
