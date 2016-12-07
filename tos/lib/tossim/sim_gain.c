@@ -127,8 +127,8 @@ void sim_gain_remove(int src, int dest) __attribute__ ((C, spontaneous)) {
 
   entry = hash_table_search(&connectivity[src], &dest);
   if (entry != NULL) {
-    hash_table_remove_entry(&connectivity[src], entry);
     node_table_free(entry);
+    hash_table_remove_entry(&connectivity[src], entry);
   }
 
   sim_set_node(temp);
