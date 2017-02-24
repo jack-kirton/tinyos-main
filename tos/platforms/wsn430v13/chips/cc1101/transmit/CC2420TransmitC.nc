@@ -102,7 +102,4 @@ implementation {
   CC1101TransmitP.CC2420PacketBody -> CC2420PacketC;
   CC1101TransmitP.PacketTimeStamp -> CC2420PacketC;
   CC1101TransmitP.PacketTimeSyncOffset -> CC2420PacketC;
-
-  components LedsC;
-  CC1101TransmitP.Leds -> LedsC;
 }

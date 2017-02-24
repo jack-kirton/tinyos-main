@@ -67,8 +67,6 @@ module CC1101ReceiveP @safe() {
   uses interface CC2420PacketBody;
   uses interface CC2420Config;
   uses interface PacketTimeStamp<T32khz,uint32_t>;
-
-  uses interface Leds;
 }
 
 implementation {

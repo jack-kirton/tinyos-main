@@ -54,7 +54,6 @@ module CC1101SpiP @safe() {
     interface SpiByte;
     interface SpiPacket;
     interface State as WorkingState;
-    interface Leds;
   }
 }
 
