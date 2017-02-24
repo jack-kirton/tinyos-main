@@ -49,7 +49,7 @@ module RandomMlcgC @safe() {
 }
 implementation
 {
-    uint32_t seed ;
+    uint32_t seed;
 
   /* Initialize the seed from the ID of the node */
   command error_t Init.init() {
