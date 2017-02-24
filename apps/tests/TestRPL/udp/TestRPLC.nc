@@ -94,7 +94,6 @@ implementation {
       call RootControl.setRoot();
     }
     call RoutingControl.start();
-    //call RoutingControl.start();
     call SplitControl.start();
 
     call RPLUDP.bind(UDP_PORT);

@@ -494,7 +494,7 @@ implementation {
     return SUCCESS;
   }
 
-  // pin a neighbor so that it does not get evicted
+  // unpin a neighbor so that it does get evicted
   command error_t LinkEstimator.unpinNeighbor(am_addr_t neighbor) {
     uint8_t nidx = findIdx(neighbor);
     if (nidx == INVALID_RVAL) {
