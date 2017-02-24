@@ -145,7 +145,7 @@ class Tossim {
   void setTime(long long int time) noexcept;
   
   Mote* currentNode() noexcept;
-  Mote* getNode(unsigned long nodeID) noexcept;
+  Mote* getNode(unsigned long nodeID);
   void setCurrentNode(unsigned long nodeID) noexcept;
 
   void addChannel(const char* channel, FILE* file);

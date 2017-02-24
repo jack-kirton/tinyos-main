@@ -263,7 +263,7 @@ Mote* Tossim::currentNode() noexcept {
   return getNode(sim_node());
 }
 
-Mote* Tossim::getNode(unsigned long nodeID) noexcept {
+Mote* Tossim::getNode(unsigned long nodeID) {
   if (nodeID >= TOSSIM_MAX_NODES) {
     throw std::runtime_error("Asked for an invalid node id. You may need to increase the maximum number of nodes.");
   }
