@@ -65,7 +65,7 @@ module PowerCycleP {
     interface State as RadioPowerState;
     interface State as SplitControlState;
     interface State as SendState;
-    interface Leds;
+    //interface Leds;
     interface ReceiveIndicator as EnergyIndicator;
     interface ReceiveIndicator as ByteIndicator;
     interface ReceiveIndicator as PacketIndicator;

@@ -67,7 +67,6 @@ module DefaultLplP {
     interface Timer<TMilli> as OffTimer;
     interface Timer<TMilli> as SendDoneTimer;
     interface Random;
-    interface Leds;
     interface SystemLowPowerListening;
   }
 }
