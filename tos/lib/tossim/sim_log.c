@@ -146,7 +146,7 @@ static void fillInOutput(int id, const char* name) {
   outputs[id].files = (FILE**)malloc(sizeof(FILE*) * count_outputs);
   outputs[id].num_files = 0;
 
-  outputs[id].callbacks = (sim_log_callback_t**)malloc(sizeof(sim_log_callback_t*) * count_outputs);
+  outputs[id].callbacks = (sim_log_callback_t**)malloc(sizeof(sim_log_callback_t*) * count_callbacks);
   outputs[id].num_callbacks = 0;
 
   // Fill it in
