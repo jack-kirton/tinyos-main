@@ -2,7 +2,7 @@
 #$Id: Makedefaults,v 1.8 2008-06-18 20:22:51 razvanm Exp $
 
 DEFAULT_LOCAL_GROUP ?= 0x22
-OPTFLAGS ?= -Os
+OPTFLAGS ?= -Os -fno-strict-aliasing
 NESC_FLAGS ?= -Wnesc-all
 GOALS += ident_flags tos_image tosboot
 
