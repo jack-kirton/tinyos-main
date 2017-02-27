@@ -101,7 +101,7 @@ entry_is_deleted(const struct hash_entry *entry)
 static inline int
 entry_is_present(const struct hash_entry *entry)
 {
-	return entry->key != NULL && entry->key != deleted_key;
+	return entry->key != NULL & entry->key != deleted_key;
 }
 
 bool

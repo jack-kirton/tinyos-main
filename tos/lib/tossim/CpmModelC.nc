@@ -207,7 +207,7 @@ implementation {
     sim_queue_insert(ackEvent);
   }
 
-  double prr_estimate_from_snr(double SNR) {
+  double prr_estimate_from_snr(double SNR) __attribute__ ((hot)) {
     // Based on CC2420 measurement by Kannan.
     // The updated function below fixes the problem of non-zero PRR
     // at very low SNR. With this function PRR is 0 for SNR <= 3.
@@ -271,7 +271,7 @@ implementation {
   /* Handle a packet reception. If the packet is being acked,
      pass the corresponding receive_message_t* to the ack handler,
      otherwise free it. */
-  void sim_gain_receive_handle(sim_event_t* evt) {
+  void sim_gain_receive_handle(sim_event_t* evt) __attribute__ ((hot)) {
     receive_message_t* const mine = (receive_message_t*)evt->data;
     receive_message_t* predecessor = NULL;
     receive_message_t* list;

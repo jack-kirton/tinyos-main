@@ -113,7 +113,7 @@ hash_table_search_pre_hashed(struct hash_table *ht,
 struct hash_entry *
 hash_table_insert_pre_hashed(struct hash_table *ht,
 			     uint32_t hash,
-			     const void *key, void *data);
+			     const void *key, void *data) __attribute__ ((hot));
 
 
 #ifdef __cplusplus
