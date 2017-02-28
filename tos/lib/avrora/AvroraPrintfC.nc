@@ -1,5 +1,9 @@
 #include "AvroraPrint.h"
 
+#ifndef AVRORA_MAX_BUFFER_SIZE
+#define AVRORA_MAX_BUFFER_SIZE 256
+#endif
+
 module AvroraPrintfC
 {
 	provides interface AvroraPrintf;
@@ -9,7 +13,7 @@ implementation
 {
 	void avrora_printf(const char* fmt, ...)  __attribute__((noinline)) @C() @spontaneous()
 	{
-		char buf[256];
+		char buf[AVRORA_MAX_BUFFER_SIZE];
 
 		va_list ap;
 		va_start(ap, fmt);
