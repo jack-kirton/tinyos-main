@@ -464,9 +464,11 @@ class Mote {
                 if (PyLong_Check(trace)) {
                     trace_int = PyLong_AsLong(trace);
                 }
+#if PY_VERSION_HEX < 0x03000000
                 else if (PyInt_Check(trace)) {
                     trace_int = PyInt_AsLong(trace);
                 }
+#endif
                 else {
                     PyErr_SetString(PyExc_TypeError, "Requires a list of ints as a parameter.");
                     return NULL;

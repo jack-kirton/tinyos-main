@@ -120,7 +120,7 @@ void sim_noise_free(void) __attribute__ ((C, spontaneous)) {
     free(noiseData[j].noiseTrace);
     noiseData[j].noiseTrace = NULL;
 
-    noiseData[j].noiseTraceLen = NOISE_MIN_TRACE;
+    noiseData[j].noiseTraceLen = 0;
     noiseData[j].noiseTraceIndex = 0;
   }
 
@@ -254,10 +254,9 @@ void sim_noise_add(uint16_t node_id, char noise)__attribute__ ((C, spontaneous))
 void sim_noise_dist(uint16_t node_id)__attribute__ ((C, spontaneous))
 {
   size_t i;
-  int bin;
   float cmf = 0.0f;
   struct hash_table * const pnoiseTable = &noiseData[node_id].noiseTable;
-  char * __restrict const key = noiseData[node_id].key;
+  const char * __restrict const key = noiseData[node_id].key;
   char * __restrict const freqKey = noiseData[node_id].freqKey;
   sim_noise_hash_t * const noise_hash = (sim_noise_hash_t *)hash_table_search_data(pnoiseTable, key);
   const unsigned int numElements = noise_hash->numElements;
@@ -272,14 +271,14 @@ void sim_noise_dist(uint16_t node_id)__attribute__ ((C, spontaneous))
   
   for (i=0; i< numElements; i++)
   {
+    const int bin = noise_hash->elements[i] - NOISE_MIN_QUANTIZE; //search_bin_num(noise_hash->elements[i]) - 1;
+    //printf("Bin %i, Noise %i\n", bin, (NOISE_MIN_QUANTIZE + bin));
+
+    noise_hash->dist[bin] += 1.0f;
+
 #ifdef DEBUG
     dbg("Noise_output", "Noise is found to be %i\n", noise_hash->elements[i]);
 #endif
-
-    bin = noise_hash->elements[i] - NOISE_MIN_QUANTIZE; //search_bin_num(noise_hash->elements[i]) - 1;
-//      printf("Bin %i, Noise %i\n", bin, (NOISE_MIN_QUANTIZE + bin));
-
-    noise_hash->dist[bin] += 1.0f;
   }
 
   for (i=0; i < NOISE_NUM_VALUES ; i++)
@@ -313,7 +312,7 @@ void sim_noise_dist(uint16_t node_id)__attribute__ ((C, spontaneous))
 
 void arrangeKey(uint16_t node_id)__attribute__ ((C, spontaneous))
 {
-  char *pKey = noiseData[node_id].key;
+  char * const pKey = noiseData[node_id].key;
   memmove(pKey, pKey+1, NOISE_HISTORY-1);
 }
 

@@ -213,7 +213,7 @@ void sim_add_callback(const char* channel, void (*handle)(void* data, const char
 }
 
 void sim_register_event(sim_time_t execution_time, void (*handle)(void*), void* data) __attribute__ ((C, spontaneous)) {
-  sim_event_t* event = sim_queue_allocate_event();
+  sim_event_t* const event = sim_queue_allocate_event();
 
   event->time = execution_time;
 
@@ -221,6 +221,7 @@ void sim_register_event(sim_time_t execution_time, void (*handle)(void*), void* 
   event->cleanup = &sim_queue_cleanup_event;
 
   event->force = 1; // Make sure the event occurs even if the mote is off
+  event->cancelled = 0;
 
   event->data = data;
 

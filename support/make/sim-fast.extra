@@ -3,7 +3,7 @@
 
 export GCC=gcc
 GPP=g++ -std=gnu++11
-OPTFLAGS = -O2 -msse4.2 -maes -mpclmul -flto
+OPTFLAGS = -O2 -msse4.2 -maes -mpclmul -flto -fno-strict-aliasing -g
 #-march=westmere
 LIBS = -lm
 PFLAGS += -tossim -fnesc-nido-tosnodes=700 -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc=$(GCC) -DTOSSIM_NO_DEBUG

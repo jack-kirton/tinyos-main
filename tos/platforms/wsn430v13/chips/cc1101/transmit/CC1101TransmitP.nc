@@ -79,7 +79,6 @@ module CC1101TransmitP @safe() {
   uses interface CC1101Register as IOCFG2;
 
   uses interface CC2420Receive;
-  uses interface Leds;
 }
 
 implementation {

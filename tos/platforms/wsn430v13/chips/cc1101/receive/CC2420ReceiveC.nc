@@ -55,9 +55,6 @@ implementation {
   components HplCC1101PinsC as Pins;
   components HplCC1101InterruptsC as InterruptsC;
 
-  components LedsC as Leds;
-  CC1101ReceiveP.Leds -> Leds;
-
   StdControl = CC1101ReceiveP;
   CC2420Receive = CC1101ReceiveP;
   Receive = CC1101ReceiveP;

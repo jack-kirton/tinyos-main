@@ -50,7 +50,6 @@ implementation {
       CC2420TransmitC,
       CC2420ReceiveC,
       CC2420CsmaC,
-      LedsC,
       new StateC() as RadioPowerStateC,
       new StateC() as SplitControlStateC,
       new TimerMilliC() as OnTimerC,
@@ -75,7 +74,6 @@ implementation {
   PowerCycleP.RadioPowerState -> RadioPowerStateC;
   PowerCycleP.SplitControlState -> SplitControlStateC;
   PowerCycleP.OnTimer -> OnTimerC;
-  PowerCycleP.Leds -> LedsC;
 }
 
 

@@ -62,8 +62,6 @@ module CC2420TransmitP {
   uses interface CC2420Strobe as SFLUSHTX;
   uses interface CC2420Register as MDMCTRL1;
 
-
-  uses interface Leds;
 }
 
 implementation {

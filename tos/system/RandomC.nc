@@ -41,18 +41,25 @@
  */
 
 configuration RandomC {
-  provides interface Init;
   provides interface ParameterInit<uint16_t> as SeedInit;
   provides interface Random;
 }
 
 implementation {
-  components RandomMlcgC, MainC;
-  
-  MainC.SoftwareInit -> RandomMlcgC;
+  components RandomMlcgC;
 
-  Init = RandomMlcgC;
+  // Initialise Random in the platform init
+  // as other code in SoftwareInit may depend
+  // on random numbers being generated.
+  // See: https://github.com/tinyos/tinyos-main/issues/225
+#ifdef TOSSIM
+  components SimMainP as MainP;
+#else
+  components RealMainP as MainP;
+#endif
+  
+  MainP.PlatformInit -> RandomMlcgC.Init;
+
   SeedInit = RandomMlcgC;
   Random = RandomMlcgC;
-
 } 

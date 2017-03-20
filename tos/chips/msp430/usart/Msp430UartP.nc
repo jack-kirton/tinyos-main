@@ -50,7 +50,6 @@ generic module Msp430UartP() {
   uses interface HplMsp430Usart as Usart;
   uses interface HplMsp430UsartInterrupts as UsartInterrupts[ uint8_t id ];
   uses interface Counter<T32khz,uint16_t>;
-  uses interface Leds;
 
 }
 

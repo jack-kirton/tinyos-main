@@ -111,7 +111,7 @@ uint8_t sim_packet_max_length(sim_packet_t* msg) __attribute__ ((C, spontaneous)
   return TOSH_DATA_LENGTH;
 }
 
-sim_packet_t* sim_packet_allocate() __attribute__ ((C, spontaneous)){
+sim_packet_t* sim_packet_allocate(void) __attribute__ ((C, spontaneous)){
   return (sim_packet_t*)malloc(sizeof(message_t));
 }
 

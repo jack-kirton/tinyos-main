@@ -320,7 +320,6 @@ implementation {
     uint8_t i, totalPkt;
     neighbor_table_entry_t *ne;
     uint8_t newEst;
-    const uint8_t minPkt = BLQ_PKT_WINDOW;
 
     dbg("LI", "%s\n", __FUNCTION__);
     for (i = 0; i < NEIGHBOR_TABLE_SIZE; i++) {
@@ -338,7 +337,7 @@ implementation {
           }
 
           ne->flags |= MATURE_ENTRY;
-          dbg("LI", "MinPkt: %d, totalPkt: %d\n", minPkt, totalPkt);
+          dbg("LI", "MinPkt: %d, totalPkt: %d\n", BLQ_PKT_WINDOW, totalPkt);
           newEst = (250UL * ne->rcvcnt) / totalPkt;
           dbg("LI,LITest", "  %hu: %hhu -> %hhu", ne->ll_addr, ne->inquality, (ALPHA * ne->inquality + (10-ALPHA) * newEst)/10);
           ne->inquality = (ALPHA * ne->inquality + (10-ALPHA) * newEst)/10;
@@ -385,10 +384,10 @@ implementation {
   }
 
 
-
-  // print the neighbor table. for debugging.
-  void print_neighbor_table() {
 #ifndef TOSSIM_NO_DEBUG
+  // print the neighbor table. for debugging.
+  void print_neighbor_table(void) {
+
     uint8_t i;
     neighbor_table_entry_t *ne;
     for (i = 0; i < NEIGHBOR_TABLE_SIZE; i++) {
@@ -399,8 +398,10 @@ implementation {
             ne->rcvcnt, ne->failcnt, computeETX(ne->inquality));
       }
     }
-#endif
   }
+#else
+# define print_neighbor_table() (void)0
+#endif
 
   // print the packet. for debugging.
   void print_packet(message_t* msg, uint8_t len) {
@@ -494,7 +495,7 @@ implementation {
     return SUCCESS;
   }
 
-  // pin a neighbor so that it does not get evicted
+  // unpin a neighbor so that it does get evicted
   command error_t LinkEstimator.unpinNeighbor(am_addr_t neighbor) {
     uint8_t nidx = findIdx(neighbor);
     if (nidx == INVALID_RVAL) {
@@ -571,7 +572,7 @@ implementation {
   }
 
   // cascade the calls down
-  command uint8_t Send.cancel(message_t* msg) {
+  command error_t Send.cancel(message_t* msg) {
     return call AMSend.cancel(msg);
   }
 
@@ -588,7 +589,6 @@ implementation {
   // link estimator is received
   void processReceivedMessage(message_t* ONE msg, void* COUNT_NOK(len) payload, uint8_t len) {
     uint8_t nidx;
-    uint8_t num_entries;
 
     dbg("LI", "LI receiving packet, buf addr: %x\n", payload);
     print_packet(msg, len);
@@ -601,7 +601,6 @@ implementation {
 
       dbg("LI", "Got seq: %d from link: %d\n", hdr->seq, ll_addr);
 
-      num_entries = hdr->flags & NUM_ENTRIES_FLAG;
       print_neighbor_table();
 
       // update neighbor table with this information

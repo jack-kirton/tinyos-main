@@ -78,7 +78,6 @@ module CC2420TransmitP {
   uses interface CaptureTime;
 
   uses interface CC2420Receive;
-  uses interface Leds;
 }
 
 implementation {

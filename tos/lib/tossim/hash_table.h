@@ -43,6 +43,7 @@ typedef struct hash_entry {
 } hash_entry_t;
 
 typedef struct hash_table {
+	uint16_t *indexes;
 	struct hash_entry *table;
 	uint32_t (*hash_function)(const void *key);
 	int (*key_equals_function)(const void *a, const void *b);
@@ -51,7 +52,6 @@ typedef struct hash_table {
 	uint32_t max_entries;
 	uint32_t size_index;
 	uint32_t entries;
-	uint32_t deleted_entries;
 } hash_table_t;
 
 bool
@@ -73,8 +73,7 @@ inline
 void *
 hash_table_search_data(struct hash_table *ht, const void *key)
 {
-	struct hash_entry * entry;
-	entry = hash_table_search(ht, key);
+	struct hash_entry * const entry = hash_table_search(ht, key);
 	return entry == NULL ? NULL : entry->data;
 }
 
@@ -85,8 +84,10 @@ void
 hash_table_remove_entry(struct hash_table *ht, struct hash_entry *entry);
 
 struct hash_entry *
-hash_table_next_entry(struct hash_table *ht,
-		      struct hash_entry *entry);
+hash_table_next_entry(struct hash_table *ht, struct hash_entry *entry);
+
+struct hash_entry *
+hash_table_next_entry_reverse(struct hash_table *ht, struct hash_entry *entry);
 
 /**
  * This foreach function is safe against deletion (which just replaces
@@ -98,6 +99,11 @@ hash_table_next_entry(struct hash_table *ht,
 	     entry != NULL;					\
 	     entry = hash_table_next_entry(ht, entry))
 
+#define hash_table_reverse_foreach(ht, entry) \
+	for (entry = hash_table_next_entry_reverse(ht, NULL);		\
+	     entry != NULL;					\
+	     entry = hash_table_next_entry_reverse(ht, entry))
+
 /* Alternate interfaces to reduce repeated calls to hash function. */
 struct hash_entry *
 hash_table_search_pre_hashed(struct hash_table *ht,
@@ -107,7 +113,7 @@ hash_table_search_pre_hashed(struct hash_table *ht,
 struct hash_entry *
 hash_table_insert_pre_hashed(struct hash_table *ht,
 			     uint32_t hash,
-			     const void *key, void *data);
+			     const void *key, void *data) __attribute__ ((hot));
 
 
 #ifdef __cplusplus

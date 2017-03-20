@@ -64,7 +64,6 @@ module CC2420ActiveMessageP @safe() {
     interface RadioBackoff as SubBackoff;
 
     interface Resource as RadioResource;
-    interface Leds;
   }
 }
 implementation {
