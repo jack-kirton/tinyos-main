@@ -285,7 +285,7 @@ FILE* object_to_file(PyObject* o)
     $1 = object_to_file($input);
     if ($1 == NULL)
     {
-        return NULL;
+        SWIG_fail;
     }
 }
 
@@ -298,6 +298,7 @@ FILE* object_to_file(PyObject* o)
     }
     if ($result == NULL) {
         PyErr_SetString(PyExc_RuntimeError, "Error generating Python type from TinyOS variable.");
+        SWIG_fail;
     }
 }
 
@@ -464,11 +465,11 @@ class Mote {
                 if (PyLong_Check(trace)) {
                     trace_int = PyLong_AsLong(trace);
                 }
-#if PY_VERSION_HEX < 0x03000000
+%#if PY_VERSION_HEX < 0x03000000
                 else if (PyInt_Check(trace)) {
                     trace_int = PyInt_AsLong(trace);
                 }
-#endif
+%#endif
                 else {
                     PyErr_SetString(PyExc_TypeError, "Requires a list of ints as a parameter.");
                     return NULL;

@@ -4700,9 +4700,11 @@ SWIGINTERN PyObject *Mote_addNoiseTraces(Mote *self,PyObject *traces){
                 if (PyLong_Check(trace)) {
                     trace_int = PyLong_AsLong(trace);
                 }
+#if PY_VERSION_HEX < 0x03000000
                 else if (PyInt_Check(trace)) {
                     trace_int = PyInt_AsLong(trace);
                 }
+#endif
                 else {
                     PyErr_SetString(PyExc_TypeError, "Requires a list of ints as a parameter.");
                     return NULL;
@@ -6815,6 +6817,7 @@ SWIGINTERN PyObject *_wrap_Variable_getData(PyObject *self, PyObject *args) {
     }
     if (resultobj == NULL) {
       PyErr_SetString(PyExc_RuntimeError, "Error generating Python type from TinyOS variable.");
+      SWIG_fail;
     }
   }
   return resultobj;
@@ -7546,7 +7549,7 @@ SWIGINTERN PyObject *_wrap_Tossim_addChannel(PyObject *self, PyObject *args) {
     arg3 = object_to_file(swig_obj[1]);
     if (arg3 == NULL)
     {
-      return NULL;
+      SWIG_fail;
     }
   }
   (arg1)->addChannel((char const *)arg2,arg3);
@@ -7587,7 +7590,7 @@ SWIGINTERN PyObject *_wrap_Tossim_removeChannel(PyObject *self, PyObject *args) 
     arg3 = object_to_file(swig_obj[1]);
     if (arg3 == NULL)
     {
-      return NULL;
+      SWIG_fail;
     }
   }
   result = (bool)(arg1)->removeChannel((char const *)arg2,arg3);
