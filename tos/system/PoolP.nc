@@ -57,7 +57,7 @@ generic module PoolP(typedef pool_t, uint8_t size) {
   }
 }
 implementation {
-  uint8_t free;
+  uint8_t available;
   uint8_t index;
   pool_t* ONE_NOK queue[size];
   pool_t pool[size];
@@ -67,18 +67,18 @@ implementation {
     for (i = 0; i < size; i++) {
       queue[i] = &pool[i];
     }
-    free = size;
+    available = size;
     index = 0;
     return SUCCESS;
   }
   
   command bool Pool.empty() {
-    dbg("PoolP", "%s size is %i\n", __FUNCTION__, (int)free);
-    return free == 0;
+    dbg("PoolP", "%s size is %i\n", __FUNCTION__, (int)available);
+    return available == 0;
   }
   command uint8_t Pool.size() {
-    dbg("PoolP", "%s size is %i\n", __FUNCTION__, (int)free);
-    return free;
+    dbg("PoolP", "%s size is %i\n", __FUNCTION__, (int)available);
+    return available;
   }
     
   command uint8_t Pool.maxSize() {
@@ -86,32 +86,35 @@ implementation {
   }
 
   command pool_t* Pool.get() {
-    if (free) {
+    if (available > 0) {
       pool_t* rval = queue[index];
       queue[index] = NULL;
-      free--;
+      available--;
       index++;
       if (index == size) {
         index = 0;
       }
-      dbg("PoolP", "%s size is %i\n", __FUNCTION__, (int)free);
+      dbg("PoolP", "%s size is %i\n", __FUNCTION__, (int)available);
       return rval;
     }
     return NULL;
   }
 
   command error_t Pool.put(pool_t* newVal) {
-    if (free >= size) {
+    if (available >= size) {
       return FAIL;
     }
+    /*else if (!call Pool.from(newVal)) {
+      return EINVAL;
+    }*/
     else {
-      uint16_t emptyIndex = (index + free);
+      uint16_t emptyIndex = (index + available);
       if (emptyIndex >= size) {
         emptyIndex -= size;
       }
       queue[emptyIndex] = newVal;
-      free++;
-      dbg("PoolP", "%s size is %i\n", __FUNCTION__, (int)free);
+      available++;
+      dbg("PoolP", "%s size is %i\n", __FUNCTION__, (int)available);
       return SUCCESS;
     }
   }
