@@ -120,6 +120,21 @@ variable_string_t Variable::getData() {
   return str;
 }
 
+bool Variable::setData(const void* new_value, size_t length) {
+
+  if (ptr == nullptr || new_value == nullptr) {
+    return false;
+  }
+
+  if (length != len || length == 0) {
+    return false;
+  }
+
+  memcpy(ptr, new_value, len);
+
+  return true;
+}
+
 Mote::Mote(const NescApp* n) : app(n) {
 }
 

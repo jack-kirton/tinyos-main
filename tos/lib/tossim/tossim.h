@@ -83,6 +83,17 @@ class Variable {
   Variable(const std::string& name, const char* format, bool array, int mote);
   ~Variable();
   variable_string_t getData();
+  bool setData(const void* new_data, size_t length);
+
+  template <typename T>
+  inline bool setData(T new_data)
+  {
+    return setData(&new_data, sizeof(new_data));
+  }
+
+  const std::string& getFormat() const { return format; }
+  void* getPtr() const { return ptr; }
+  size_t getLen() const { return len; }
 
  private:
   void update();

@@ -350,7 +350,6 @@ bool fill_nesc_app(NescApp* app, int i, PyObject* name, PyObject* array, PyObjec
     }
 #endif
 }
-
 %}
 
 %typemap(in) NescApp {
@@ -410,11 +409,69 @@ public:
     std::vector<bool> variableArray;
 };
 
+#define REVERSE_CONVERT_TYPE(NAME, CONVERT_FUNCTION) \
+if (fmt == #NAME) { \
+    const NAME val = (NAME)CONVERT_FUNCTION(data); \
+    if (PyErr_Occurred()) \
+    { \
+        return NULL; \
+    } \
+    $self->setData(val); \
+    Py_RETURN_NONE; \
+}
+
 class Variable {
  public:
     Variable(const char* name, const char* format, int array, int mote);
     ~Variable();
-    variable_string_t getData();  
+    variable_string_t getData();
+
+    %extend {
+        PyObject* setData(PyObject* data)
+        {
+            const std::string& fmt = $self->getFormat();
+
+            if (PyString_CheckExact(data))
+            {
+                char* bytes = PyString_AS_STRING(data);
+                Py_ssize_t size = PyString_GET_SIZE(data);
+
+                bool result = $self->setData(bytes, size);
+
+                if (!result)
+                {
+                    PyErr_Format(PyExc_RuntimeError,
+                        "The provided bytes are of length %zd whereas %zu was expected.",
+                        size, $self->getLen());
+                    return NULL;
+                }
+
+                Py_RETURN_NONE;
+            }
+
+            REVERSE_CONVERT_TYPE(uint8_t, PyLong_AsUnsignedLong)
+            REVERSE_CONVERT_TYPE(uint16_t, PyLong_AsUnsignedLong)
+            REVERSE_CONVERT_TYPE(uint32_t, PyLong_AsUnsignedLong)
+            REVERSE_CONVERT_TYPE(uint64_t, PyLong_AsUnsignedLongLong)
+            REVERSE_CONVERT_TYPE(int8_t, PyLong_AsLong)
+            REVERSE_CONVERT_TYPE(int16_t, PyLong_AsLong)
+            REVERSE_CONVERT_TYPE(int32_t, PyLong_AsLong)
+            REVERSE_CONVERT_TYPE(int64_t, PyLong_AsLongLong)
+            REVERSE_CONVERT_TYPE(char, PyLong_AsLong)
+            REVERSE_CONVERT_TYPE(short, PyLong_AsLong)
+            REVERSE_CONVERT_TYPE(int, PyLong_AsLong)
+            REVERSE_CONVERT_TYPE(long, PyLong_AsLong)
+            REVERSE_CONVERT_TYPE(unsigned char, PyLong_AsUnsignedLong)
+            REVERSE_CONVERT_TYPE(unsigned short, PyLong_AsUnsignedLong)
+            REVERSE_CONVERT_TYPE(unsigned int, PyLong_AsUnsignedLong)
+            REVERSE_CONVERT_TYPE(unsigned long, PyLong_AsUnsignedLong)
+            REVERSE_CONVERT_TYPE(float, PyFloat_AsDouble)
+            REVERSE_CONVERT_TYPE(double, PyFloat_AsDouble)
+
+            PyErr_Format(PyExc_TypeError, "Unknown type.");
+            return NULL;
+        }
+    }
 };
 
 class Mote {

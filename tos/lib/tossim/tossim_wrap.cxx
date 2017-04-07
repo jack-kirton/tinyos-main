@@ -4549,7 +4549,49 @@ bool fill_nesc_app(NescApp* app, int i, PyObject* name, PyObject* array, PyObjec
 #endif
 }
 
+SWIGINTERN PyObject *Variable_setData(Variable *self,PyObject *data){
+            const std::string& fmt = self->getFormat();
 
+            if (PyString_CheckExact(data))
+            {
+                char* bytes = PyString_AS_STRING(data);
+                Py_ssize_t size = PyString_GET_SIZE(data);
+
+                bool result = self->setData(bytes, size);
+
+                if (!result)
+                {
+                    PyErr_Format(PyExc_RuntimeError,
+                        "The provided bytes are of length %zd whereas %zu was expected.",
+                        size, self->getLen());
+                    return NULL;
+                }
+
+                Py_RETURN_NONE;
+            }
+
+             if (fmt =="uint8_t") {      const uint8_t val = (uint8_t)PyLong_AsUnsignedLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="uint16_t") {      const uint16_t val = (uint16_t)PyLong_AsUnsignedLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="uint32_t") {      const uint32_t val = (uint32_t)PyLong_AsUnsignedLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="uint64_t") {      const uint64_t val = (uint64_t)PyLong_AsUnsignedLongLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="int8_t") {      const int8_t val = (int8_t)PyLong_AsLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="int16_t") {      const int16_t val = (int16_t)PyLong_AsLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="int32_t") {      const int32_t val = (int32_t)PyLong_AsLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="int64_t") {      const int64_t val = (int64_t)PyLong_AsLongLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="char") {      const char val = (char)PyLong_AsLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="short") {      const short val = (short)PyLong_AsLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="int") {      const int val = (int)PyLong_AsLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="long") {      const long val = (long)PyLong_AsLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="unsigned char") {      const unsigned char val = (unsigned char)PyLong_AsUnsignedLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="unsigned short") {      const unsigned short val = (unsigned short)PyLong_AsUnsignedLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="unsigned int") {      const unsigned int val = (unsigned int)PyLong_AsUnsignedLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="unsigned long") {      const unsigned long val = (unsigned long)PyLong_AsUnsignedLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="float") {      const float val = (float)PyFloat_AsDouble(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+             if (fmt =="double") {      const double val = (double)PyFloat_AsDouble(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
+
+            PyErr_Format(PyExc_TypeError, "Unknown type.");
+            return NULL;
+        }
 
   #define SWIG_From_long   PyInt_FromLong 
 
@@ -6826,6 +6868,43 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Variable_setData(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Variable *arg1 = (Variable *) 0 ;
+  PyObject *arg2 = (PyObject *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::shared_ptr< Variable > tempshared1 ;
+  std::shared_ptr< Variable > *smartarg1 = 0 ;
+  PyObject *swig_obj[2] ;
+  PyObject *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Variable_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Variable_setData" "', argument " "1"" of type '" "Variable *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
+      arg1 = const_cast< Variable * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
+      arg1 = const_cast< Variable * >((smartarg1 ? smartarg1->get() : 0));
+    }
+  }
+  arg2 = swig_obj[0];
+  result = (PyObject *)Variable_setData(arg1,arg2);
+  resultobj = result;
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Variable) /* defines _wrap_delete_Variable_destructor_closure */
 
 SWIGINTERN PyObject *_wrap_Mote_id(PyObject *self, PyObject *args) {
@@ -8962,6 +9041,7 @@ SwigPyBuiltin__Variable_richcompare(PyObject *self, PyObject *other, int op) {
 
 SWIGINTERN PyMethodDef SwigPyBuiltin__Variable_methods[] = {
   { "getData", (PyCFunction) _wrap_Variable_getData, METH_NOARGS, (char *) "" },
+  { "setData", (PyCFunction) _wrap_Variable_setData, METH_O, (char *) "" },
   { NULL, NULL, 0, NULL } /* Sentinel */
 };
 
