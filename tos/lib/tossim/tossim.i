@@ -289,13 +289,20 @@ FILE* object_to_file(PyObject* o)
     }
 }
 
+
 %typemap(out) variable_string_t {
+    if (strcmp($1.type, "<no such variable>") == 0) {
+        PyErr_Format(PyExc_RuntimeError, "no such variable");
+        SWIG_fail;
+    }
+
     if ($1.isArray) {
         $result = listFromArray($1.type, $1.ptr, $1.len);
     }
     else {
         $result = valueFromScalar($1.type, $1.ptr, $1.len);
     }
+
     if ($result == NULL) {
         PyErr_SetString(PyExc_RuntimeError, "Error generating Python type from TinyOS variable.");
         SWIG_fail;
@@ -494,6 +501,17 @@ class Mote {
     bool isOn();
     void turnOff();
     void turnOn();
+
+    %exception getVariable(const char*) {
+        try {
+            $action
+        }
+        catch (std::runtime_error ex) {
+            PyErr_Format(PyExc_RuntimeError, "No such variable as %s.", arg2);
+            SWIG_fail;
+        }
+    }
+
     std::shared_ptr<Variable> getVariable(const char* name_cstr);
 
     void reserveNoiseTraces(size_t num_traces);
@@ -620,8 +638,8 @@ class Tossim {
     void setTime(long long int time) noexcept;
     const char* timeStr() noexcept;
 
-    Mote* currentNode() noexcept;
-    Mote* getNode(unsigned long nodeID) noexcept;
+    Mote* currentNode();
+    Mote* getNode(unsigned long nodeID);
     void setCurrentNode(unsigned long nodeID) noexcept;
 
     void addChannel(const char* channel, FILE* file);

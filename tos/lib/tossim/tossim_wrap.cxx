@@ -6851,12 +6851,18 @@ SWIGINTERN PyObject *_wrap_Variable_getData(PyObject *self, PyObject *args) {
   }
   result = (arg1)->getData();
   {
+    if (strcmp((&result)->type, "<no such variable>") == 0) {
+      PyErr_Format(PyExc_RuntimeError, "no such variable");
+      SWIG_fail;
+    }
+    
     if ((&result)->isArray) {
       resultobj = listFromArray((&result)->type, (&result)->ptr, (&result)->len);
     }
     else {
       resultobj = valueFromScalar((&result)->type, (&result)->ptr, (&result)->len);
     }
+    
     if (resultobj == NULL) {
       PyErr_SetString(PyExc_RuntimeError, "Error generating Python type from TinyOS variable.");
       SWIG_fail;
@@ -7173,7 +7179,15 @@ SWIGINTERN PyObject *_wrap_Mote_getVariable(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Mote_getVariable" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
-  result = (arg1)->getVariable((char const *)arg2);
+  {
+    try {
+      result = (arg1)->getVariable((char const *)arg2);
+    }
+    catch (std::runtime_error ex) {
+      PyErr_Format(PyExc_RuntimeError, "No such variable as %s.", arg2);
+      SWIG_fail;
+    }
+  }
   {
     std::shared_ptr<  Variable > *smartresult = result ? new std::shared_ptr<  Variable >(result) : 0;
     resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_Variable_t, SWIG_POINTER_OWN);

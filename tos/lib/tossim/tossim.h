@@ -155,7 +155,7 @@ class Tossim {
   const char* timeStr() noexcept;
   void setTime(long long int time) noexcept;
   
-  Mote* currentNode() noexcept;
+  Mote* currentNode();
   Mote* getNode(unsigned long nodeID);
   void setCurrentNode(unsigned long nodeID) noexcept;
 

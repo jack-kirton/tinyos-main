@@ -194,7 +194,7 @@ std::shared_ptr<Variable> Mote::getVariable(const char* name_cstr) {
   auto find = varTable.find(name);
 
   if (find == varTable.end()) {
-    const char* typeStr = "";
+    const char* typeStr = nullptr;
     bool isArray = false;
     // Could hash this for greater efficiency,
     // but that would either require transformation
@@ -207,6 +207,12 @@ std::shared_ptr<Variable> Mote::getVariable(const char* name_cstr) {
           break;
         }
       }
+    }
+
+    // Could not find the variable
+    if (typeStr == nullptr)
+    {
+      throw std::runtime_error("no such variable");
     }
 
     var = std::make_shared<Variable>(name, typeStr, isArray, nodeID);
@@ -274,7 +280,7 @@ void Tossim::setTime(long long int val) noexcept {
   sim_set_time(val);
 }
 
-Mote* Tossim::currentNode() noexcept {
+Mote* Tossim::currentNode() {
   return getNode(sim_node());
 }
 
