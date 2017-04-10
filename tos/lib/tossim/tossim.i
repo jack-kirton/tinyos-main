@@ -427,10 +427,10 @@ if (fmt == #NAME) { \
     Py_RETURN_NONE; \
 }
 
+%nodefaultctor Variable;
+%nodefaultdtor Variable;
 class Variable {
  public:
-    Variable(const char* name, const char* format, int array, int mote);
-    ~Variable();
     variable_string_t getData();
 
     %extend {
@@ -481,11 +481,9 @@ class Variable {
     }
 };
 
+%nodefaultctor Mote;
+%nodefaultdtor Mote;
 class Mote {
- protected:
-    Mote(const NescApp* app);
-    ~Mote();
-
  public:
     unsigned long id() const noexcept;
   

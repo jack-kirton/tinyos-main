@@ -61,7 +61,7 @@ uint16_t TOS_NODE_ID = 1;
 
 static bool python_event_called = false;
 
-Variable::Variable(const std::string& name, const char* formatStr, bool array, int which)
+Variable::Variable(const std::string& name, const std::string& formatStr, bool array, int which)
   : realName(name)
   , format(formatStr)
 
@@ -194,7 +194,7 @@ std::shared_ptr<Variable> Mote::getVariable(const char* name_cstr) {
   auto find = varTable.find(name);
 
   if (find == varTable.end()) {
-    const char* typeStr = nullptr;
+    const std::string* typeStr = nullptr;
     bool isArray = false;
     // Could hash this for greater efficiency,
     // but that would either require transformation
@@ -202,7 +202,7 @@ std::shared_ptr<Variable> Mote::getVariable(const char* name_cstr) {
     if (app != nullptr) {
       for (unsigned int i = 0; i < app->numVariables; i++) {
         if (name == app->variableNames[i]) {
-          typeStr = app->variableTypes[i].c_str();
+          typeStr = &app->variableTypes[i];
           isArray = app->variableArray[i];
           break;
         }
@@ -215,7 +215,7 @@ std::shared_ptr<Variable> Mote::getVariable(const char* name_cstr) {
       throw std::runtime_error("no such variable");
     }
 
-    var = std::make_shared<Variable>(name, typeStr, isArray, nodeID);
+    var = std::make_shared<Variable>(name, *typeStr, isArray, nodeID);
 
     varTable.emplace(std::move(name), var);
   }

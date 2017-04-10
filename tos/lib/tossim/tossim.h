@@ -80,7 +80,7 @@ public:
 
 class Variable {
  public:
-  Variable(const std::string& name, const char* format, bool array, int mote);
+  Variable(const std::string& name, const std::string& format, bool array, int mote);
   ~Variable();
   variable_string_t getData();
   bool setData(const void* new_data, size_t length);

@@ -6735,94 +6735,6 @@ fail:
 
 SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Packet) /* defines _wrap_delete_Packet_destructor_closure */
 
-SWIGINTERN int _wrap_new_Variable(PyObject *self, PyObject *args) {
-  PyObject *resultobj = 0;
-  char *arg1 = (char *) 0 ;
-  char *arg2 = (char *) 0 ;
-  int arg3 ;
-  int arg4 ;
-  int res1 ;
-  char *buf1 = 0 ;
-  int alloc1 = 0 ;
-  int res2 ;
-  char *buf2 = 0 ;
-  int alloc2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  int val4 ;
-  int ecode4 = 0 ;
-  PyObject *swig_obj[4] ;
-  Variable *result = 0 ;
-  
-  if (!SWIG_Python_UnpackTuple(args,"new_Variable",4,4,swig_obj)) SWIG_fail;
-  res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Variable" "', argument " "1"" of type '" "char const *""'");
-  }
-  arg1 = reinterpret_cast< char * >(buf1);
-  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_Variable" "', argument " "2"" of type '" "char const *""'");
-  }
-  arg2 = reinterpret_cast< char * >(buf2);
-  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "new_Variable" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
-  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "new_Variable" "', argument " "4"" of type '" "int""'");
-  } 
-  arg4 = static_cast< int >(val4);
-  result = (Variable *)new Variable((char const *)arg1,(char const *)arg2,arg3,arg4);
-  {
-    std::shared_ptr<  Variable > *smartresult = result ? new std::shared_ptr<  Variable >(result SWIG_NO_NULL_DELETER_SWIG_BUILTIN_INIT) : 0;
-    resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(smartresult), SWIGTYPE_p_std__shared_ptrT_Variable_t, SWIG_BUILTIN_INIT | SWIG_POINTER_OWN);
-  }
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  return resultobj == Py_None ? -1 : 0;
-fail:
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  return -1;
-}
-
-
-SWIGINTERN PyObject *_wrap_delete_Variable(PyObject *self, PyObject *args) {
-  PyObject *resultobj = 0;
-  Variable *arg1 = (Variable *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  std::shared_ptr< Variable > tempshared1 ;
-  std::shared_ptr< Variable > *smartarg1 = 0 ;
-  PyObject *swig_obj[1] ;
-  
-  if (!SWIG_Python_UnpackTuple(args,"delete_Variable",0,0,0)) SWIG_fail;
-  {
-    int newmem = 0;
-    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Variable_t, 0 |  0 , &newmem);
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Variable" "', argument " "1"" of type '" "Variable *""'"); 
-    }
-    if (newmem & SWIG_CAST_NEW_MEMORY) {
-      tempshared1 = *reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
-      delete reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
-      arg1 = const_cast< Variable * >(tempshared1.get());
-    } else {
-      smartarg1 = reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
-      arg1 = const_cast< Variable * >((smartarg1 ? smartarg1->get() : 0));
-    }
-  }
-  (void)arg1; delete smartarg1;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_Variable_getData(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Variable *arg1 = (Variable *) 0 ;
@@ -6910,8 +6822,6 @@ fail:
   return NULL;
 }
 
-
-SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Variable) /* defines _wrap_delete_Variable_destructor_closure */
 
 SWIGINTERN PyObject *_wrap_Mote_id(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
@@ -9070,7 +8980,7 @@ static PyHeapTypeObject SwigPyBuiltin__Variable_type = {
     "TOSSIM.Variable",                        /* tp_name */
     sizeof(SwigPyObject),                     /* tp_basicsize */
     0,                                        /* tp_itemsize */
-    (destructor) (destructor) _wrap_delete_Variable_destructor_closure,/* tp_dealloc */
+    (destructor) SwigPyBuiltin_BadDealloc,    /* tp_dealloc */
     (printfunc) 0,                            /* tp_print */
     (getattrfunc) 0,                          /* tp_getattr */
     (setattrfunc) 0,                          /* tp_setattr */
@@ -9109,7 +9019,7 @@ static PyHeapTypeObject SwigPyBuiltin__Variable_type = {
     (descrgetfunc) 0,                         /* tp_descr_get */
     (descrsetfunc) 0,                         /* tp_descr_set */
     (Py_ssize_t) offsetof(SwigPyObject, dict),/* tp_dictoffset */
-    (initproc) _wrap_new_Variable,            /* tp_init */
+    (initproc) SwigPyBuiltin_BadInit,         /* tp_init */
     (allocfunc) 0,                            /* tp_alloc */
     (newfunc) 0,                              /* tp_new */
     (freefunc) 0,                             /* tp_free */
