@@ -246,6 +246,8 @@ int Mote::generateNoise(int when) {
 Tossim::Tossim(NescApp n)
   : app(std::move(n))
   , motes(TOSSIM_MAX_NODES)
+  , _mac()
+  , _radio()
   , duration_started(false)
 {
   init();
@@ -272,7 +274,8 @@ long long int Tossim::ticksPerSecond() noexcept {
 }
 
 const char* Tossim::timeStr() noexcept {
-  sim_print_now(timeBuf, 128);
+  static char timeBuf[128];
+  sim_print_now(timeBuf, sizeof(timeBuf));
   return timeBuf;
 }
 
@@ -458,12 +461,12 @@ long long int Tossim::runAllEventsWithTriggeredMaxTimeAndCallback(
   return event_count;
 }
 
-std::shared_ptr<MAC> Tossim::mac() {
-  return std::make_shared<MAC>();
+MAC& Tossim::mac() {
+  return _mac;
 }
 
-std::shared_ptr<Radio> Tossim::radio() {
-  return std::make_shared<Radio>();
+Radio& Tossim::radio() {
+  return _radio;
 }
 
 std::shared_ptr<Packet> Tossim::newPacket() {

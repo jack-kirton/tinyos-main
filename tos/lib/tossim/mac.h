@@ -42,8 +42,8 @@
 
 class MAC {
  public:
-  MAC();
-  ~MAC();
+  MAC() = default;
+  ~MAC() = default;
 
   int initHigh();
   int initLow();

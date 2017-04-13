@@ -181,14 +181,17 @@ class Tossim {
     std::function<bool()> continue_events,
     std::function<void(long long int)> callback);
 
-  std::shared_ptr<MAC> mac();
-  std::shared_ptr<Radio> radio();
+  MAC& mac();
+  Radio& radio();
   std::shared_ptr<Packet> newPacket();
 
  private:
   const NescApp app;
+
   std::vector<std::unique_ptr<Mote>> motes;
-  char timeBuf[128];
+
+  MAC _mac;
+  Radio _radio;
 
   bool duration_started;
   long long int duration_started_at;

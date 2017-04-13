@@ -43,8 +43,6 @@
 %module TOSSIM
 
 %include <std_shared_ptr.i>
-%shared_ptr(MAC)
-%shared_ptr(Radio)
 %shared_ptr(Packet)
 %shared_ptr(Variable)
 
@@ -664,7 +662,7 @@ class Tossim {
         std::function<bool()> continue_events,
         std::function<void(long long int)> callback);
 
-    std::shared_ptr<MAC> mac();
-    std::shared_ptr<Radio> radio();
+    MAC& mac();
+    Radio& radio();
     std::shared_ptr<Packet> newPacket();
 };
