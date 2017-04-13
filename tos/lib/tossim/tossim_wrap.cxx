@@ -6735,6 +6735,39 @@ fail:
 
 SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Packet) /* defines _wrap_delete_Packet_destructor_closure */
 
+SWIGINTERN PyObject *_wrap_delete_Variable(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Variable *arg1 = (Variable *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::shared_ptr< Variable > tempshared1 ;
+  std::shared_ptr< Variable > *smartarg1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!SWIG_Python_UnpackTuple(args,"delete_Variable",0,0,0)) SWIG_fail;
+  {
+    int newmem = 0;
+    res1 = SWIG_ConvertPtrAndOwn(self, &argp1, SWIGTYPE_p_std__shared_ptrT_Variable_t, 0 |  0 , &newmem);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Variable" "', argument " "1"" of type '" "Variable *""'"); 
+    }
+    if (newmem & SWIG_CAST_NEW_MEMORY) {
+      tempshared1 = *reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
+      arg1 = const_cast< Variable * >(tempshared1.get());
+    } else {
+      smartarg1 = reinterpret_cast< std::shared_ptr<  Variable > * >(argp1);
+      arg1 = const_cast< Variable * >((smartarg1 ? smartarg1->get() : 0));
+    }
+  }
+  (void)arg1; delete smartarg1;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Variable_getData(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Variable *arg1 = (Variable *) 0 ;
@@ -6817,6 +6850,29 @@ SWIGINTERN PyObject *_wrap_Variable_setData(PyObject *self, PyObject *args) {
   arg2 = swig_obj[0];
   result = (PyObject *)Variable_setData(arg1,arg2);
   resultobj = result;
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Variable) /* defines _wrap_delete_Variable_destructor_closure */
+
+SWIGINTERN PyObject *_wrap_delete_Mote(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Mote *arg1 = (Mote *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!SWIG_Python_UnpackTuple(args,"delete_Mote",0,0,0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Mote, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Mote" "', argument " "1"" of type '" "Mote *""'"); 
+  }
+  arg1 = reinterpret_cast< Mote * >(argp1);
+  delete arg1;
+  resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
   return NULL;
@@ -7246,6 +7302,8 @@ fail:
   return NULL;
 }
 
+
+SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Mote) /* defines _wrap_delete_Mote_destructor_closure */
 
 SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
@@ -8980,7 +9038,7 @@ static PyHeapTypeObject SwigPyBuiltin__Variable_type = {
     "TOSSIM.Variable",                        /* tp_name */
     sizeof(SwigPyObject),                     /* tp_basicsize */
     0,                                        /* tp_itemsize */
-    (destructor) SwigPyBuiltin_BadDealloc,    /* tp_dealloc */
+    (destructor) (destructor) _wrap_delete_Variable_destructor_closure,/* tp_dealloc */
     (printfunc) 0,                            /* tp_print */
     (getattrfunc) 0,                          /* tp_getattr */
     (setattrfunc) 0,                          /* tp_setattr */
@@ -9211,7 +9269,7 @@ static PyHeapTypeObject SwigPyBuiltin__Mote_type = {
     "TOSSIM.Mote",                            /* tp_name */
     sizeof(SwigPyObject),                     /* tp_basicsize */
     0,                                        /* tp_itemsize */
-    (destructor) SwigPyBuiltin_BadDealloc,    /* tp_dealloc */
+    (destructor) (destructor) _wrap_delete_Mote_destructor_closure,/* tp_dealloc */
     (printfunc) 0,                            /* tp_print */
     (getattrfunc) 0,                          /* tp_getattr */
     (setattrfunc) 0,                          /* tp_setattr */

@@ -428,9 +428,10 @@ if (fmt == #NAME) { \
 }
 
 %nodefaultctor Variable;
-%nodefaultdtor Variable;
 class Variable {
  public:
+    ~Variable();
+
     variable_string_t getData();
 
     %extend {
@@ -482,9 +483,10 @@ class Variable {
 };
 
 %nodefaultctor Mote;
-%nodefaultdtor Mote;
 class Mote {
  public:
+    ~Mote();
+    
     unsigned long id() const noexcept;
   
     long long int euid() const noexcept;
