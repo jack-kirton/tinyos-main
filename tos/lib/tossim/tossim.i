@@ -285,19 +285,27 @@ FILE* object_to_file(PyObject* o)
     $1 = object_to_file($input);
     if ($1 == NULL)
     {
-        return NULL;
+        SWIG_fail;
     }
 }
 
+
 %typemap(out) variable_string_t {
+    if (strcmp($1.type, "<no such variable>") == 0) {
+        PyErr_Format(PyExc_RuntimeError, "no such variable");
+        SWIG_fail;
+    }
+
     if ($1.isArray) {
         $result = listFromArray($1.type, $1.ptr, $1.len);
     }
     else {
         $result = valueFromScalar($1.type, $1.ptr, $1.len);
     }
+
     if ($result == NULL) {
         PyErr_SetString(PyExc_RuntimeError, "Error generating Python type from TinyOS variable.");
+        SWIG_fail;
     }
 }
 
@@ -349,7 +357,6 @@ bool fill_nesc_app(NescApp* app, int i, PyObject* name, PyObject* array, PyObjec
     }
 #endif
 }
-
 %}
 
 %typemap(in) NescApp {
@@ -409,18 +416,74 @@ public:
     std::vector<bool> variableArray;
 };
 
+#define REVERSE_CONVERT_TYPE(NAME, CONVERT_FUNCTION) \
+if (fmt == #NAME) { \
+    const NAME val = (NAME)CONVERT_FUNCTION(data); \
+    if (PyErr_Occurred()) \
+    { \
+        return NULL; \
+    } \
+    $self->setData(val); \
+    Py_RETURN_NONE; \
+}
+
+%nodefaultctor Variable;
+%nodefaultdtor Variable;
 class Variable {
  public:
-    Variable(const char* name, const char* format, int array, int mote);
-    ~Variable();
-    variable_string_t getData();  
+    variable_string_t getData();
+
+    %extend {
+        PyObject* setData(PyObject* data)
+        {
+            const std::string& fmt = $self->getFormat();
+
+            if (PyString_CheckExact(data))
+            {
+                char* bytes = PyString_AS_STRING(data);
+                Py_ssize_t size = PyString_GET_SIZE(data);
+
+                bool result = $self->setData(bytes, size);
+
+                if (!result)
+                {
+                    PyErr_Format(PyExc_RuntimeError,
+                        "The provided bytes are of length %zd whereas %zu was expected.",
+                        size, $self->getLen());
+                    return NULL;
+                }
+
+                Py_RETURN_NONE;
+            }
+
+            REVERSE_CONVERT_TYPE(uint8_t, PyLong_AsUnsignedLong)
+            REVERSE_CONVERT_TYPE(uint16_t, PyLong_AsUnsignedLong)
+            REVERSE_CONVERT_TYPE(uint32_t, PyLong_AsUnsignedLong)
+            REVERSE_CONVERT_TYPE(uint64_t, PyLong_AsUnsignedLongLong)
+            REVERSE_CONVERT_TYPE(int8_t, PyLong_AsLong)
+            REVERSE_CONVERT_TYPE(int16_t, PyLong_AsLong)
+            REVERSE_CONVERT_TYPE(int32_t, PyLong_AsLong)
+            REVERSE_CONVERT_TYPE(int64_t, PyLong_AsLongLong)
+            REVERSE_CONVERT_TYPE(char, PyLong_AsLong)
+            REVERSE_CONVERT_TYPE(short, PyLong_AsLong)
+            REVERSE_CONVERT_TYPE(int, PyLong_AsLong)
+            REVERSE_CONVERT_TYPE(long, PyLong_AsLong)
+            REVERSE_CONVERT_TYPE(unsigned char, PyLong_AsUnsignedLong)
+            REVERSE_CONVERT_TYPE(unsigned short, PyLong_AsUnsignedLong)
+            REVERSE_CONVERT_TYPE(unsigned int, PyLong_AsUnsignedLong)
+            REVERSE_CONVERT_TYPE(unsigned long, PyLong_AsUnsignedLong)
+            REVERSE_CONVERT_TYPE(float, PyFloat_AsDouble)
+            REVERSE_CONVERT_TYPE(double, PyFloat_AsDouble)
+
+            PyErr_Format(PyExc_TypeError, "Unknown type.");
+            return NULL;
+        }
+    }
 };
 
+%nodefaultctor Mote;
+%nodefaultdtor Mote;
 class Mote {
- protected:
-    Mote(const NescApp* app);
-    ~Mote();
-
  public:
     unsigned long id() const noexcept;
   
@@ -436,6 +499,17 @@ class Mote {
     bool isOn();
     void turnOff();
     void turnOn();
+
+    %exception getVariable(const char*) {
+        try {
+            $action
+        }
+        catch (std::runtime_error ex) {
+            PyErr_Format(PyExc_RuntimeError, "No such variable as %s.", arg2);
+            SWIG_fail;
+        }
+    }
+
     std::shared_ptr<Variable> getVariable(const char* name_cstr);
 
     void reserveNoiseTraces(size_t num_traces);
@@ -464,11 +538,11 @@ class Mote {
                 if (PyLong_Check(trace)) {
                     trace_int = PyLong_AsLong(trace);
                 }
-#if PY_VERSION_HEX < 0x03000000
+%#if PY_VERSION_HEX < 0x03000000
                 else if (PyInt_Check(trace)) {
                     trace_int = PyInt_AsLong(trace);
                 }
-#endif
+%#endif
                 else {
                     PyErr_SetString(PyExc_TypeError, "Requires a list of ints as a parameter.");
                     return NULL;
@@ -562,8 +636,8 @@ class Tossim {
     void setTime(long long int time) noexcept;
     const char* timeStr() noexcept;
 
-    Mote* currentNode() noexcept;
-    Mote* getNode(unsigned long nodeID) noexcept;
+    Mote* currentNode();
+    Mote* getNode(unsigned long nodeID);
     void setCurrentNode(unsigned long nodeID) noexcept;
 
     void addChannel(const char* channel, FILE* file);

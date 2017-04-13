@@ -61,7 +61,7 @@ uint16_t TOS_NODE_ID = 1;
 
 static bool python_event_called = false;
 
-Variable::Variable(const std::string& name, const char* formatStr, bool array, int which)
+Variable::Variable(const std::string& name, const std::string& formatStr, bool array, int which)
   : realName(name)
   , format(formatStr)
 
@@ -118,6 +118,21 @@ variable_string_t Variable::getData() {
     str.isArray = false;
   }
   return str;
+}
+
+bool Variable::setData(const void* new_value, size_t length) {
+
+  if (ptr == nullptr || new_value == nullptr) {
+    return false;
+  }
+
+  if (length != len || length == 0) {
+    return false;
+  }
+
+  memcpy(ptr, new_value, len);
+
+  return true;
 }
 
 Mote::Mote(const NescApp* n) : app(n) {
@@ -179,7 +194,7 @@ std::shared_ptr<Variable> Mote::getVariable(const char* name_cstr) {
   auto find = varTable.find(name);
 
   if (find == varTable.end()) {
-    const char* typeStr = "";
+    const std::string* typeStr = nullptr;
     bool isArray = false;
     // Could hash this for greater efficiency,
     // but that would either require transformation
@@ -187,14 +202,20 @@ std::shared_ptr<Variable> Mote::getVariable(const char* name_cstr) {
     if (app != nullptr) {
       for (unsigned int i = 0; i < app->numVariables; i++) {
         if (name == app->variableNames[i]) {
-          typeStr = app->variableTypes[i].c_str();
+          typeStr = &app->variableTypes[i];
           isArray = app->variableArray[i];
           break;
         }
       }
     }
 
-    var = std::make_shared<Variable>(name, typeStr, isArray, nodeID);
+    // Could not find the variable
+    if (typeStr == nullptr)
+    {
+      throw std::runtime_error("no such variable");
+    }
+
+    var = std::make_shared<Variable>(name, *typeStr, isArray, nodeID);
 
     varTable.emplace(std::move(name), var);
   }
@@ -259,7 +280,7 @@ void Tossim::setTime(long long int val) noexcept {
   sim_set_time(val);
 }
 
-Mote* Tossim::currentNode() noexcept {
+Mote* Tossim::currentNode() {
   return getNode(sim_node());
 }
 

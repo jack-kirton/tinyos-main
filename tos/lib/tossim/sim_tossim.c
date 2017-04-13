@@ -138,8 +138,10 @@ void sim_set_node(unsigned long node) __attribute__ ((C, spontaneous)) {
 }
 
 bool sim_run_next_event(void) __attribute__ ((C, spontaneous)) {
-  bool result = FALSE;
-  if (!sim_queue_is_empty()) {
+  if (sim_queue_is_empty()) {
+    return FALSE;
+  }
+  else {
     sim_event_t* event = sim_queue_pop();
     sim_set_time(event->time);
     sim_set_node(event->mote);
@@ -148,23 +150,19 @@ bool sim_run_next_event(void) __attribute__ ((C, spontaneous)) {
 
     // Need to test whether function pointers are for statically
     // allocated events that are zeroed out on reboot
-    dbg("Tossim", "CORE: popping event 0x%p for %lu at %llu with handler %p...\n",
-      event, sim_node(), sim_time(), event->handle);
+    dbg("Tossim", "CORE: popping event 0x%p for %lu at %llu with handler %p (forced=%d) (node on=%d)...\n",
+      event, sim_node(), sim_time(), event->handle, event->force, sim_mote_is_on(event->mote));
+
     if ((event->force || sim_mote_is_on(event->mote)) && event->handle != NULL) {
-      result = TRUE;
-      //dbg_clear("Tossim", " mote is on (or forced event), run it.\n");
       event->handle(event);
     }
-    //else {
-    //  dbg_clear("Tossim", "\n");
-    //}
 
     if (event->cleanup != NULL) {
       event->cleanup(event);
     }
-  }
 
-  return result;
+    return TRUE;
+  }
 }
 
 int sim_print_time(char* buf, int len, sim_time_t ftime) __attribute__ ((C, spontaneous)) {

@@ -80,9 +80,20 @@ public:
 
 class Variable {
  public:
-  Variable(const std::string& name, const char* format, bool array, int mote);
+  Variable(const std::string& name, const std::string& format, bool array, int mote);
   ~Variable();
   variable_string_t getData();
+  bool setData(const void* new_data, size_t length);
+
+  template <typename T>
+  inline bool setData(T new_data)
+  {
+    return setData(&new_data, sizeof(new_data));
+  }
+
+  const std::string& getFormat() const { return format; }
+  void* getPtr() const { return ptr; }
+  size_t getLen() const { return len; }
 
  private:
   void update();
@@ -144,7 +155,7 @@ class Tossim {
   const char* timeStr() noexcept;
   void setTime(long long int time) noexcept;
   
-  Mote* currentNode() noexcept;
+  Mote* currentNode();
   Mote* getNode(unsigned long nodeID);
   void setCurrentNode(unsigned long nodeID) noexcept;
 
