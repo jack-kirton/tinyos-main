@@ -4499,52 +4499,58 @@ SWIG_AsVal_long_SS_long (PyObject *obj, long long *val)
 #endif
 
 
-bool fill_nesc_app(NescApp* app, int i, PyObject* name, PyObject* array, PyObject* format)
+bool fill_nesc_app(NescApp* app, PyObject* name, PyObject* value)
 {
+    if (!PyTuple_Check(value) || PyTuple_GET_SIZE(value) != 2)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "bad value");
+        return false;
+    }
+
+    PyObject* array = PyTuple_GET_ITEM(value, 0);
+    PyObject* format = PyTuple_GET_ITEM(value, 1);
+
 #if PY_VERSION_HEX < 0x03000000
-    if (PyString_Check(name) && PyString_Check(format) && PyString_Check(array)) {
-        app->variableNames[i] = PyString_AsString(name);
-        app->variableTypes[i] = PyString_AsString(format);
-        app->variableArray[i] = (strcmp(PyString_AsString(array), "array") == 0);
+    if (PyString_Check(name) && PyString_Check(format) && PyBool_Check(array)) {
+        app->variables[PyString_AsString(name)] =
+            std::make_tuple<bool, std::string>(
+                array == Py_True,
+                PyString_AsString(format)
+            );
 
         return true;
     }
-    else {
-        PyErr_SetString(PyExc_RuntimeError, "bad string");
-        return false;
-    }
 #else
-    if (PyUnicode_Check(name) && PyUnicode_Check(format) && PyUnicode_Check(array)) {
+    if (PyUnicode_Check(name) && PyUnicode_Check(format) && PyBool_Check(array)) {
 
         PyObject* name_ascii = PyUnicode_AsASCIIString(name);
         PyObject* format_ascii = PyUnicode_AsASCIIString(format);
-        PyObject* array_ascii = PyUnicode_AsASCIIString(array);
 
-        if (name_ascii == NULL || format_ascii == NULL || array_ascii == NULL)
+        if (name_ascii == NULL || format_ascii == NULL)
         {
             Py_XDECREF(name_ascii);
             Py_XDECREF(format_ascii);
-            Py_XDECREF(array_ascii);
 
             PyErr_SetString(PyExc_RuntimeError, "bad string not ascii");
             return false;
         }
 
-        app->variableNames[i] = PyBytes_AsString(name_ascii);
-        app->variableTypes[i] = PyBytes_AsString(format_ascii);
-        app->variableArray[i] = (strcmp(PyBytes_AsString(array_ascii), "array") == 0);
+        app->variables[PyBytes_AsString(name_ascii)] =
+            std::make_tuple<bool, std::string>(
+                array == Py_True,
+                PyBytes_AsString(format_ascii)
+            );
 
         Py_DECREF(name_ascii);
         Py_DECREF(format_ascii);
-        Py_DECREF(array_ascii);
         
         return true;
     }
+#endif
     else {
         PyErr_SetString(PyExc_RuntimeError, "bad string");
         return false;
     }
-#endif
 }
 
 SWIGINTERN PyObject *Variable_setData(Variable *self,PyObject *data){
@@ -6915,32 +6921,25 @@ SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Mote) /* defines _wrap_delete_Mote_destru
 
 SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
-  SwigValueWrapper< NescApp > arg1 ;
+  NescApp arg1 ;
   PyObject *swig_obj[1] ;
   Tossim *result = 0 ;
   
   if (!SWIG_Python_UnpackTuple(args,"new_Tossim",1,1,swig_obj)) SWIG_fail;
   {
-    if (!PyList_Check(swig_obj[0])) {
-      PyErr_SetString(PyExc_TypeError, "Requires a list as a parameter.");
+    if (!PyDict_Check(swig_obj[0])) {
+      PyErr_SetString(PyExc_TypeError, "Requires a dict as a parameter.");
       SWIG_fail;
     }
     else {
-      Py_ssize_t size = PyList_Size(swig_obj[0]);
-      Py_ssize_t i = 0;
+      NescApp app;
       
-      if (size < 0 || size % 3 != 0) {
-        PyErr_SetString(PyExc_RuntimeError, "List must have 3*N elements.");
-        SWIG_fail;
-      }
+      PyObject *key, *value;
+      Py_ssize_t pos = 0;
       
-      NescApp app(static_cast<unsigned int>(size) / 3);
-      
-      for (i = 0; i < app.numVariables; i++) {
-        PyObject* name = PyList_GET_ITEM(swig_obj[0], 3 * i);
-        PyObject* array = PyList_GET_ITEM(swig_obj[0], (3 * i) + 1);
-        PyObject* format = PyList_GET_ITEM(swig_obj[0], (3 * i) + 2);
-        if (!fill_nesc_app(&app, i, name, array, format))
+      while (PyDict_Next(swig_obj[0], &pos, &key, &value))
+      {
+        if (!fill_nesc_app(&app, key, value))
         {
           SWIG_fail;
         }

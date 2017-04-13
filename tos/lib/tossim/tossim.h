@@ -64,24 +64,14 @@ typedef struct variable_string {
 
 class NescApp {
 public:
-    NescApp(unsigned int size)
-        : numVariables(size)
-        , variableNames(size)
-        , variableTypes(size)
-        , variableArray(size)
-    {
-    }
-
-    unsigned int numVariables;
-    std::vector<std::string> variableNames;
-    std::vector<std::string> variableTypes;
-    std::vector<bool> variableArray;
+    std::unordered_map<std::string, std::tuple<bool, std::string>> variables;
 };
 
 class Variable {
  public:
   Variable(const std::string& name, const std::string& format, bool array, int mote);
   ~Variable();
+
   variable_string_t getData();
   bool setData(const void* new_data, size_t length);
 
