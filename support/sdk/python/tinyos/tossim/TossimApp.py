@@ -40,7 +40,7 @@ class NescVariables(object):
     def __init__(self, applicationName="Unknown App", xmlFilename=None):
         self.applicationName = applicationName
         self._varNames = []
-        self._vars = []
+        self._vars = {}
 
         dom = minidom.parse(xmlFilename)
         for variables_node in dom.getElementsByTagName("variables"):
@@ -68,26 +68,22 @@ class NescVariables(object):
                             fileName = fileName[0:index]
                             name = fileName + "." + name
 
-                varType = "unknown"
-                varTypes = variable.getElementsByTagName("type-float")
-                if len(varTypes) == 0:
-                    varTypes = variable.getElementsByTagName("type-int")
-
-                isArray = (len(variable.getElementsByTagName("type-array")) > 0)
-                    
-                if len(varTypes) > 0:
-                    varTypeEntry = varTypes[0]
-                    varType = varTypeEntry.getAttribute("cname")
-
                 if not cVariable:
+                    varType = "unknown"
+                    varTypes = variable.getElementsByTagName("type-float")
+                    if len(varTypes) == 0:
+                        varTypes = variable.getElementsByTagName("type-int")
+
+                    isArray = (len(variable.getElementsByTagName("type-array")) > 0)
+                        
+                    if len(varTypes) > 0:
+                        varTypeEntry = varTypes[0]
+                        varType = varTypeEntry.getAttribute("cname")
+                
                     self._varNames.append(str(name))
-                    self._vars.append(str(name))
-                    if isArray:
-                        self._vars.append("array")
-                    else:
-                        self._vars.append("simple")
-                    self._vars.append(str(varType))
-                         
+
+                    self._vars[str(name)] = (isArray, str(varType))
+
     def __str__(self) :
         """ Print all available variables."""
         string = "\n"
