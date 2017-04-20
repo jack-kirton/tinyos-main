@@ -282,13 +282,9 @@ Mote* Tossim::getNode(unsigned long nodeID) {
 
   if (motes[nodeID] == nullptr) {
     motes[nodeID].reset(new Mote(&app));
-
-    if (nodeID == TOSSIM_MAX_NODES) {
-      nodeID = 0xFFFF;
-    }
-
     motes[nodeID]->setID(nodeID);
   }
+
   return motes[nodeID].get();
 }
 
