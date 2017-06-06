@@ -159,7 +159,7 @@ implementation {
     uint8_t routingTableActive;
 
     /* statistics */
-    uint32_t parentChanges;
+    //uint32_t parentChanges;
     /* end statistics */
 
     // forward declarations
@@ -213,7 +213,7 @@ implementation {
     command error_t Init.init() {
         radioOn = FALSE;
         running = FALSE;
-        parentChanges = 0;
+        //parentChanges = 0;
         state_is_root = 0;
         routeInfoInit(&routeInfo);
         routingTableInit();
@@ -348,7 +348,7 @@ implementation {
                 // since the linkMetric may change, we will compose whenever
                 // we need it: i. when choosing a parent (here); 
                 //            ii. when choosing a next hop
-                parentChanges++;
+                //parentChanges++;
 
                 dbg("TreeRouting","Changed parent. from %d to %d\n", routeInfo.parent, best->neighbor);
                 call CollectionDebug.logEventDbg(NET_C_TREE_NEW_PARENT, best->neighbor, best->info.etx, minEtx);
@@ -368,17 +368,19 @@ implementation {
         /* Finally, tell people what happened:  */
         /* We can only loose a route to a parent if it has been evicted. If it hasn't 
          * been just evicted then we already did not have a route */
-        if (justEvicted && routeInfo.parent == INVALID_ADDR) 
+        if (justEvicted && routeInfo.parent == INVALID_ADDR) {
             signal Routing.noRoute();
+        }
         /* On the other hand, if we didn't have a parent (no currentEtx) and now we
          * do, then we signal route found. The exception is if we just evicted the 
          * parent and immediately found a replacement route: we don't signal in this 
          * case */
         else if (!justEvicted && 
                   currentEtx == MAX_METRIC &&
-                  minEtx != MAX_METRIC)
+                  minEtx != MAX_METRIC) {
             signal Routing.routeFound();
-        justEvicted = FALSE; 
+        }
+        justEvicted = FALSE;
     }
 
     
