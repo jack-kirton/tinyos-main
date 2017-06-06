@@ -193,7 +193,11 @@ enum cc2420_enums {
   CC2420_TIME_SYMBOL = 2,         // 2 symbols / jiffy
   CC2420_BACKOFF_PERIOD = ( 20 / CC2420_TIME_SYMBOL ), // symbols
   CC2420_MIN_BACKOFF = ( 20 / CC2420_TIME_SYMBOL ),  // platform specific?
+
   CC2420_ACK_WAIT_DELAY = 256,    // jiffies
+  // Changed from 256 to 50 due to:
+  // https://github.com/tinyos/tinyos-main/pull/341/commits/90b32069b11979448867828102f3bfa24c885d88
+  //CC2420_ACK_WAIT_DELAY = 50,    // jiffies
 };
 
 enum cc2420_status_enums {
