@@ -370,6 +370,9 @@ implementation {
     // packet. So I don't set receiving to 1, but I keep track of
     // the signal strength.
 
+    // TODO: PERFORAMCE: Would love to reorder these statements, so the cheaper
+    // checks are done before shouldReceive. But because shouldReceive involves
+    // random numbers, it breaks backwards compatibility.
     if (!sim_mote_is_on(sim_node())) { 
       dbg("CpmModelC,PacketLoss", "Lost packet from %i due to %i being off\n", source, sim_node());
       rcv->lost = 1;
