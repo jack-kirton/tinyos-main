@@ -68,7 +68,7 @@ sim_event_t* sim_queue_allocate_raw_event(void);
 void sim_queue_free_event(sim_event_t* event);
 
 void sim_queue_init(void);
-void sim_queue_free(void);
+void sim_queue_free(void) __attribute__ ((cold));
 
 void sim_queue_insert(sim_event_t* event);
 bool sim_queue_is_empty(void);

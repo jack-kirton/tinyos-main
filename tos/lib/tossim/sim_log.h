@@ -75,7 +75,7 @@ extern "C" {
 #endif
 
 void sim_log_init(void);
-void sim_log_free(void);
+void sim_log_free(void) __attribute__ ((cold));
 
 void sim_log_add_channel(const char* output, FILE* file);
 bool sim_log_remove_channel(const char* output, FILE* file);

@@ -51,7 +51,7 @@ extern "C" {
 typedef long long int sim_time_t;
   
 void sim_init(void);
-void sim_end(void);
+void sim_end(void) __attribute__ ((cold));
 
 void sim_random_seed(int seed);
 int sim_random(void);
@@ -60,7 +60,7 @@ sim_time_t sim_time(void);
 void sim_set_time(sim_time_t time);
 sim_time_t sim_ticks_per_sec(void);
   
-unsigned long sim_node();
+unsigned long sim_node(void);
 void sim_set_node(unsigned long node);
 
 int sim_print_time(char* buf, int bufLen, sim_time_t time);
