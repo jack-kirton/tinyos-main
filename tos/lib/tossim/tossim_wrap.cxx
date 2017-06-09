@@ -3750,8 +3750,9 @@ SwigPyBuiltin_iternextfunc_closure(SwigPyWrapperFunction wrapper, PyObject *a) {
 #define SWIGTYPE_p_std__functionT_void_flong_longF_t swig_types[13]
 #define SWIGTYPE_p_std__shared_ptrT_Packet_t swig_types[14]
 #define SWIGTYPE_p_std__shared_ptrT_Variable_t swig_types[15]
-static swig_type_info *swig_types[17];
-static swig_module_info swig_module = {swig_types, 16, 0, 0, 0, 0};
+#define SWIGTYPE_p_std__string swig_types[16]
+static swig_type_info *swig_types[18];
+static swig_module_info swig_module = {swig_types, 17, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -4767,6 +4768,20 @@ SWIGINTERN PyObject *Mote_addNoiseTraces(Mote *self,PyObject *traces){
 
             Py_RETURN_NONE;
         }
+
+SWIGINTERN int
+SWIG_AsVal_bool (PyObject *obj, bool *val)
+{
+  int r;
+  if (!PyBool_Check(obj))
+    return SWIG_ERROR;
+  r = PyObject_IsTrue(obj);
+  if (r == -1)
+    return SWIG_ERROR;
+  if (val) *val = r ? true : false;
+  return SWIG_OK;
+}
+
 SWIGINTERN PyObject *Tossim_addCallback__SWIG_1(Tossim *self,char const *channel,PyObject *callback){
         try
         {
@@ -6919,13 +6934,56 @@ fail:
 
 SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Mote) /* defines _wrap_delete_Mote_destructor_closure */
 
-SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
+SWIGINTERN int _wrap_new_Tossim__SWIG_0(PyObject *self, int nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   NescApp arg1 ;
-  PyObject *swig_obj[1] ;
+  bool arg2 ;
+  bool val2 ;
+  int ecode2 = 0 ;
   Tossim *result = 0 ;
   
-  if (!SWIG_Python_UnpackTuple(args,"new_Tossim",1,1,swig_obj)) SWIG_fail;
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  {
+    if (!PyDict_Check(swig_obj[0])) {
+      PyErr_SetString(PyExc_TypeError, "Requires a dict as a parameter.");
+      SWIG_fail;
+    }
+    else {
+      NescApp app;
+      
+      PyObject *key, *value;
+      Py_ssize_t pos = 0;
+      
+      while (PyDict_Next(swig_obj[0], &pos, &key, &value))
+      {
+        if (!fill_nesc_app(&app, key, value))
+        {
+          SWIG_fail;
+        }
+      }
+      
+      arg1 = std::move(app);
+    }
+  }
+  ecode2 = SWIG_AsVal_bool(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "new_Tossim" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  result = (Tossim *)new Tossim(arg1,arg2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Tossim, SWIG_BUILTIN_INIT |  0 );
+  return resultobj == Py_None ? -1 : 0;
+fail:
+  return -1;
+}
+
+
+SWIGINTERN int _wrap_new_Tossim__SWIG_1(PyObject *self, int nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  NescApp arg1 ;
+  Tossim *result = 0 ;
+  
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
   {
     if (!PyDict_Check(swig_obj[0])) {
       PyErr_SetString(PyExc_TypeError, "Requires a dict as a parameter.");
@@ -6952,6 +7010,30 @@ SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Tossim, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
+  return -1;
+}
+
+
+SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[3] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args,"new_Tossim",0,2,argv))) SWIG_fail;
+  --argc;
+  if (argc == 1) {
+    return _wrap_new_Tossim__SWIG_1(self, argc, argv);
+  }
+  if (argc == 2) {
+    return _wrap_new_Tossim__SWIG_0(self, argc, argv);
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_Tossim'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Tossim::Tossim(NescApp,bool)\n"
+    "    Tossim::Tossim(NescApp)\n");
   return -1;
 }
 
@@ -7091,16 +7173,16 @@ SWIGINTERN PyObject *_wrap_Tossim_timeStr(PyObject *self, PyObject *args) {
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  char *result = 0 ;
+  std::string result;
   
   if (!SWIG_Python_UnpackTuple(args,"Tossim_timeStr",0,0,0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_timeStr" "', argument " "1"" of type '" "Tossim *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_timeStr" "', argument " "1"" of type '" "Tossim const *""'"); 
   }
   arg1 = reinterpret_cast< Tossim * >(argp1);
-  result = (char *)(arg1)->timeStr();
-  resultobj = SWIG_FromCharPtr((const char *)result);
+  result = ((Tossim const *)arg1)->timeStr();
+  resultobj = SWIG_NewPointerObj((new std::string(static_cast< const std::string& >(result))), SWIGTYPE_p_std__string, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -9304,6 +9386,7 @@ static swig_type_info _swigt__p_std__functionT_void_fchar_const_p_size_tF_t = {"
 static swig_type_info _swigt__p_std__functionT_void_flong_longF_t = {"_p_std__functionT_void_flong_longF_t", "std::function< void (long long) > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__shared_ptrT_Packet_t = {"_p_std__shared_ptrT_Packet_t", "std::shared_ptr< Packet > *", 0, 0, (void*)&SwigPyBuiltin__Packet_clientdata, 0};
 static swig_type_info _swigt__p_std__shared_ptrT_Variable_t = {"_p_std__shared_ptrT_Variable_t", "std::shared_ptr< Variable > *", 0, 0, (void*)&SwigPyBuiltin__Variable_clientdata, 0};
+static swig_type_info _swigt__p_std__string = {"_p_std__string", "std::string *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_FILE,
@@ -9322,6 +9405,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__functionT_void_flong_longF_t,
   &_swigt__p_std__shared_ptrT_Packet_t,
   &_swigt__p_std__shared_ptrT_Variable_t,
+  &_swigt__p_std__string,
 };
 
 static swig_cast_info _swigc__p_FILE[] = {  {&_swigt__p_FILE, 0, 0, 0},{0, 0, 0, 0}};
@@ -9340,6 +9424,7 @@ static swig_cast_info _swigc__p_std__functionT_void_fchar_const_p_size_tF_t[] = 
 static swig_cast_info _swigc__p_std__functionT_void_flong_longF_t[] = {  {&_swigt__p_std__functionT_void_flong_longF_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__shared_ptrT_Packet_t[] = {  {&_swigt__p_std__shared_ptrT_Packet_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__shared_ptrT_Variable_t[] = {  {&_swigt__p_std__shared_ptrT_Variable_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__string[] = {  {&_swigt__p_std__string, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_FILE,
@@ -9358,6 +9443,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__functionT_void_flong_longF_t,
   _swigc__p_std__shared_ptrT_Packet_t,
   _swigc__p_std__shared_ptrT_Variable_t,
+  _swigc__p_std__string,
 };
 
 

@@ -134,7 +134,7 @@ class Mote {
 
 class Tossim {
  public:
-  Tossim(NescApp app);
+  Tossim(NescApp app, bool should_free=true);
   ~Tossim();
   
   void init();
@@ -142,7 +142,7 @@ class Tossim {
   long long int time() const noexcept;
   double timeInSeconds() const noexcept;
   static long long int ticksPerSecond() noexcept;
-  const char* timeStr() noexcept;
+  std::string timeStr() const;
   void setTime(long long int time) noexcept;
   
   Mote* currentNode();
@@ -183,8 +183,10 @@ class Tossim {
   MAC _mac;
   Radio _radio;
 
-  bool duration_started;
   long long int duration_started_at;
+  bool duration_started;
+
+  bool should_free;
 };
 
 #endif // TOSSIM_H_INCLUDED

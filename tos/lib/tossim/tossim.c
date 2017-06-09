@@ -231,18 +231,22 @@ int Mote::generateNoise(int when) {
 }
 
 
-Tossim::Tossim(NescApp n)
+Tossim::Tossim(NescApp n, bool should_free_at_dtor)
   : app(std::move(n))
   , motes(TOSSIM_MAX_NODES)
   , _mac()
   , _radio()
   , duration_started(false)
+  , should_free(should_free_at_dtor)
 {
   init();
 }
 
 Tossim::~Tossim() {
-  sim_end();
+  if (should_free)
+  {
+    sim_end();
+  }
 }
 
 void Tossim::init(){
@@ -261,9 +265,9 @@ long long int Tossim::ticksPerSecond() noexcept {
   return sim_ticks_per_sec();
 }
 
-const char* Tossim::timeStr() noexcept {
-  static char timeBuf[128];
-  sim_print_now(timeBuf, sizeof(timeBuf));
+std::string Tossim::timeStr() const {
+  std::string timeBuf(128, '\0');
+  sim_print_now(const_cast<char*>(timeBuf.data()), timeBuf.size() - 1);
   return timeBuf;
 }
 
@@ -282,6 +286,7 @@ Mote* Tossim::getNode(unsigned long nodeID) {
 
   if (motes[nodeID] == nullptr) {
     motes[nodeID].reset(new Mote(&app));
+
     motes[nodeID]->setID(nodeID);
   }
 

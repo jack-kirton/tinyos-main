@@ -613,7 +613,7 @@ class Mote {
 
 class Tossim {
  public:
-    Tossim(NescApp app);
+    Tossim(NescApp app, bool should_free=true);
     ~Tossim();
     
     void init();
@@ -622,7 +622,7 @@ class Tossim {
     double timeInSeconds() const noexcept;
     static long long int ticksPerSecond() noexcept;
     void setTime(long long int time) noexcept;
-    const char* timeStr() noexcept;
+    std::string timeStr() const;
 
     Mote* currentNode();
     Mote* getNode(unsigned long nodeID);
