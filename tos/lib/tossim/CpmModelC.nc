@@ -76,6 +76,7 @@ implementation {
     bool ack;
     message_t* msg;
     receive_message_t* next;
+    receive_message_t* prev;
   };
 
   receive_message_t* outstandingReceptionHead = NULL;
@@ -273,22 +274,23 @@ implementation {
      otherwise free it. */
   void sim_gain_receive_handle(sim_event_t* evt) __attribute__ ((hot)) {
     receive_message_t* const mine = (receive_message_t*)evt->data;
-    receive_message_t* predecessor = NULL;
-    receive_message_t* list;
+    receive_message_t* const predecessor = mine->prev;
 
     dbg("CpmModelC", "Handling reception event @ %s.\n", sim_time_string());
-    for (list = outstandingReceptionHead; list != NULL; list = list->next) {
-      if (list->next == mine) {
-        predecessor = list;
-        break;
-      }
-    }
 
     if (predecessor) {
       predecessor->next = mine->next;
+
+      if (predecessor->next) {
+        predecessor->next->prev = predecessor;
+      }
     }
     else if (mine == outstandingReceptionHead) { // must be head
       outstandingReceptionHead = mine->next;
+
+      if (outstandingReceptionHead) {
+        outstandingReceptionHead->prev = NULL;
+      }
     }
     else {
       dbgerror("CpmModelC", "Incoming packet list structure is corrupted: entry is not the head and no entry points to it.\n");
@@ -402,7 +404,14 @@ implementation {
     }
     
     rcv->next = outstandingReceptionHead;
+    rcv->prev = NULL;
+
+    if (outstandingReceptionHead) {
+      outstandingReceptionHead->prev = rcv;
+    }
+
     outstandingReceptionHead = rcv;
+
     evt = allocate_receive_event(endTime, rcv);
     sim_queue_insert(evt);
   }
