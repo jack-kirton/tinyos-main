@@ -364,7 +364,7 @@ void sim_log_debug(uint16_t id, const char* string, const char* format, ...) {
     va_start(args, format);
     fprintf(file, "D:%lu:%lf:", sim_node(), sim_time() / (double)sim_ticks_per_sec());
     vfprintf(file, format, args); 
-    //va_end(args);
+    va_end(args);
     fflush(file);
   }
   write_performed = (outputs[id].num_files > 0) || outputs[id].num_callbacks > 0;
@@ -376,7 +376,7 @@ void sim_log_debug(uint16_t id, const char* string, const char* format, ...) {
     va_start(args, format);
     length = snprintf(buffer, sizeof(buffer), "D:%lu:%lf:", sim_node(), sim_time() / (double)sim_ticks_per_sec());
     length += vsnprintf(buffer + length, sizeof(buffer) - length, format, args);
-    //va_end(args);
+    va_end(args);
 
     for (i = 0; i < outputs[id].num_callbacks; ++i) {
       sim_log_callback_t* callback = outputs[id].callbacks[i];
@@ -397,7 +397,7 @@ void sim_log_error(uint16_t id, const char* string, const char* format, ...) {
     va_start(args, format);
     fprintf(file, "E:%lu:%lf:", sim_node(), sim_time() / (double)sim_ticks_per_sec());
     vfprintf(file, format, args);
-    //va_end(args);
+    va_end(args);
     fflush(file);
   }
   write_performed = (outputs[id].num_files > 0) || outputs[id].num_callbacks > 0;
@@ -409,7 +409,7 @@ void sim_log_error(uint16_t id, const char* string, const char* format, ...) {
     va_start(args, format);
     length = snprintf(buffer, sizeof(buffer), "E:%lu:%lf:", sim_node(), sim_time() / (double)sim_ticks_per_sec());
     length += vsnprintf(buffer + length, sizeof(buffer) - length, format, args);
-    //va_end(args);
+    va_end(args);
 
     for (i = 0; i < outputs[id].num_callbacks; ++i) {
       sim_log_callback_t* callback = outputs[id].callbacks[i];
@@ -429,7 +429,7 @@ void sim_log_debug_clear(uint16_t id, const char* string, const char* format, ..
     FILE* file = outputs[id].files[i];
     va_start(args, format);
     vfprintf(file, format, args);
-    //va_end(args);
+    va_end(args);
     fflush(file);
   }
   write_performed = (outputs[id].num_files > 0) || outputs[id].num_callbacks > 0;
@@ -440,7 +440,7 @@ void sim_log_debug_clear(uint16_t id, const char* string, const char* format, ..
 
     va_start(args, format);
     length = vsnprintf(buffer, sizeof(buffer), format, args);
-    //va_end(args);
+    va_end(args);
 
     for (i = 0; i < outputs[id].num_callbacks; ++i) {
       sim_log_callback_t* callback = outputs[id].callbacks[i];
@@ -460,7 +460,7 @@ void sim_log_error_clear(uint16_t id, const char* string, const char* format, ..
     FILE* file = outputs[id].files[i];
     va_start(args, format);
     vfprintf(file, format, args);
-    //va_end(args);
+    va_end(args);
     fflush(file);
   }
   write_performed = (outputs[id].num_files > 0) || outputs[id].num_callbacks > 0;
@@ -471,7 +471,7 @@ void sim_log_error_clear(uint16_t id, const char* string, const char* format, ..
 
     va_start(args, format);
     length = vsnprintf(buffer, sizeof(buffer), format, args);
-    //va_end(args);
+    va_end(args);
 
     for (i = 0; i < outputs[id].num_callbacks; ++i) {
       sim_log_callback_t* callback = outputs[id].callbacks[i];
