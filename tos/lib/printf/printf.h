@@ -58,14 +58,13 @@
 #endif
 
 #if defined (_H_msp430hardware_h) || defined (_H_atmega128hardware_H)
-  #include <stdio.h>
+#	include <stdio.h>
+#elif defined(__M16C60HARDWARE_H__ )
+#	include "m16c60_printf.h"
 #else
-#ifdef __M16C60HARDWARE_H__ 
-  #include "m16c60_printf.h"
-#else
-  #include "generic_printf.h"
+#	include "generic_printf.h"
 #endif
-#endif
+
 #undef putchar
 
 #include "message.h"

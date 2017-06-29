@@ -38,13 +38,9 @@ module SerialDebugP
 
 implementation
 {
-#ifdef SERIAL_DEBUG
-
 	void serial_assert(bool condition) @C() @spontaneous()
 	{
 		if( ! condition )
 			call Leds.led0On();
 	}
-
-#endif
 }
