@@ -1,6 +1,7 @@
 if ($target eq "tinynode184" || $target eq "tinynode" || $target eq "telosa" || $target eq "telosb")
 {
 push @includes, "$dir/msp430/clock";
+push @includes, "$dir/serial";
 }
 
 if ($target eq "tinynode184" || $target eq "tinynode")
