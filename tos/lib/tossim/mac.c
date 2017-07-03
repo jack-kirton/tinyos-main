@@ -40,9 +40,6 @@
 #include <mac.h>
 #include <sim_csma.h>
 
-MAC::MAC() {}
-MAC::~MAC() {}
-
 int MAC::initHigh() {return sim_csma_init_high();}
 int MAC::initLow() {return sim_csma_init_low();}
 int MAC::high() const {return sim_csma_high();}

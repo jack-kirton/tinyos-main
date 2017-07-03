@@ -62,7 +62,7 @@ enum {
 };
 
 void sim_noise_init(void);
-void sim_noise_free(void);
+void sim_noise_free(void) __attribute__ ((cold));
 char sim_real_noise(uint16_t node_id, uint32_t cur_t);
 char sim_noise_generate(uint16_t node_id, uint32_t cur_t);
 void sim_noise_reserve(uint16_t node_id, uint32_t num_traces);

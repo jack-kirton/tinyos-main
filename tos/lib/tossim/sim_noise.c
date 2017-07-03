@@ -356,7 +356,7 @@ void sim_noise_alarm() {
 }
 #endif
 
-char sim_noise_gen(uint16_t node_id)__attribute__ ((C, spontaneous))
+char sim_noise_gen(uint16_t node_id) __attribute__ ((C, spontaneous))
 {
   int i;
   //int noiseIndex = 0;

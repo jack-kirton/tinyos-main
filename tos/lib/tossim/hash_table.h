@@ -108,12 +108,12 @@ hash_table_next_entry_reverse(struct hash_table *ht, struct hash_entry *entry);
 struct hash_entry *
 hash_table_search_pre_hashed(struct hash_table *ht,
 			     uint32_t hash,
-			     const void *key);
+			     const void *key) __attribute__((hot));
 
 struct hash_entry *
 hash_table_insert_pre_hashed(struct hash_table *ht,
 			     uint32_t hash,
-			     const void *key, void *data) __attribute__ ((hot));
+			     const void *key, void *data);
 
 
 #ifdef __cplusplus

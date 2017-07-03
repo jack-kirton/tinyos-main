@@ -72,15 +72,14 @@
  * @author Peter A. Bigot <pabigot@users.sourceforge.net>
  */
 
-#if defined (_H_msp430hardware_h) || defined (_H_atmega128hardware_H)
-  #include <stdio.h>
+#if defined(_H_msp430hardware_h) || defined(_H_atmega128hardware_H)
+#   include <stdio.h>
+#elif defined(__M16C60HARDWARE_H__)
+#   include "m16c60_printf.h"
 #else
-#ifdef __M16C60HARDWARE_H__ 
-  #include "m16c60_printf.h"
-#else
-  #include "generic_printf.h"
+#   include "generic_printf.h"
 #endif
-#endif
+
 #undef putchar
 
 #ifdef _H_atmega128hardware_H
@@ -103,18 +102,14 @@ module PutcharP {
       return rv;
   }
 
-#ifdef _H_msp430hardware_h
+#if defined(_H_msp430hardware_h)
   int putchar(int c) __attribute__((noinline)) @C() @spontaneous() {
-#else
-#ifdef _H_atmega128hardware_H
+#elif defined(_H_atmega128hardware_H)
   int uart_putchar(char c, FILE *stream) __attribute__((noinline)) @C() @spontaneous() {
-#else
-#ifdef __M16C60HARDWARE_H__
+#elif defined(__M16C60HARDWARE_H__)
   int lowlevel_putc(int c) __attribute__((noinline)) @C() @spontaneous() {
 #else
   int lowlevel_putc(int c) __attribute__((noinline)) @C() @spontaneous() {
-#endif
-#endif
 #endif
     return call Putchar.putchar (c);
   }

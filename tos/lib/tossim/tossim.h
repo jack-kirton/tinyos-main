@@ -64,24 +64,14 @@ typedef struct variable_string {
 
 class NescApp {
 public:
-    NescApp(unsigned int size)
-        : numVariables(size)
-        , variableNames(size)
-        , variableTypes(size)
-        , variableArray(size)
-    {
-    }
-
-    unsigned int numVariables;
-    std::vector<std::string> variableNames;
-    std::vector<std::string> variableTypes;
-    std::vector<bool> variableArray;
+    std::unordered_map<std::string, std::tuple<bool, std::string>> variables;
 };
 
 class Variable {
  public:
   Variable(const std::string& name, const std::string& format, bool array, int mote);
   ~Variable();
+
   variable_string_t getData();
   bool setData(const void* new_data, size_t length);
 
@@ -144,7 +134,7 @@ class Mote {
 
 class Tossim {
  public:
-  Tossim(NescApp app);
+  Tossim(NescApp app, bool should_free=true);
   ~Tossim();
   
   void init();
@@ -152,7 +142,7 @@ class Tossim {
   long long int time() const noexcept;
   double timeInSeconds() const noexcept;
   static long long int ticksPerSecond() noexcept;
-  const char* timeStr() noexcept;
+  std::string timeStr() const;
   void setTime(long long int time) noexcept;
   
   Mote* currentNode();
@@ -181,17 +171,22 @@ class Tossim {
     std::function<bool()> continue_events,
     std::function<void(long long int)> callback);
 
-  std::shared_ptr<MAC> mac();
-  std::shared_ptr<Radio> radio();
+  MAC& mac();
+  Radio& radio();
   std::shared_ptr<Packet> newPacket();
 
  private:
   const NescApp app;
-  std::vector<std::unique_ptr<Mote>> motes;
-  char timeBuf[128];
 
-  bool duration_started;
+  std::vector<std::unique_ptr<Mote>> motes;
+
+  MAC _mac;
+  Radio _radio;
+
   long long int duration_started_at;
+  bool duration_started;
+
+  bool should_free;
 };
 
 #endif // TOSSIM_H_INCLUDED
