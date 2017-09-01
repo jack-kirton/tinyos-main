@@ -69,22 +69,25 @@ class NescVariables(object):
                             name = fileName + "." + name
 
                 if not cVariable:
-                    varType = "unknown"
                     varTypes = variable.getElementsByTagName("type-float")
                     if len(varTypes) == 0:
                         varTypes = variable.getElementsByTagName("type-int")
 
                     isArray = (len(variable.getElementsByTagName("type-array")) > 0)
-                        
+
                     if len(varTypes) > 0:
                         varTypeEntry = varTypes[0]
-                        varType = varTypeEntry.getAttribute("cname")
+                        varType = str(varTypeEntry.getAttribute("cname"))
+                    else:
+                        varType = "unknown"
 
-                    self._varNames.append(str(name))
+                    name = str(name)
 
-                    self._vars[str(name)] = (isArray, str(varType))
+                    self._varNames.append(name)
 
-    def __str__(self) :
+                    self._vars[name] = (isArray, varType)
+
+    def __str__(self):
         """ Print all available variables."""
         string = "\n"
         name = True
@@ -121,7 +124,7 @@ class NescTypes(object):
         platformTypes = {}
         
         with open(xmlFilename, 'r') as infile:
-            for line in infile :
+            for line in infile:
                 match = self.typeRE.search(line)
                 if match != None:
                     platformTypes[match.groups()[0]] = int(match.groups()[1])
@@ -254,7 +257,7 @@ class NescTypes(object):
         err = ""
         if len(self.anonymousStructs) > 0:
             err += "\nWarning: %d structs were anonymous." % len(self.anonymousStructs)
-#        for struc in anonymousStructs :
+#        for struc in anonymousStructs:
 #            err += "\t%s\n" % struc.getAttribute("ref")
         if len(self.anonymousRefStructs) > 0:
             err += "\nWarning: The following structs referenced anonymous structs:\n"
@@ -281,12 +284,12 @@ class NescTypes(object):
             childNodes = [node for node in xmlDefinition.childNodes
                                         if node.nodeType == 1]
             for tag in childNodes:
-                if tag.tagName.find("type-") >= 0 :
+                if tag.tagName.find("type-") >= 0:
                     foundType += 1
                     typeTag = tag
             if foundType < 1:
                 raise Exception("No type tag found")
-            if foundType > 1:
+            elif foundType > 1:
                 raise Exception("Too many type tags found")
             else:
                 return self.getTypeFromXML(typeTag)
@@ -341,8 +344,8 @@ class NescEnums(object):
 
         self.createEnumsFromXml(xmlFilename)
 
-    def __getitem__(self, key) :
-        if key in self._enums :
+    def __getitem__(self, key):
+        if key in self._enums:
             return self.__dict__[key]
         else:
             raise AttributeError("No such enum defined")
@@ -354,9 +357,9 @@ class NescEnums(object):
         integer = re.compile('^I:(\d+)$')
         hexidecimal = re.compile('^(0x[\dabcdefABCDEF]+)$')
         
-        for enumDef in enumDefs :
+        for enumDef in enumDefs:
             name = enumDef.getAttribute("name")
-            if name in self._enums :
+            if name in self._enums:
                 continue
             value = enumDef.getAttribute("value")
             match = integer.match(value)
@@ -382,7 +385,7 @@ class NescEnums(object):
     def __str__(self):
         """ Print all available enums."""
         string = "\n"
-        for key in self._enums :
+        for key in self._enums:
             string += "\t%s = %s\n" % (key, str(self[key]))
         return string
         
@@ -414,25 +417,25 @@ class NescMsgs(object):
                         self._msgNames.append(key)
                         break
 
-    def __getattr__(self, name) :
-        if name in self._msgNames :
+    def __getattr__(self, name):
+        if name in self._msgNames:
             return deepcopy(self._msgs[name])
         else:
             raise AttributeError("No such message defined")
     
-    def __getitem__(self, key) :
-        if key in self._msgNames :
+    def __getitem__(self, key):
+        if key in self._msgNames:
             return deepcopy(self._msgs[key])
         else:
             raise AttributeError("No such message defined")
             
-    def __repr__(self) :
+    def __repr__(self):
         return "%s object at %s:\n\n\t%s" % (self.__class__, hex(id(self)), str(self))
     
-    def __str__(self) :
+    def __str__(self):
         """ Print all available msgs."""
         string = "\n"
-        for key in self._msgNames :
+        for key in self._msgNames:
             string += "\t%5d : %s\n" % (self._msgs[key].amType, key)
         return string
         
@@ -467,10 +470,10 @@ Your nesC app cannot be imported.  Be sure that you compiled with the \"nescDecl
         self.variables = NescVariables(applicationName, xmlFile)
         self.messages = NescMsgs(self.types, self.enums, applicationName)
 
-    def __repr__(self) :
+    def __repr__(self):
         return "%s object at %s:\n\n%s" % (self.__class__, hex(id(self)), str(self))
     
-    def __str__(self) :
+    def __str__(self):
         """ Print all application declarations."""
         string = "%20s : %d\n" % ("Enums", len(self.enums._enums))
         string += "%20s : %d\n" % ("Types", len(self.types._types))

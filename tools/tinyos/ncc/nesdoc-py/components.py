@@ -58,7 +58,7 @@ def generate_speclist(ht, name, elems):
       ht.func_sig_stop();
 
 def interface_compare(x, y):
-  if cmp(x.getAttribute("qname").lower(), y.getAttribute("qname").lower()) == 0 :
+  if cmp(x.getAttribute("qname").lower(), y.getAttribute("qname").lower()) == 0:
     return cmp(x.getAttribute("name").lower(), y.getAttribute("name").lower())
   return cmp(x.getAttribute("qname").lower(), y.getAttribute("qname").lower())
 
