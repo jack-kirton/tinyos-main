@@ -79,7 +79,7 @@ class NescVariables(object):
                     if len(varTypes) > 0:
                         varTypeEntry = varTypes[0]
                         varType = varTypeEntry.getAttribute("cname")
-                
+
                     self._varNames.append(str(name))
 
                     self._vars[str(name)] = (isArray, str(varType))
@@ -113,7 +113,7 @@ class NescTypes(object):
 
     typeRE = re.compile('cname=\"([\w\s]+?)\" size=\"I:(\d+?)\"')
 
-    def __init__( self, applicationName="Unknown App", xmlFilename=None):
+    def __init__(self, applicationName="Unknown App", xmlFilename=None):
         self.applicationName = applicationName
         self._typeNames = []
         self._types = {}
@@ -276,8 +276,7 @@ class NescTypes(object):
         If it is an array or pointer, define the new type here."""
 
         #first, see if the tag is type or if child is type
-        if xmlDefinition.tagName.find("type-") < 0 or \
-                     xmlDefinition.tagName.find("type-qualified") >= 0:
+        if xmlDefinition.tagName.find("type-") < 0 or xmlDefinition.tagName.find("type-qualified") >= 0:
             foundType = 0
             childNodes = [node for node in xmlDefinition.childNodes
                                         if node.nodeType == 1]

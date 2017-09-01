@@ -192,8 +192,38 @@ std::shared_ptr<Variable> Mote::getVariable(const char* name_cstr) {
   auto find = varTable.find(name);
 
   if (find == varTable.end()) {
-    if (app != nullptr) {
-      auto find_var = app->variables.find(name);
+    if (app == nullptr) {
+      throw std::runtime_error("app is null so cannot find variables");
+    }
+
+    auto find_var = app->variables.find(name);
+
+    if (find_var != app->variables.end()) {
+      const bool isArray = std::get<0>(find_var->second);
+      const std::string& typeStr = std::get<1>(find_var->second);
+
+      auto var = std::make_shared<Variable>(name, typeStr, isArray, nodeID);
+
+      varTable.emplace(std::move(name), var);
+
+      return var;
+    }
+    else {
+      // At this point we were unable to find the variable
+      // It might be a variable for a generic component.
+
+      // Generic names might be like: "/*AlarmCounterMilliP.Atm128AlarmAsyncC.Atm128AlarmAsyncP*/Atm128AlarmAsyncP$0$set"
+
+      // We need to get the name after the /*...*/ comment to get the variable type.
+      std::string sanitised_name(name, name.find_last_of('/'));
+      sanitised_name = sanitised_name.substr(1);
+
+      size_t first = sanitised_name.find_first_of('$');
+      size_t last = sanitised_name.find_last_of('$');
+
+      sanitised_name = sanitised_name.substr(0, first) + '.' + sanitised_name.substr(last+1);
+
+      find_var = app->variables.find(sanitised_name);
 
       if (find_var != app->variables.end()) {
         const bool isArray = std::get<0>(find_var->second);
