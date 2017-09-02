@@ -55,7 +55,7 @@ def findBuildFile(givenString, desiredFilename):
         filename = givenString
 
     #then check to see if it is an absolute or relative path
-    elif givenString.find('/') >= 0 :
+    elif givenString.find('/') >= 0:
         filename = givenString + desiredFilename
 
     #then check to see if it is just the platform name
@@ -100,17 +100,17 @@ class nescType(object):
         self._conversionString = conversionString
         self.value = defaultValue
 
-    def __repr__(self) :
+    def __repr__(self):
         return "%s object at %s:\n\n%20s : %s" % (self.__class__, hex(id(self)), "value", str(self))
 
-    def __str__(self) :
-        if self._conversionString == "c" :
+    def __str__(self):
+        if self._conversionString == "c":
             return "'" + str(self.value) + "'"
         else:
             return str(self.value)
 
     #   this func could be used for type checking 
-    def __setattr__(self, name, value) :
+    def __setattr__(self, name, value):
         if "value" in self.__dict__ and name == "value":
             #use the type conversions built into pack
             pack(self._conversionString, value)
@@ -119,7 +119,7 @@ class nescType(object):
     def oneLineStr(self):
         return str(self)
 
-    def __deepcopy__(self, memo={}) :
+    def __deepcopy__(self, memo={}):
         result = nescType(self.nescType, self.cType, self.pythonType,
                           self._xmlTag, self._conversionString, self.size,
                           deepcopy(self.value, memo))
@@ -131,15 +131,15 @@ class nescType(object):
         Returns 0 otherwise."""
         if xmlDefinition != None and xmlDefinition.tagName == self._xmlTag and \
                      xmlDefinition.hasAttribute("cname") and \
-                     xmlDefinition.getAttribute("cname") == self.cType :
+                     xmlDefinition.getAttribute("cname") == self.cType:
             return 1
-        elif self.nescType == "void" and xmlDefinition.tagName == self._xmlTag :
+        elif self.nescType == "void" and xmlDefinition.tagName == self._xmlTag:
             #void is a special xml case that doesn't have cname defined (grr)
             return 1
-        else :
+        else:
             return 0
     
-    def getBytes(self) :
+    def getBytes(self):
         """Hexidecimal representation of a value of this type"""
         if self.nescType == "void":
             return ''
@@ -155,7 +155,7 @@ class nescType(object):
     
     def setBytes(self, given_bytes):
         """A value of this type from a hexidecimal representation"""
-        if self.nescType == "void" :
+        if self.nescType == "void":
             return given_bytes
         if len(given_bytes) < self.size:
             raise Exception("Wrong number of bytes for conversion: %s %d bytes to %d" %
@@ -187,23 +187,23 @@ class nescArray(object):
     print array
     """
 
-    def __init__( self , *varargs) :
+    def __init__( self , *varargs):
         """initialize all elements to 0"""
-        if len(varargs) == 0 :
+        if len(varargs) == 0:
             return
         elif len(varargs) == 2 and type(varargs[0]) == int:
             (self.len,self.elementType) = varargs[:]
             bracketStr = "[" + str(self.len) + "]"
-        elif len(varargs) == 2 :
+        elif len(varargs) == 2:
             (nescTypes, xmlDefinition) = varargs[:]
-            if xmlDefinition.tagName != "type-array" :
+            if xmlDefinition.tagName != "type-array":
                 raise Exception("Not array definition")
             child = getUniqueChild(xmlDefinition)
             self.elementType = nescTypes.getTypeFromXML(child)
             sizeStr = xmlDefinition.getAttribute("elements")[2:]
             self.len = int(sizeStr)
             bracketStr = "[" + sizeStr + "]"
-        else :
+        else:
             raise Exception("Illegal array params")
         self.nescType = self.elementType.nescType + bracketStr
         self.cType = self.elementType.cType + bracketStr
@@ -214,26 +214,26 @@ class nescArray(object):
             self.value.append(deepcopy(self.elementType))
             
 
-    def __repr__(self) :
+    def __repr__(self):
         """A printable representation of the value"""
         return "%s object at %s:\n\n\t%s" % (self.__class__, hex(id(self)), str(self))
         
-    def __str__(self) :
+    def __str__(self):
         """A printable representation of the value"""
         string = "nescArray of type %s:\n" % self.nescType
 #     if self.elementType._conversionString == "c":
 #       string += self.oneLineStr()
 #     else:
-        for i in range(self.len) :
+        for i in range(self.len):
             string += "%2d: %s\n" % (i, self.value[i].oneLineStr())
         return string
 
-    def __getitem__(self, key) :
-        if self.elementType.__class__ == nescType :
+    def __getitem__(self, key):
+        if self.elementType.__class__ == nescType:
             if key.__class__ == slice:
                 if self.elementType._conversionString == "c":
                     string = ""
-                    for item in self.value.__getitem__(key) :
+                    for item in self.value.__getitem__(key):
                         string += item.value
                     return string
                 else:
@@ -244,37 +244,37 @@ class nescArray(object):
             return self.value.__getitem__(key)
             
     def __setitem__(self, key, value) : 
-        if self.elementType.__class__ == nescType :
+        if self.elementType.__class__ == nescType:
             if key.__class__ == slice:
                 for (i, item) in enumerate(self.value.__getitem__(key)):
                     item.value = value[i]
             else:
                 self.value.__getitem__(key).value = value
-        else :
+        else:
             self.value.__setitem__(key, value)
 
     def __delitem__(self, key) : 
             return self.value.__delitem__(key)
 
-    def oneLineStr(self) :
+    def oneLineStr(self):
         """A one-line representation of the value"""
         #maybe the string should just print like a string
         #but the \x00 chars look like nothing
 #     if self.elementType._conversionString == "c":
 #       string = '\''
-#       for c in self.value :
+#       for c in self.value:
 #         string += c.value
 #       string += '\''
 #     else:
         tmpStr = str(self.elementType)
-        if tmpStr.find("\n") >= 0 or len(tmpStr) > 5 :
+        if tmpStr.find("\n") >= 0 or len(tmpStr) > 5:
             return self.nescType
-        else :
+        else:
             i = 0; string = "["
             while len(string) < 40 and i < self.len:
                 string += str(self.value[i]) + ", "
                 i += 1
-            if i < self.len :
+            if i < self.len:
                 string += "...]"
             else:
                 string += "\b\b]"
@@ -292,7 +292,7 @@ class nescArray(object):
         result.value = deepcopy(self.value, memo)
         return result
 
-    def isType(self, xmlDefinition) :
+    def isType(self, xmlDefinition):
         """returns 1 if the xml definition describes this type.
         Returns 0 otherwise."""
         if (xmlDefinition != None and xmlDefinition.tagName == "type-array" and
@@ -302,7 +302,7 @@ class nescArray(object):
         else:
             return 0
 
-    def getBytes(self) :
+    def getBytes(self):
         """Hexidecimal representation of a value of this type"""
         result = ""
         for i in range(self.len):
@@ -313,12 +313,12 @@ class nescArray(object):
         return result
         
     
-    def setBytes(self, bytes) :
+    def setBytes(self, bytes):
         """A value of this type from a hexidecimal representation"""
         if len(bytes) < self.size:
             raise Exception("Byte conversion error: %s %d bytes to %d" %
                                                 (self.nescType, len(bytes), self.size) )
-        for i in range(self.len) :
+        for i in range(self.len):
             bytes = self.value[i].setBytes(bytes)
         return bytes
 
@@ -340,38 +340,38 @@ class nescPointer(object):
     print pointer
     """
     
-    def __init__( self , *varargs) :
+    def __init__( self , *varargs):
         """initialize all elements to 0"""
         if len(varargs) == 0:
             return
         elif len(varargs) == 2 and hasattr(varargs[1], "tagName"):
             (nescTypes, xmlDefinition) = varargs[:]
-            if xmlDefinition.tagName != "type-pointer" :
+            if xmlDefinition.tagName != "type-pointer":
                 raise Exception("Not pointer definition")
             child = getUniqueChild(xmlDefinition)
             self.value = nescTypes.getTypeFromXML(child)
             self.size = int(xmlDefinition.getAttribute("size")[2:])
-        elif len(varargs) == 2 :
+        elif len(varargs) == 2:
             self.size = varargs[0].types["unsigned int"].size
             self.value = varargs[1]
-        else :
+        else:
             raise Exception("Illegal nescPointer constructor arguments")
         self.nescType = self.value.nescType + "*"
         self.cType = self.value.cType + "*"
         self.pythonType = self.value.pythonType + "*"
             
-    def __repr__(self) :
+    def __repr__(self):
         return "%s object at %s:\n\n\t%s" % (self.__class__, hex(id(self)), str(self))
 
-    def __str__(self) :
+    def __str__(self):
         """A text representation of the value"""
         return "ptr-> %s" % str(self.value)
 
-    def oneLineStr(self) :
+    def oneLineStr(self):
         """A one-line representation of the value"""
         return  "ptr-> %s" % self.value.oneLineStr()
 
-    def __deepcopy__(self, memo={}) :
+    def __deepcopy__(self, memo={}):
         result = nescPointer()
         memo[id(self)] = result
         result.value = deepcopy(self.value, memo)
@@ -381,23 +381,23 @@ class nescPointer(object):
         result.pythonType = self.pythonType
         return result
 
-    def isType(self, xmlDefinition) :
+    def isType(self, xmlDefinition):
         """returns 1 if the xml definition describes this type.
         Returns 0 otherwise."""
-        if xmlDefinition != None and xmlDefinition.tagName == "type-pointer" :
+        if xmlDefinition != None and xmlDefinition.tagName == "type-pointer":
             child = getUniqueChild(xmlDefinition)
             return self.value.isType(child)
         else:
             return 0
 
-    def getBytes(self) :
+    def getBytes(self):
             bytes = pack(str(self.size)+"s", '\x00')
             if len(bytes) != self.size:
                 raise Exception("Byte conversion error: %s %d bytes to %d" %
                                                     (self.nescType, len(bytes), self.size) )
             return bytes
     
-    def setBytes(self, bytes) :
+    def setBytes(self, bytes):
         if len(bytes) < self.size:
             raise Exception("Byte conversion error: %s %d bytes to %d" %
                                                 ( self.nescType, len(bytes), self.size) )
@@ -422,12 +422,12 @@ class nescStruct(object):
     print struct
     """
 
-    def __init__( self, *varargs) :
+    def __init__( self, *varargs):
         """initialize all fields to 0"""
         self.__dict__["value"] = {}
         self.fields = []
         self.size = 0
-        if len(varargs) == 0 :
+        if len(varargs) == 0:
             self.nescType = ""
         #create the struct from nescType args
         elif len(varargs) >= 1 and isinstance(varargs[0], self.string_types()):
@@ -436,7 +436,7 @@ class nescStruct(object):
         ## parse the struct def from xml
         elif len(varargs) == 2 and type(varargs[1]) != tuple:
             (nescTypes, xmlDefinition) = varargs[:]
-            if xmlDefinition.tagName != "struct" :
+            if xmlDefinition.tagName != "struct":
                 raise Exception("Not struct definition")
             if xmlDefinition.hasAttribute("name") == False:
                 raise Exception("Anonymous struct")
@@ -446,7 +446,7 @@ class nescStruct(object):
             else:
                 self.size = 0
             self._parseXMLFields(nescTypes, xmlDefinition)
-        else :
+        else:
             raise Exception("Illegal nescStruct constructor args")
         self.cType = self.nescType
         self.pythonType = self.nescType
@@ -459,8 +459,8 @@ class nescStruct(object):
         except:
             return str
         
-    def __getattr__(self, name) :
-        if hasattr(self, "value") :
+    def __getattr__(self, name):
+        if hasattr(self, "value"):
             if name in self.value:
                 if self.value[name].__class__ == nescType:
                     return self.value[name].value
@@ -469,7 +469,7 @@ class nescStruct(object):
         else:
             raise AttributeError("No such field \"%s\" in the nescStruct \"%s\"" % (name, self.nescType))
 
-    def __setattr__(self, name, value) :
+    def __setattr__(self, name, value):
         if "_nescStruct__initialized" not in self.__dict__:
             self.__dict__[name] = value
 
@@ -486,10 +486,10 @@ class nescStruct(object):
             raise AttributeError("No such field \"%s\" in the nescStruct \"%s\"" % (name, self.nescType))
                 
 
-    def __repr__(self) :
+    def __repr__(self):
         return "%s object at %s:\n\n\t%s" % (self.__class__, hex(id(self)), str(self))
         
-    def __str__(self) :
+    def __str__(self):
         """All fields and values as a readable string"""
         string = self.nescType + ": \n"
         for field in self.fields:
@@ -498,7 +498,7 @@ class nescStruct(object):
                 self.value[field["name"]].oneLineStr() )
         return string
 
-    def oneLineStr(self) :
+    def oneLineStr(self):
         """A one-line representation of the struct"""
         return self.nescType
 
@@ -513,15 +513,15 @@ class nescStruct(object):
         other.nescType = self.nescType
         other.cType = self.cType
         other.pythonType = self.pythonType
-        if memo == None :
+        if memo == None:
             other.value = deepcopy(self.value)
             other.fields = deepcopy(self.fields)
-        else :
+        else:
             other.value = deepcopy(self.value, memo)
             other.fields = deepcopy(self.fields, memo)
         other.__initialized = True
 
-    def _parseXMLFields(self, nescTypes, xmlDefinition) :
+    def _parseXMLFields(self, nescTypes, xmlDefinition):
         """Create a list of fields & values given a struct xml declaration."""
         fields = [node for node in xmlDefinition.getElementsByTagName("field")]
         fields.sort(key=lambda x: int(x.getAttribute("bit-offset")[2:]))
@@ -537,14 +537,14 @@ class nescStruct(object):
             self.value[fieldDef.getAttribute("name")] = nescTypes.getTypeFromXML(fieldDef)
         #here's a weird bug in the nesc.xml generation where the "size" attribute
         #for packed structs is actually the size of the unpacked struct.
-        if xmlDefinition.hasAttribute("packed") :
+        if xmlDefinition.hasAttribute("packed"):
             self.size = self.packedSize()
         elif xmlDefinition.getAttribute("size")[2:]:
             self.size = int(xmlDefinition.getAttribute("size")[2:])
         else:
             self.size = 0
 
-    def _parseNescTypeFields(self, fields) :
+    def _parseNescTypeFields(self, fields):
         """Create a list of fields & values given a tuple of
         fieldname,value sequences."""
         self.size = 0
@@ -557,29 +557,29 @@ class nescStruct(object):
             self.value[field["name"]] = fType
             self.size += fType.size
     
-    def isType(self, xmlDefinition) :
+    def isType(self, xmlDefinition):
         """returns 1 if the xml definition describes this type.
         Returns 0 otherwise."""
-        if xmlDefinition == None :
+        if xmlDefinition == None:
             return 0
         child = getUniqueChild(xmlDefinition)
         if ( ( xmlDefinition.tagName == "struct" and
                      xmlDefinition.getAttribute("name") == self.nescType) or
                  ( xmlDefinition.tagName == "type-tag" and child != None and 
                      child.tagName == "struct-ref" and
-                     child.getAttribute("name") == self.nescType ) ) :
+                     child.getAttribute("name") == self.nescType ) ):
             return 1
-        else :
+        else:
             return 0
 
-    def getBytes(self) :
+    def getBytes(self):
         """Hexidecimal representation of struct"""
         # We have to be careful in here about:
         # 1.  bit fields (ie. bitSize shorter than nominal type size)
         # 2.  packing (ie. bits that are not part of any particular field)
         bits = ""
-        for field in self.fields :
-            for i in range(len(bits), field["bitOffset"]) :
+        for field in self.fields:
+            for i in range(len(bits), field["bitOffset"]):
                 bits += "0"
             newBits = hex2bin(self.value[field["name"]].getBytes())
             bits += newBits[-field["bitSize"]:]
@@ -587,7 +587,7 @@ class nescStruct(object):
             for i in range(len(newBits)-field["bitSize"]):
                 if newBits[i] == "1":
                     print("Bit-field type error: value of %s.%s being truncated" % (self.nescType, field["name"]))
-        for i in range(len(bits), self.size*8) :
+        for i in range(len(bits), self.size*8):
             bits += "0"
         bytes = bin2hex(bits)
         if len(bytes) != self.size:
@@ -595,7 +595,7 @@ class nescStruct(object):
                                             ( self.nescType, len(bytes), self.size))
         return bytes
 
-    def setBytes(self, bytes) :
+    def setBytes(self, bytes):
         """Set all values using hexidecimal representation"""
         # We have to be careful in here about:
         # 1.  bit fields (ie. bitSize shorter than nominal type size)
@@ -604,33 +604,33 @@ class nescStruct(object):
             raise Exception("Byte conversion error: %s %d bytes to %d" %
                                             (self.nescType, len(bytes), self.size) )
         bits = hex2bin(bytes)
-        for field in self.fields :
+        for field in self.fields:
             newBits = ""
-            for i in range(self.value[field["name"]].size*8) :
+            for i in range(self.value[field["name"]].size*8):
                 newBits += "0"
             selectedBits=bits[field["bitOffset"]:field["bitOffset"]+field["bitSize"]]
             newBits = newBits[:-field["bitSize"]] + selectedBits
             newBytes = ""
-            for i in range(self.value[field["name"]].size) :
+            for i in range(self.value[field["name"]].size):
                 newBytes += '\x00'
             tmpBytes = bin2hex(newBits)
             newBytes = newBytes[:-len(tmpBytes)] + tmpBytes
             self.value[field["name"]].setBytes(newBytes);
         return bytes[self.size:]
 
-    def packedSize(self) :
-        if len(self.fields) == 0 :
+    def packedSize(self):
+        if len(self.fields) == 0:
             trueSize = 0
-        else :
+        else:
             a,b,lastField = self._findLastNestedField()
             trueSize = (lastField["bitOffset"] + lastField["bitSize"]) /8
         return trueSize
 
-    def _findLastNestedField(self) :
+    def _findLastNestedField(self):
         lastField = self
         parents = []
         #find the last (possibly nested) field
-        while issubclass(type(lastField), nescStruct) and len(lastField.fields) > 0 :
+        while issubclass(type(lastField), nescStruct) and len(lastField.fields) > 0:
             parent = lastField
             lastFieldDef = parent.fields[-1]
             lastField = parent.value[lastFieldDef["name"]]
@@ -641,7 +641,7 @@ class nescStruct(object):
 
 
 
-class TosMsg ( nescStruct ) :
+class TosMsg ( nescStruct ):
     """A python representation of a TosMsg.
     Is a nescStruct object.
     Can be used with
@@ -677,16 +677,16 @@ class TosMsg ( nescStruct ) :
         result.parentMsg = deepcopy(self.parentMsg, memo)
         return result
 
-    def getParentMsg(self, amOrName) :
+    def getParentMsg(self, amOrName):
         """This function will get the parent message with the amType or name specified"""
-        if self.parentMsg == None :
+        if self.parentMsg == None:
             return None
-        elif self.parentMsg.nescType == amOrName or self.parentMsg.amType == amOrName :
+        elif self.parentMsg.nescType == amOrName or self.parentMsg.amType == amOrName:
             return self.parentMsg
-        else :
+        else:
             return self.parentMsg.getParentMsg(amOrName)
         
-    def createMigMsg(self) :
+    def createMigMsg(self):
         """Returns a java BaseTOSMsg with same amType and length
         and with data payload of same bytes"""
         Message = tinyos.message.Message()
@@ -697,26 +697,26 @@ class TosMsg ( nescStruct ) :
 #        msg.set_length(self.size)
         return msg
 
-    def parseMigMsg(self, msg) :
+    def parseMigMsg(self, msg):
         """Takes a java BaseTOSMsg and creates TosMsg
         with same amType and length and with data payload of same bytes"""
         self.amType = msg.amType()
         data = list(msg.dataGet())
         self.setBytes(pack(str(len(data)) + 'b', *data))
 
-    def __repr__(self) :
+    def __repr__(self):
         return "%s object at %s:\n\n\t%s" % (self.__class__, hex(id(self)), str(self))
         
-    def __str__(self) :
+    def __str__(self):
         """All fields and values as a readable string"""
         return "TosMsg(am=%d) " % self.amType + nescStruct.__str__(self)
             
-    def setBytes(self, bytes) :
+    def setBytes(self, bytes):
         """Extend this msg to be longer, if necessary to accomodate extra data.
         This only happens if the last field is a nescArray of length 0.
         Unlike nescStructs, TosMsg objects are not nested recursively, so it is
         Ok to do this."""
-        if len(bytes) > self.size: #trueSize() :
+        if len(bytes) > self.size: #trueSize():
             #print "there are more bytes than fit in this msg... trying to grow msg"
             lastField, parents,b = self._findLastNestedField()
             #see if it is an array of size 0
@@ -731,7 +731,7 @@ class TosMsg ( nescStruct ) :
                 #print "new size is %d" % numExtraBytes
                 #and set it, changing the size of all parent structs
                 parents.reverse()
-                for parent in parents :
+                for parent in parents:
 #                    trueSize = parent.trueSize()
                     parent.value[parent.fields[-1]["name"]] = lastField
                     parent.fields[-1]["bitSize"] = lastField.size*8
@@ -742,7 +742,7 @@ class TosMsg ( nescStruct ) :
                 pass
                 
         #make sure everything worked out correctly and call parent's function
-        if len(bytes) != self.size :#trueSize() :
+        if len(bytes) != self.size :#trueSize():
             raise Exception("Incorrect number of bytes for TosMsg. Byte conversion error: %s %d bytes to %d" % ( self.nescType, len(bytes), self.size) )
         #print "passing to child to set bytes."
         nescStruct.setBytes(self, bytes)
@@ -761,7 +761,7 @@ def getUniqueChild(xmlDefinition):
             break
     return child
 
-def bin2hex(bits) :
+def bin2hex(bits):
     bytes = ""
     for i in range(0, len(bits), 8):
         bytes += pack('B', int(bits[i:i+8], 2))
@@ -781,7 +781,7 @@ def hex2bin(bytes):
     return bits
 
 
-#def TestAppTypes() :
+#def TestAppTypes():
 #    testRpc = appTypes('/home/kamin/tinyos-1.x/contrib/hood/apps/TestRpc/build/telosb/nesc.xml')
 #    print(testRpc)
 #        

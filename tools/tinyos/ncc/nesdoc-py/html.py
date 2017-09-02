@@ -157,10 +157,10 @@ class Html:
     self.pq(s)
     self.pop();
 
-  def func_sig_start(self) :
+  def func_sig_start(self):
     self.push("div", "id=funcsig")
 
-  def func_sig_stop(self) :
+  def func_sig_stop(self):
     self.pop();
 
   # print a function signature. namedecorator is called with the function
