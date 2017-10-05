@@ -22,7 +22,9 @@
  * defined away for non-safe users */
 #include "../lib/safe/include/annots_stage1.h"
 
+#ifndef __cplusplus
 typedef uint8_t bool;
+#endif
 enum { FALSE = 0, TRUE = 1 };
 
 typedef nx_int8_t nx_bool;

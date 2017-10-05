@@ -60,7 +60,7 @@ const void* sim_gain_iter(int src) __attribute__ ((C, spontaneous)) {
     return NULL;
   }
 
-  return hash_table_next_entry_reverse(&connectivity[src], NULL);
+  return hash_table_next_entry_reverse(&connectivity[src], (hash_entry_t*)NULL);
 }
 
 const void* sim_gain_next(int src, const void* iter) __attribute__ ((C, spontaneous)) {
@@ -83,7 +83,7 @@ void sim_gain_add(int src, int dest, double gain) __attribute__ ((C, spontaneous
   item = (gain_entry_t*)hash_table_search_data(&connectivity[src], &dest);
 
   if (item == NULL) {
-    item = malloc(sizeof(gain_entry_t));
+    item = (gain_entry_t*)malloc(sizeof(gain_entry_t));
     item->mote = dest;
     item->gain = gain;
 

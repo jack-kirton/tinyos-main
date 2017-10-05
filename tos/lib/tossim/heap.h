@@ -58,8 +58,13 @@
 #ifndef HEAP_H_INCLUDED
 #define HEAP_H_INCLUDED
 
-typedef struct heap {
+typedef struct heap_node {
+  long long int key;
   void* data;
+} heap_node_t;
+
+typedef struct heap {
+  heap_node_t* data;
   int size;
   int private_size;
 } heap_t;
@@ -70,9 +75,9 @@ void free_heap(heap_t* heap);
 int heap_size(const heap_t* heap);
 int heap_is_empty(const heap_t* heap);
 
-long long int heap_get_min_key(heap_t* heap);
+long long int heap_get_min_key(const heap_t* heap);
 void* heap_peek_min_data(heap_t* heap);
-void* heap_pop_min_data(heap_t* heap, long long int* key);
+heap_node_t heap_pop_min(heap_t* heap);
 void heap_insert(heap_t * heap, void* data, long long int key);
 
 
