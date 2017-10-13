@@ -57,7 +57,7 @@ void sim_queue_insert(sim_event_t* event) __attribute__ ((C, spontaneous)) {
 }
 
 sim_event_t* sim_queue_pop(void) __attribute__ ((C, spontaneous)) {
-  return (sim_event_t*)heap_pop_min_data(&eventHeap, NULL);
+  return (sim_event_t*)heap_pop_min(&eventHeap).data;
 }
 
 bool sim_queue_is_empty(void) __attribute__ ((C, spontaneous)) {
@@ -65,12 +65,8 @@ bool sim_queue_is_empty(void) __attribute__ ((C, spontaneous)) {
 }
 
 long long int sim_queue_peek_time(void) __attribute__ ((C, spontaneous)) {
-  if (heap_is_empty(&eventHeap)) {
-    return -1;
-  }
-  else {
-    return heap_get_min_key(&eventHeap);
-  }
+  // If the heap is empty this returns -1
+  return heap_get_min_key(&eventHeap);
 }
 
 

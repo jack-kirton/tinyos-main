@@ -7014,6 +7014,19 @@ fail:
 }
 
 
+SWIGINTERN int _wrap_new_Tossim__SWIG_2(PyObject *self, int nobjs, PyObject **SWIGUNUSEDPARM(swig_obj)) {
+  PyObject *resultobj = 0;
+  Tossim *result = 0 ;
+  
+  if ((nobjs < 0) || (nobjs > 0)) SWIG_fail;
+  result = (Tossim *)new Tossim();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Tossim, SWIG_BUILTIN_INIT |  0 );
+  return resultobj == Py_None ? -1 : 0;
+fail:
+  return -1;
+}
+
+
 SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[3] = {
@@ -7022,6 +7035,9 @@ SWIGINTERN int _wrap_new_Tossim(PyObject *self, PyObject *args) {
   
   if (!(argc = SWIG_Python_UnpackTuple(args,"new_Tossim",0,2,argv))) SWIG_fail;
   --argc;
+  if (argc == 0) {
+    return _wrap_new_Tossim__SWIG_2(self, argc, argv);
+  }
   if (argc == 1) {
     return _wrap_new_Tossim__SWIG_1(self, argc, argv);
   }
@@ -7033,7 +7049,8 @@ fail:
   SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_Tossim'.\n"
     "  Possible C/C++ prototypes are:\n"
     "    Tossim::Tossim(NescApp,bool)\n"
-    "    Tossim::Tossim(NescApp)\n");
+    "    Tossim::Tossim(NescApp)\n"
+    "    Tossim::Tossim()\n");
   return -1;
 }
 

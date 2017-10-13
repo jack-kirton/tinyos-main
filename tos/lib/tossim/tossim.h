@@ -134,7 +134,7 @@ class Mote {
 
 class Tossim {
  public:
-  Tossim(NescApp app, bool should_free=true);
+  Tossim(NescApp app=NescApp(), bool should_free=true);
   ~Tossim();
   
   void init();

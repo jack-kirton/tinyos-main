@@ -118,7 +118,7 @@ void sim_noise_free(void) __attribute__ ((C, spontaneous)) {
     noiseData[j].noiseGenTime = 0;
 
     free(noiseData[j].noiseTrace);
-    noiseData[j].noiseTrace = NULL;
+    noiseData[j].noiseTrace = (char*)NULL;
 
     noiseData[j].noiseTraceLen = 0;
     noiseData[j].noiseTraceIndex = 0;

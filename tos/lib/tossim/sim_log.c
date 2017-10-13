@@ -130,7 +130,7 @@ static void fillInOutput(int id, const char* name) {
       newName[termination - namePos] = '\0';
     }
     
-    channel = hash_table_search_data(&channelTable, newName);
+    channel = (sim_log_channel_t*)hash_table_search_data(&channelTable, newName);
     if (channel != NULL) {
       count_outputs += channel->num_outputs;
       count_callbacks += channel->num_callbacks;
@@ -164,7 +164,7 @@ static void fillInOutput(int id, const char* name) {
       newName[termination - namePos] = 0;
     }
     
-    channel = hash_table_search_data(&channelTable, newName);
+    channel = (sim_log_channel_t*)hash_table_search_data(&channelTable, newName);
     if (channel != NULL) {
       int i, j;
       for (i = 0; i < channel->num_outputs; i++) {
@@ -204,7 +204,7 @@ void sim_log_init(void) {
     outputs[i].files = (FILE**)malloc(sizeof(FILE*) * 1);
     outputs[i].files[0] = stdout;
 
-    outputs[i].callbacks = NULL;
+    outputs[i].callbacks = (sim_log_callback_t**)NULL;
     outputs[i].num_callbacks = 0;
   }
 
@@ -224,11 +224,11 @@ void sim_log_free(void) {
 
   for (i = 0; i < SIM_LOG_OUTPUT_COUNT; i++) {
     free(outputs[i].files);
-    outputs[i].files = NULL;
+    outputs[i].files = (FILE**)NULL;
     outputs[i].num_files = 0;
 
     free(outputs[i].callbacks);
-    outputs[i].callbacks = NULL;
+    outputs[i].callbacks = (sim_log_callback_t**)NULL;
     outputs[i].num_callbacks = 0;
   }
 
@@ -325,7 +325,7 @@ void sim_log_add_callback(const char* name, void (*handle)(void* data, const cha
     channel->callbacks = (sim_log_callback_t**)realloc(channel->callbacks, sizeof(FILE*) * channel->size_callbacks);
   }
 
-  callback = malloc(sizeof(*callback));
+  callback = (sim_log_callback_t*)malloc(sizeof(*callback));
   callback->handle = handle;
   callback->data = data;
 
@@ -341,13 +341,13 @@ void sim_log_commit_change(void) {
     if (outputs[i].files != NULL) {
       outputs[i].num_files = 0;
       free(outputs[i].files);
-      outputs[i].files = NULL;
+      outputs[i].files = (FILE**)NULL;
     }
 
     if (outputs[i].callbacks != NULL) {
       outputs[i].num_callbacks = 0;
       free(outputs[i].callbacks);
-      outputs[i].callbacks = NULL;
+      outputs[i].callbacks = (sim_log_callback_t**)NULL;
     }
   }
 }

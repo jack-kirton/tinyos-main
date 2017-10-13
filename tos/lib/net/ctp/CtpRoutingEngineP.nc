@@ -415,7 +415,6 @@ implementation {
                   __FUNCTION__,
                   beaconMsg->parent, 
                   beaconMsg->etx);
-        call CollectionDebug.logEventRoute(NET_C_TREE_SENT_BEACON, beaconMsg->parent, 0, beaconMsg->etx);
 
         eval = call BeaconSend.send(AM_BROADCAST_ADDR, 
                                     &beaconMsgBuffer, 
@@ -426,6 +425,8 @@ implementation {
             radioOn = FALSE;
             dbg("TreeRoutingCtl","%s running: %d radioOn: %d\n", __FUNCTION__, running, radioOn);
         }
+
+        call CollectionDebug.logEventRoute(NET_C_TREE_SENT_BEACON, beaconMsg->parent, 0, beaconMsg->etx, &beaconMsgBuffer);
     }
 
     event void BeaconSend.sendDone(message_t* msg, error_t error) {
@@ -485,7 +486,7 @@ implementation {
 
         congested = call CtpRoutingPacket.getOption(msg, CTP_OPT_ECN);
 
-        call CollectionDebug.logEventRoute(NET_C_TREE_RCV_BEACON, from, 0, rcvBeacon->etx);
+        call CollectionDebug.logEventRoute(NET_C_TREE_RCV_BEACON, from, 0, rcvBeacon->etx, msg);
 
         dbg("TreeRouting","%s from: %d  [ parent: %d etx: %d]\n",
             __FUNCTION__, from, 
@@ -610,7 +611,7 @@ implementation {
         if (route_found) 
             signal Routing.routeFound();
         dbg("TreeRouting","%s I'm a root now!\n",__FUNCTION__);
-        call CollectionDebug.logEventRoute(NET_C_TREE_NEW_PARENT, routeInfo.parent, 0, routeInfo.etx);
+        call CollectionDebug.logEventRoute(NET_C_TREE_NEW_PARENT, routeInfo.parent, 0, routeInfo.etx, NULL);
         return SUCCESS;
     }
 
@@ -776,10 +777,10 @@ implementation {
     default command error_t CollectionDebug.logEventDbg(uint8_t type, uint16_t arg1, uint16_t arg2, uint16_t arg3) {
         return SUCCESS;
     }
-    default command error_t CollectionDebug.logEventMsg(uint8_t type, uint16_t msg, am_addr_t origin, am_addr_t node) {
+    default command error_t CollectionDebug.logEventMsg(uint8_t type, uint16_t msg, am_addr_t origin, am_addr_t node, const message_t* packet) {
         return SUCCESS;
     }
-    default command error_t CollectionDebug.logEventRoute(uint8_t type, am_addr_t parent, uint8_t hopcount, uint16_t etx) {
+    default command error_t CollectionDebug.logEventRoute(uint8_t type, am_addr_t parent, uint8_t hopcount, uint16_t etx, const message_t* packet) {
         return SUCCESS;
     }
 

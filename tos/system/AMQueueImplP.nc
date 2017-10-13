@@ -132,7 +132,7 @@ implementation {
                     if(cancelMask[i] & mask) {
                         last = i*8 + j;
                         msg = queue[last].msg;
-                        queue[last].msg = NULL;
+                        queue[last].msg = (message_t*)NULL;
                         cancelMask[i] &= ~mask;
                         signal Send.sendDone[last](msg, ECANCEL);
                     }
@@ -161,7 +161,7 @@ implementation {
     }
 
     void sendDone(uint8_t last, message_t * ONE msg, error_t err) {
-        queue[last].msg = NULL;
+        queue[last].msg = (message_t*)NULL;
         tryToSend();
         signal Send.sendDone[last](msg, err);
     }

@@ -150,8 +150,8 @@ implementation {
     meta->ack = 0;
     meta->strength = 0;
     meta->time = 0;
-    sending = NULL;
-    signal Packet.sendDone(msg, running? SUCCESS:EOFF);
+    sending = (message_t*)NULL;
+    signal Packet.sendDone(msg, running ? SUCCESS : EOFF);
   }
 
   command error_t Packet.cancel(message_t* msg) {
@@ -249,10 +249,6 @@ implementation {
     }
   }
 
-  int sim_packet_header_length() {
-    return sizeof(tossim_header_t);
-  }
-  
   void send_transmit(sim_event_t* evt) {
     sim_time_t duration;
     tossim_metadata_t* metadata = getMetadata(sending);
