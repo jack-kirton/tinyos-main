@@ -70,11 +70,11 @@ interface CollectionDebug {
      * This is intended to allow following the same message as it goes from one
      * hop to the next 
      */
-    command error_t logEventMsg(uint8_t type, uint16_t msg, am_addr_t origin, am_addr_t node);
+    command error_t logEventMsg(uint8_t type, uint16_t msg, am_addr_t origin, am_addr_t node, const message_t* packet);
 
     /* Log the occurrence of an event related to a route update message, 
      * such as a node receiving a route, updating its own route information,
      * or looking at a particular entry in its routing table.
      */
-    command error_t logEventRoute(uint8_t type, am_addr_t parent, uint8_t hopcount, uint16_t metric);
+    command error_t logEventRoute(uint8_t type, am_addr_t parent, uint8_t hopcount, uint16_t metric, const message_t* packet);
 }
