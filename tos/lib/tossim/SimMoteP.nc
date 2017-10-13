@@ -51,7 +51,7 @@ implementation {
   long long int startTime;
   long long int tag; // An arbitrary tag supplied by the developer, use to customise simulation actions.
   bool isOn;
-  sim_event_t* bootEvent;
+  sim_event_t* bootEvent = NULL;
   sim_event_t bootEventStore;
   
   async command long long int SimMote.getEuid() {
