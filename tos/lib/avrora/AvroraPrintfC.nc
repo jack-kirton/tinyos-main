@@ -4,6 +4,21 @@
 #define AVRORA_MAX_BUFFER_SIZE 256
 #endif
 
+void avrora_printf(const char* fmt, ...)  __attribute__((noinline)) @C() @spontaneous()
+{
+	char buf[AVRORA_MAX_BUFFER_SIZE];
+
+	va_list ap;
+	va_start(ap, fmt);
+	vsnprintf(buf, sizeof(buf), fmt, ap);
+
+	atomic {
+		printStr(buf);
+	}
+
+	va_end(ap);
+}
+
 module AvroraPrintfC
 {
 	provides interface AvroraPrintf;
@@ -11,19 +26,6 @@ module AvroraPrintfC
 
 implementation
 {
-	void avrora_printf(const char* fmt, ...)  __attribute__((noinline)) @C() @spontaneous()
-	{
-		char buf[AVRORA_MAX_BUFFER_SIZE];
-
-		va_list ap;
-		va_start(ap, fmt);
-		vsnprintf(buf, sizeof(buf), fmt, ap);
-
-		call AvroraPrintf.print_str(buf);
-
-		va_end(ap);
-	}
-
 	command void AvroraPrintf.print_char(char c)
 	{
 		printChar(c);
