@@ -59,7 +59,7 @@ module LedsP @safe() {
 implementation {
   command error_t Init.init() {
     atomic {
-      dbg("Init", "LEDS: initialized.\n");
+      //dbg("Init", "LEDS: initialized.\n");
       call Led0.makeOutput();
       call Led1.makeOutput();
       call Led2.makeOutput();
@@ -73,7 +73,7 @@ implementation {
   /* Note: the call is inside the dbg, as it's typically a read of a volatile
      location, so can't be deadcode eliminated */
 #define DBGLED(n) \
-  simdbg("LedsC", "LEDS: Led" #n " %s.\n", call Led ## n .get() ? "off" : "on");
+  simdbg("LedsC", #n ",%s\n", call Led ## n .get() ? "off" : "on")
 
   async command void Leds.led0On() {
     call Led0.clr();
