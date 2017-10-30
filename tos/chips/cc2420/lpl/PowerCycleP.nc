@@ -65,10 +65,13 @@ module PowerCycleP {
     interface State as RadioPowerState;
     interface State as SplitControlState;
     interface State as SendState;
-    //interface Leds;
+    
     interface ReceiveIndicator as EnergyIndicator;
     interface ReceiveIndicator as ByteIndicator;
     interface ReceiveIndicator as PacketIndicator;
+
+    interface Leds;
+    interface LocalTime<TMilli>;
   }
 }
 
@@ -195,7 +198,7 @@ implementation {
   /***************** SubControl Events ****************/
   event void SubControl.startDone(error_t error) {
     call RadioPowerState.forceState(S_ON);
-    //call Leds.led2On();
+    call Leds.led2On();
     
     if(finishSplitControlRequests()) {
       return;
@@ -207,7 +210,7 @@ implementation {
   
   event void SubControl.stopDone(error_t error) {
     call RadioPowerState.forceState(S_OFF);
-    //call Leds.led2Off();
+    call Leds.led2Off();
     
     if(finishSplitControlRequests()) {
       return;
@@ -232,7 +235,7 @@ implementation {
   task void startRadio() {
     error_t startResult = call SubControl.start();
     // If the radio wasn't started successfully, or already on, try again
-    if ((startResult != SUCCESS && startResult != EALREADY)) {
+    if (startResult != SUCCESS && startResult != EALREADY) {
       post startRadio();
     }
   }

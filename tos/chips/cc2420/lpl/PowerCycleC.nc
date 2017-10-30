@@ -74,6 +74,10 @@ implementation {
   PowerCycleP.RadioPowerState -> RadioPowerStateC;
   PowerCycleP.SplitControlState -> SplitControlStateC;
   PowerCycleP.OnTimer -> OnTimerC;
+
+  components LedsC;
+  PowerCycleP.Leds -> LedsC;
+
+  components LocalTimeMilliC;
+  PowerCycleP.LocalTime -> LocalTimeMilliC;
 }
-
-
