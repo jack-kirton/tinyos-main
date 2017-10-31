@@ -116,7 +116,7 @@ PyObject* valueFromScalar(const char* type, const void* ptr, size_t len) {
 #endif
 }
 
-PyObject* listFromArray(const char* type, const void* ptr, int len) {
+PyObject* listFromArray(const char* type, const void* ptr, size_t len) {
     size_t elementLen = lengthOfType(type);
     PyObject* list = PyList_New(0);
     //printf("Generating list of %s\n", type);
@@ -392,7 +392,7 @@ bool fill_nesc_app(NescApp* app, PyObject* name, PyObject* value)
 typedef struct variable_string {
     const char* type;
     void* ptr;
-    int len;
+    size_t len;
     bool isArray;
 } variable_string_t;
 

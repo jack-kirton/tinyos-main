@@ -3949,7 +3949,7 @@ PyObject* valueFromScalar(const char* type, const void* ptr, size_t len) {
 #endif
 }
 
-PyObject* listFromArray(const char* type, const void* ptr, int len) {
+PyObject* listFromArray(const char* type, const void* ptr, size_t len) {
     size_t elementLen = lengthOfType(type);
     PyObject* list = PyList_New(0);
     //printf("Generating list of %s\n", type);
