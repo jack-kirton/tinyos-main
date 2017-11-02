@@ -59,7 +59,6 @@ module LedsP @safe() {
 implementation {
   command error_t Init.init() {
     atomic {
-      //dbg("Init", "LEDS: initialized.\n");
       call Led0.makeOutput();
       call Led1.makeOutput();
       call Led2.makeOutput();
@@ -70,19 +69,31 @@ implementation {
     return SUCCESS;
   }
 
-  /* Note: the call is inside the dbg, as it's typically a read of a volatile
-     location, so can't be deadcode eliminated */
+#if defined(SLP_USES_GUI_OUPUT) && SLP_USES_GUI_OUPUT
+#define DBGLEDON(n) \
+  simdbg("LedsC", #n ",on\n")
+
+#define DBGLEDOFF(n) \
+  simdbg("LedsC", #n ",off\n")
+
+/* Note: the call is inside the dbg, as it's typically a read of a volatile
+   location, so can't be deadcode eliminated */
 #define DBGLED(n) \
-  simdbg("LedsC", #n ",%s\n", call Led ## n .get() ? "off" : "on")
+  simdbg("LedsC", #n ",%s\n", (call Led ## n .get()) ? "off" : "on")
+#else
+#define DBGLEDON(n)
+#define DBGLEDOFF(n)
+#define DBGLED(n)
+#endif
 
   async command void Leds.led0On() {
     call Led0.clr();
-    DBGLED(0);
+    DBGLEDON(0);
   }
 
   async command void Leds.led0Off() {
     call Led0.set();
-    DBGLED(0);
+    DBGLEDOFF(0);
   }
 
   async command void Leds.led0Toggle() {
@@ -92,12 +103,12 @@ implementation {
 
   async command void Leds.led1On() {
     call Led1.clr();
-    DBGLED(1);
+    DBGLEDON(1);
   }
 
   async command void Leds.led1Off() {
     call Led1.set();
-    DBGLED(1);
+    DBGLEDOFF(1);
   }
 
   async command void Leds.led1Toggle() {
@@ -107,12 +118,12 @@ implementation {
 
   async command void Leds.led2On() {
     call Led2.clr();
-    DBGLED(2);
+    DBGLEDON(2);
   }
 
   async command void Leds.led2Off() {
     call Led2.set();
-    DBGLED(2);
+    DBGLEDOFF(2);
   }
 
   async command void Leds.led2Toggle() {
