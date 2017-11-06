@@ -52,8 +52,7 @@ implementation {
       CC2420CsmaC,
       new StateC() as RadioPowerStateC,
       new StateC() as SplitControlStateC,
-      new TimerMilliC() as OnTimerC,
-      new TimerMilliC() as CheckTimerC;
+      new TimerMilliC() as OnTimerC;
 
   components LplC;
 
