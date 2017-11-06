@@ -30,48 +30,46 @@
  */
 
 /**
- * Use this component to duty cycle the radio. When a message is heard,
- * disable DutyCycling.
- *
- * @author David Moss dmm@rincon.com
+ * Low Power Listening for the CC2420
+ * @author David Moss
  */
 
-configuration PowerCycleC {
-  provides {
-    interface PowerCycle;
+configuration LplC
+{
+  provides
+  {
+    interface LowPowerListening;
+    interface Send;
+    interface Receive;
     interface SplitControl;
-    interface State as SplitControlState;
-    interface State as RadioPowerState;
+    interface State as SendState;
+  }
+  uses
+  { 
+    interface Send as SubSend;
+    interface Receive as SubReceive;
+    interface SplitControl as SubControl;
   }
 }
+implementation
+{
+#if defined(LOW_POWER_LISTENING) || defined(ACK_LOW_POWER_LISTENING)
+#if defined(CUSTOM_LOW_POWER_LISTENING)
+  components CUSTOM_LOW_POWER_LISTENING as LplP;
+#else
+  components DefaultLplC as LplP;
+#endif
+#else
+  components DummyLplC as LplP;
+#endif
 
-implementation {
-  components PowerCycleP,
-      CC2420TransmitC,
-      CC2420ReceiveC,
-      CC2420CsmaC,
-      LedsC,
-      new StateC() as RadioPowerStateC,
-      new StateC() as SplitControlStateC,
-      new TimerMilliC() as OnTimerC,
-      new TimerMilliC() as CheckTimerC;
+  LowPowerListening = LplP.LowPowerListening;
+  Send = LplP.Send;
+  Receive = LplP.Receive;
+  SplitControl = LplP.SplitControl;
+  SendState = LplP.SendState;
 
-  components LplC;
-
-  PowerCycle = PowerCycleP;
-  SplitControl = PowerCycleP;
-  SplitControlState = SplitControlStateC;
-  RadioPowerState = RadioPowerStateC;
-
-  PowerCycleP.EnergyIndicator -> CC2420TransmitC.EnergyIndicator;
-  PowerCycleP.ByteIndicator -> CC2420TransmitC.ByteIndicator;
-  PowerCycleP.PacketIndicator -> CC2420ReceiveC.PacketIndicator;
-  PowerCycleP.SubControl -> CC2420CsmaC;
-  PowerCycleP.SendState -> LplC;
-  PowerCycleP.RadioPowerState -> RadioPowerStateC;
-  PowerCycleP.SplitControlState -> SplitControlStateC;
-  PowerCycleP.OnTimer -> OnTimerC;
-  PowerCycleP.Leds -> LedsC;
+  LplP.SubSend = SubSend;
+  LplP.SubReceive = SubReceive;
+  LplP.SubControl = SubControl;
 }
-
-

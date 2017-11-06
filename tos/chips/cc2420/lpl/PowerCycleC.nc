@@ -55,11 +55,7 @@ implementation {
       new TimerMilliC() as OnTimerC,
       new TimerMilliC() as CheckTimerC;
 
-#if defined(LOW_POWER_LISTENING) || defined(ACK_LOW_POWER_LISTENING)
-  components DefaultLplC as LplC;
-#else
-  components DummyLplC as LplC;
-#endif
+  components LplC;
 
   PowerCycle = PowerCycleP;
   SplitControl = PowerCycleP;
@@ -74,10 +70,4 @@ implementation {
   PowerCycleP.RadioPowerState -> RadioPowerStateC;
   PowerCycleP.SplitControlState -> SplitControlStateC;
   PowerCycleP.OnTimer -> OnTimerC;
-
-  components LedsC;
-  PowerCycleP.Leds -> LedsC;
-
-  components LocalTimeMilliC;
-  PowerCycleP.LocalTime -> LocalTimeMilliC;
 }

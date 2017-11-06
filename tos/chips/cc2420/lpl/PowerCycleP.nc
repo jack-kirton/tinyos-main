@@ -69,9 +69,6 @@ module PowerCycleP {
     interface ReceiveIndicator as EnergyIndicator;
     interface ReceiveIndicator as ByteIndicator;
     interface ReceiveIndicator as PacketIndicator;
-
-    interface Leds;
-    interface LocalTime<TMilli>;
   }
 }
 
@@ -198,7 +195,6 @@ implementation {
   /***************** SubControl Events ****************/
   event void SubControl.startDone(error_t error) {
     call RadioPowerState.forceState(S_ON);
-    call Leds.led2On();
     
     if(finishSplitControlRequests()) {
       return;
@@ -210,7 +206,6 @@ implementation {
   
   event void SubControl.stopDone(error_t error) {
     call RadioPowerState.forceState(S_OFF);
-    call Leds.led2Off();
     
     if(finishSplitControlRequests()) {
       return;
