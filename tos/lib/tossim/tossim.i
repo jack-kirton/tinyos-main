@@ -425,12 +425,13 @@ class Variable {
         {
             const std::string& fmt = $self->getFormat();
 
+%#if PY_VERSION_HEX < 0x03000000
             if (PyString_CheckExact(data))
             {
-                char* bytes = PyString_AS_STRING(data);
-                Py_ssize_t size = PyString_GET_SIZE(data);
+                const char* bytes = PyString_AS_STRING(data);
+                const Py_ssize_t size = PyString_GET_SIZE(data);
 
-                bool result = $self->setData(bytes, size);
+                const bool result = $self->setData(bytes, size);
 
                 if (!result)
                 {
@@ -442,6 +443,25 @@ class Variable {
 
                 Py_RETURN_NONE;
             }
+%#else
+            if (PyBytes_CheckExact(data))
+            {
+                const char* bytes = PyBytes_AsString(data);
+                const Py_ssize_t size = PyBytes_GET_SIZE(data);
+
+                const bool result = $self->setData(bytes, size);
+
+                if (!result)
+                {
+                    PyErr_Format(PyExc_RuntimeError,
+                        "The provided bytes are of length %zd whereas %zu was expected.",
+                        size, $self->getLen());
+                    return NULL;
+                }
+
+                Py_RETURN_NONE;
+            }
+%#endif
 
             REVERSE_CONVERT_TYPE(uint8_t, PyLong_AsUnsignedLong)
             REVERSE_CONVERT_TYPE(uint16_t, PyLong_AsUnsignedLong)
