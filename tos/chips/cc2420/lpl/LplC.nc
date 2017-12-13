@@ -42,7 +42,7 @@ configuration LplC
     interface Send;
     interface Receive;
     interface SplitControl;
-    interface State as SendState;
+    //interface State as SendState;
   }
   uses
   { 
@@ -67,7 +67,7 @@ implementation
   Send = LplP.Send;
   Receive = LplP.Receive;
   SplitControl = LplP.SplitControl;
-  SendState = LplP.SendState;
+  //SendState = LplP.SendState;
 
   LplP.SubSend = SubSend;
   LplP.SubReceive = SubReceive;

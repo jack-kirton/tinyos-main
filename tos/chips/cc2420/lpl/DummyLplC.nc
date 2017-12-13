@@ -63,6 +63,11 @@ implementation {
   SplitControl = SubControl;
   LowPowerListening = DummyLplP;
   SendState = StateC;
+
+  DummyLplP.SubControl = SubControl;
+
+  components LedsC;
+  DummyLplP.Leds -> LedsC;
   
 }
 
