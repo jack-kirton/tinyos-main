@@ -94,4 +94,7 @@ implementation {
   DefaultLplP.RadioBackoff -> CC2420CsmaC;
   DefaultLplP.Random -> RandomC;
   DefaultLplP.SystemLowPowerListening -> SystemLowPowerListeningC;
+
+  components LedsC;
+  DefaultLplP.Leds -> LedsC;
 }

@@ -36,9 +36,17 @@
  * @author David Moss
  */
  
-module DummyLplP {
-  provides {
+module DummyLplP
+{
+  provides
+  {
     interface LowPowerListening;
+  }
+
+  uses
+  {
+    interface Leds;
+    interface SplitControl as SubControl;
   }
 }
 
@@ -56,6 +64,16 @@ implementation {
   
   command uint16_t LowPowerListening.getRemoteWakeupInterval(message_t *msg) {
     return 0;
+  }
+
+  event void SubControl.startDone(error_t error)
+  {
+    call Leds.led2On();
+  }
+
+  event void SubControl.stopDone(error_t error)
+  {
+   call Leds.led2Off();
   }
   
 }

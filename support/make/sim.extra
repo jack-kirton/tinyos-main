@@ -11,7 +11,8 @@ OPTFLAGS = -O2 -msse4.2 -maes -mpclmul -flto -fno-strict-aliasing -g
 LIBS = -lm
 PFLAGS += -tossim -fnesc-nido-tosnodes=$(MAX_TOSSIM_NODES) -fnesc-simulate -fnesc-nido-motenumber=sim_node\(\) -fnesc-gcc="$(GCC)" -DTOSSIM_NO_DEBUG
 WFLAGS = -Wno-nesc-data-race
-PYTHON_VERSION ?= $(shell python --version 2>&1 | sed 's/Python \([0-9]\)\.\([0-9]\)\.[0-9]+\{0,1\}.*/\1.\2/')
+PYTHON_BINARY ?= "python"
+PYTHON_VERSION ?= $(shell $(PYTHON_BINARY) --version 2>&1 | sed 's/Python \([0-9]\)\.\([0-9]\)\.[0-9]+\{0,1\}.*/\1.\2/')
 
 BUILDDIR   = simbuild/$(PLATFORM)
 CFILE    = $(BUILDDIR)/sim.c
@@ -73,6 +74,7 @@ sim-exe: builddir $(BUILD_EXTRA_DEPS) FORCE
 	$(NCC) -c $(PLATFORM_FLAGS) -o $(OBJFILE) $(OPTFLAGS) $(PFLAGS) $(CFLAGS) $(WFLAGS) $(COMPONENT).nc $(LDFLAGS)  $(DUMPTYPES) -fnesc-dumpfile=$(XML)
 
 	@echo "  compiling Python support and C libraries into pytossim.o, tossim.o, and c-support.o"
+	@echo "  compiling for Python version $(PYTHON_VERSION)"
 	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(PYOBJFILE) $(OPTFLAGS) $(CFLAGS) $(PYFILE) $(PYDIR) -I$(SIMDIR) -DHAVE_CONFIG_H
 	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(CXXOBJFILE) $(OPTFLAGS) $(CFLAGS) $(CXXFILE) $(PYDIR) -I$(SIMDIR)
 	$(GPP) -c $(PLATFORM_CC_FLAGS) $(PLATFORM_FLAGS) -o $(HASHOBJFILE) $(OPTFLAGS) $(CFLAGS) $(HASHFILE) $(PYDIR) -I$(SIMDIR)

@@ -58,7 +58,7 @@
 typedef struct variable_string {
   const char* type;
   void* ptr;
-  int len;
+  size_t len;
   bool isArray;
 } variable_string_t;
 

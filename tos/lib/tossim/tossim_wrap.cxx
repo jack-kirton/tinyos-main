@@ -3949,7 +3949,7 @@ PyObject* valueFromScalar(const char* type, const void* ptr, size_t len) {
 #endif
 }
 
-PyObject* listFromArray(const char* type, const void* ptr, int len) {
+PyObject* listFromArray(const char* type, const void* ptr, size_t len) {
     size_t elementLen = lengthOfType(type);
     PyObject* list = PyList_New(0);
     //printf("Generating list of %s\n", type);
@@ -4557,12 +4557,13 @@ bool fill_nesc_app(NescApp* app, PyObject* name, PyObject* value)
 SWIGINTERN PyObject *Variable_setData(Variable *self,PyObject *data){
             const std::string& fmt = self->getFormat();
 
+#if PY_VERSION_HEX < 0x03000000
             if (PyString_CheckExact(data))
             {
-                char* bytes = PyString_AS_STRING(data);
-                Py_ssize_t size = PyString_GET_SIZE(data);
+                const char* bytes = PyString_AS_STRING(data);
+                const Py_ssize_t size = PyString_GET_SIZE(data);
 
-                bool result = self->setData(bytes, size);
+                const bool result = self->setData(bytes, size);
 
                 if (!result)
                 {
@@ -4574,6 +4575,25 @@ SWIGINTERN PyObject *Variable_setData(Variable *self,PyObject *data){
 
                 Py_RETURN_NONE;
             }
+#else
+            if (PyBytes_CheckExact(data))
+            {
+                const char* bytes = PyBytes_AsString(data);
+                const Py_ssize_t size = PyBytes_GET_SIZE(data);
+
+                const bool result = self->setData(bytes, size);
+
+                if (!result)
+                {
+                    PyErr_Format(PyExc_RuntimeError,
+                        "The provided bytes are of length %zd whereas %zu was expected.",
+                        size, self->getLen());
+                    return NULL;
+                }
+
+                Py_RETURN_NONE;
+            }
+#endif
 
              if (fmt =="uint8_t") {      const uint8_t val = (uint8_t)PyLong_AsUnsignedLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }
              if (fmt =="uint16_t") {      const uint16_t val = (uint16_t)PyLong_AsUnsignedLong(data);      if (PyErr_Occurred())      {          return NULL;      }      self->setData(val);      Py_RETURN_NONE;  }

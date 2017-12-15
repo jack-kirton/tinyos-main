@@ -55,7 +55,7 @@ implementation {
    * @param   len The length of the buffer over which to compute CRC.
    * @return  The CRC-16 value.
    */
-  async command uint16_t Crc.crc16(void *buf, uint8_t len) {
+  async command uint16_t Crc.crc16(const void *buf, uint8_t len) {
     return call Crc.seededCrc16(0, buf, len);
   }
   
@@ -68,8 +68,8 @@ implementation {
    * @param len The length of the buffer
    * @return The CRC-16 value.
    */
-  async command uint16_t Crc.seededCrc16(uint16_t startCrc, void *buf, uint8_t len) {
-    uint8_t *tmp = (uint8_t *) buf;
+  async command uint16_t Crc.seededCrc16(uint16_t startCrc, const void *buf, uint8_t len) {
+    const uint8_t *tmp = (const uint8_t *) buf;
     uint16_t crc;
     for (crc = startCrc; len > 0; len--) {
       crc = crcByte(crc, *tmp++);
