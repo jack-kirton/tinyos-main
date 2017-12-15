@@ -56,6 +56,8 @@
 
 #include <string.h>
 #include <stdlib.h>
+//Undefining float128 is required in later versions of GCC in order for TOSSIM to compile
+#undef __HAVE_DISTINCT_FLOAT128
 #include <math.h>
 #include <stddef.h>
 #include <ctype.h>
