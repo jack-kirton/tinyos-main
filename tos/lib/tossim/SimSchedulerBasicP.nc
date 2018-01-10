@@ -44,6 +44,8 @@
 
 #include <sim_event_queue.h>
 
+static const sim_time_t sim_config_task_latency = 100;
+
 module SimSchedulerBasicP {
   provides interface Scheduler;
   provides interface TaskBasic[uint8_t id];
@@ -66,8 +68,6 @@ implementation
   bool sim_scheduler_event_pending = FALSE;
   sim_event_t sim_scheduler_event;
 
-  int sim_config_task_latency() {return 100;}
-  
 
   /* Only enqueue the event for execution if it is
      not already enqueued. If there are more tasks in the
@@ -76,7 +76,7 @@ implementation
   
   void sim_scheduler_submit_event() {
     if (sim_scheduler_event_pending == FALSE) {
-      sim_scheduler_event.time = sim_time() + sim_config_task_latency();
+      sim_scheduler_event.time = sim_time() + sim_config_task_latency;
       sim_queue_insert(&sim_scheduler_event);
       sim_scheduler_event_pending = TRUE;
     }
