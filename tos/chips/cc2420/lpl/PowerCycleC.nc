@@ -65,7 +65,7 @@ implementation {
   PowerCycleP.ByteIndicator -> CC2420TransmitC.ByteIndicator;
   PowerCycleP.PacketIndicator -> CC2420ReceiveC.PacketIndicator;
   PowerCycleP.SubControl -> CC2420CsmaC;
-  PowerCycleP.SendState -> LplC;
+  PowerCycleP.SendState -> LplC.SendState;
   PowerCycleP.RadioPowerState -> RadioPowerStateC;
   PowerCycleP.SplitControlState -> SplitControlStateC;
   PowerCycleP.OnTimer -> OnTimerC;
