@@ -51,7 +51,7 @@ module LedsP @safe() {
     interface GeneralIO as Led1;
     interface GeneralIO as Led2;
 
-#ifdef CYCLEACCURATE
+#if defined(CYCLEACCURATE) && defined(SLP_USES_GUI_OUPUT) && SLP_USES_GUI_OUPUT
     interface LocalTime<TMilli>;
 #endif
   }
