@@ -49,7 +49,6 @@ module CC2420CsmaP @safe() {
   uses interface CC2420Packet;
   uses interface CC2420PacketBody;
   uses interface State as SplitControlState;
-
 }
 
 implementation {
@@ -220,15 +219,13 @@ implementation {
   
   /***************** SubBackoff Events ****************/
   async event void SubBackoff.requestInitialBackoff(message_t *msg) {
-    call SubBackoff.setInitialBackoff ( call Random.rand16() 
-        % (0x1F * CC2420_BACKOFF_PERIOD) + CC2420_MIN_BACKOFF);
+    call SubBackoff.setInitialBackoff(call Random.rand16() % (0x1F * CC2420_BACKOFF_PERIOD) + CC2420_MIN_BACKOFF);
         
     signal RadioBackoff.requestInitialBackoff(msg);
   }
 
   async event void SubBackoff.requestCongestionBackoff(message_t *msg) {
-    call SubBackoff.setCongestionBackoff( call Random.rand16() 
-        % (0x7 * CC2420_BACKOFF_PERIOD) + CC2420_MIN_BACKOFF);
+    call SubBackoff.setCongestionBackoff(call Random.rand16() % (0x7 * CC2420_BACKOFF_PERIOD) + CC2420_MIN_BACKOFF);
 
     signal RadioBackoff.requestCongestionBackoff(msg);
   }
