@@ -528,7 +528,9 @@ implementation {
       case S_SFD:
         // We didn't receive an SFD interrupt within CC2420_ABORT_PERIOD
         // jiffies. Assume something is wrong.
+        call CSN.clr(); // From Chase
         call SFLUSHTX.strobe();
+        call CSN.set(); // From Chase
         call CaptureSFD.captureRisingEdge();
         releaseSpiResource();
         signalDone( ERETRY );
@@ -539,7 +541,7 @@ implementation {
       }
     }
   }
-      
+
   /***************** Functions ****************/
   /**
    * Set up a message to be sent. First load it into the outbound tx buffer
@@ -601,7 +603,7 @@ implementation {
     } else if ( acquireSpiResource() == SUCCESS ) {
       attemptSend();
     }
-    
+
     return SUCCESS;
   }
 #ifdef CC2420_HW_SECURITY
@@ -749,16 +751,17 @@ implementation {
 
     atomic {
       if (m_state == S_CANCEL) {
+        call CSN.clr();
         call SFLUSHTX.strobe();
-        releaseSpiResource();
         call CSN.set();
+        releaseSpiResource();
         m_state = S_STARTED;
         signal Send.sendDone( m_msg, ECANCEL );
         return;
       }
 #ifdef CC2420_HW_SECURITY
       if(securityChecked != 1){
-	securityCheck();
+        securityCheck();
       }
       securityChecked = 1;
 #endif
