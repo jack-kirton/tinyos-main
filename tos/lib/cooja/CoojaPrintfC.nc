@@ -1,6 +1,6 @@
 
 #ifndef COOJA_MAX_BUFFER_SIZE
-#define COOJA_MAX_BUFFER_SIZE 256
+#define COOJA_MAX_BUFFER_SIZE 128
 #endif
 
 // This variable has a special name, see MspDebugOutput.java in Cooja.
