@@ -56,8 +56,6 @@ implementation {
   LedsP.Led1 -> PlatformLedsC.Led1;
   LedsP.Led2 -> PlatformLedsC.Led2;
 
-#if defined(CYCLEACCURATE) && defined(SLP_USES_GUI_OUPUT) && SLP_USES_GUI_OUPUT
   components LocalTimeMilliC;
   LedsP.LocalTime -> LocalTimeMilliC;
-#endif
 }

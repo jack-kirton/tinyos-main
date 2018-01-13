@@ -51,9 +51,7 @@ module LedsP @safe() {
     interface GeneralIO as Led1;
     interface GeneralIO as Led2;
 
-#if defined(CYCLEACCURATE) && defined(SLP_USES_GUI_OUPUT) && SLP_USES_GUI_OUPUT
     interface LocalTime<TMilli>;
-#endif
   }
 }
 implementation {
@@ -69,7 +67,7 @@ implementation {
     return SUCCESS;
   }
 
-#if defined(SLP_USES_GUI_OUPUT) && SLP_USES_GUI_OUPUT
+#if defined(SLP_USES_GUI_OUPUT) && !defined(SLP_LEDS_RECORD_NO_SERIAL)
 #define DBGLEDON(n) \
   simdbg("LedsC", #n ",on\n")
 
