@@ -143,16 +143,6 @@ implementation {
     tossim_metadata_t* meta = getMetadata(ack);
     return meta->ack;
   }
-      
-  task void sendDoneTask() {
-    message_t* msg = sending;
-    tossim_metadata_t* meta = getMetadata(msg);
-    meta->ack = 0;
-    meta->strength = 0;
-    meta->time = 0;
-    sending = (message_t*)NULL;
-    signal Packet.sendDone(msg, running ? SUCCESS : EOFF);
-  }
 
   command error_t Packet.cancel(message_t* msg) {
     return FAIL;
@@ -175,6 +165,7 @@ implementation {
     }
     sendingLength = len; 
     sending = msg;
+    getMetadata(sending)->valid_time = FALSE;
     destNode = dest;
     backoffCount = 0;
     neededFreeSamples = sim_csma_min_free_samples();

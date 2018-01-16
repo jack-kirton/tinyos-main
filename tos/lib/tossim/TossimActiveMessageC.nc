@@ -51,6 +51,8 @@ module TossimActiveMessageC {
     interface Packet;
     interface AMPacket;
     interface TossimPacket;
+
+    interface PacketTimeStamp<TMilli, uint32_t> as PacketTimeStampMilli;
   }
   uses {
     interface TossimPacketModel as Model;
@@ -255,5 +257,29 @@ implementation {
    sim_event_t* evt = allocate_deliver_event(node, msg, t);
    sim_queue_insert(evt);
  }
- 
+
+
+
+  async command bool PacketTimeStampMilli.isValid(message_t* msg)
+  {
+    return getMetadata(msg)->valid_time;
+  }
+
+  async command uint32_t PacketTimeStampMilli.timestamp(message_t* msg)
+  {
+    return getMetadata(msg)->time;
+  }
+
+  async command void PacketTimeStampMilli.clear(message_t* msg)
+  {
+    tossim_metadata_t* meta = getMetadata(msg);
+    meta->valid_time = FALSE;
+  }
+
+  async command void PacketTimeStampMilli.set(message_t* msg, uint32_t value)
+  {
+    tossim_metadata_t* meta = getMetadata(msg);
+    meta->time = value;
+    meta->valid_time = TRUE;
+  }
 }

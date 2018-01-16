@@ -51,6 +51,8 @@
 
 module CpmModelC {
   provides interface GainRadioModel as Model;
+
+  uses interface LocalTime<TMilli>;
 }
 
 implementation {
@@ -307,6 +309,8 @@ implementation {
       // receivers: a higher layer performs the copy.
       tossim_metadata_t* const meta = (tossim_metadata_t*)&mine->msg->metadata;
       meta->strength = mine->strength;
+      meta->time = call LocalTime.get();
+      meta->valid_time = TRUE;
       
       dbg_clear("CpmModelC,SNRLoss", "  -signalling reception\n");
       signal Model.receive(mine->msg);

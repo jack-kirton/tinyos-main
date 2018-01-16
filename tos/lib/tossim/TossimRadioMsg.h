@@ -18,7 +18,9 @@ typedef nx_struct tossim_footer {
 typedef nx_struct tossim_metadata {
   nx_int8_t strength;
   nx_uint8_t ack;
+
   nx_uint16_t time;
+  nx_uint8_t valid_time;
 
 #ifdef PACKET_LINK
   nx_uint16_t maxRetries;
