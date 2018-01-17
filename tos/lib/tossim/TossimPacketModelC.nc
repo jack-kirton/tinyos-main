@@ -67,6 +67,7 @@ module TossimPacketModelC {
     interface TossimPacketModel as Packet;
   }
   uses interface GainRadioModel;
+  uses interface Leds;
 }
 implementation {
   bool initialized = FALSE;
@@ -97,11 +98,13 @@ implementation {
 
   task void startDoneTask() {
     running = TRUE;
+    call Leds.led2On(); // To monitor radio state
     signal Control.startDone(SUCCESS);
   }
 
   task void stopDoneTask() {
     running = FALSE;
+    call Leds.led2Off(); // To monitor radio state
     signal Control.stopDone(SUCCESS);
   }
   

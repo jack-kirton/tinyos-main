@@ -82,5 +82,8 @@ implementation {
 
   components LocalTimeMilliC;
   Model.LocalTime -> LocalTimeMilliC;
+
+  components LedsC;
+  Network.Leds -> LedsC;
 }
 
