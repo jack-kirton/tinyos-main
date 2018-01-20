@@ -1,6 +1,6 @@
 
 #ifndef COOJA_MAX_BUFFER_SIZE
-#define COOJA_MAX_BUFFER_SIZE 128
+#define COOJA_MAX_BUFFER_SIZE 255
 #endif
 
 // This variable has a special name, see MspDebugOutput.java in Cooja.
@@ -14,9 +14,7 @@ void cooja_printf(const char* fmt, ...)  __attribute__((noinline)) @C() @spontan
     va_start(ap, fmt);
     vsnprintf(buf, sizeof(buf), fmt, ap);
 
-    atomic {
-        cooja_debug_ptr = buf;
-    }
+    cooja_debug_ptr = buf;
 
     va_end(ap);
 }
