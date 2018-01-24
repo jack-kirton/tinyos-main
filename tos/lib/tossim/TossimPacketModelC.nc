@@ -80,8 +80,6 @@ implementation {
   int destNode;
   sim_event_t sendEvent;
   
-  message_t receiveBuffer;
-  
   tossim_metadata_t* getMetadata(message_t* msg) {
     return (tossim_metadata_t*)(&msg->metadata);
   }
@@ -223,8 +221,7 @@ implementation {
       evt->handle = send_transmit;
       sim_queue_insert(evt);
     }
-    else if (sim_csma_max_iterations() == 0 ||
-	     backoffCount <= sim_csma_max_iterations()) {
+    else if (sim_csma_max_iterations() == 0 || backoffCount <= sim_csma_max_iterations()) {
       sim_time_t backoff = sim_random();
       sim_time_t modulo = sim_csma_high() - sim_csma_low();
       modulo *= pow(sim_csma_exponent_base(), backoffCount);
