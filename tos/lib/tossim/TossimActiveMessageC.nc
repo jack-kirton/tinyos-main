@@ -57,6 +57,8 @@ module TossimActiveMessageC {
   uses {
     interface TossimPacketModel as Model;
     command am_addr_t amAddress();
+
+    interface LocalTime<TMilli>;
   }
 }
 implementation {
@@ -82,6 +84,7 @@ implementation {
     header->dest = addr;
     header->src = call AMPacket.address();
     header->length = len;
+    call PacketTimeStampMilli.clear(amsg);
     err = call Model.send((int)addr, amsg, len + sizeof(tossim_header_t) + sizeof(tossim_footer_t));
     return err;
   }
@@ -103,6 +106,7 @@ implementation {
   }
   
   event void Model.sendDone(message_t* msg, error_t result) {
+    call PacketTimeStampMilli.set(msg, call LocalTime.get());
     signal AMSend.sendDone[call AMPacket.type(msg)](msg, result);
   }
 
@@ -115,6 +119,8 @@ implementation {
     memcpy(bufferPointer, msg, sizeof(message_t));
     len = call Packet.payloadLength(bufferPointer);
     payload = call Packet.getPayload(bufferPointer, call Packet.maxPayloadLength());
+
+    call PacketTimeStampMilli.set(bufferPointer, call LocalTime.get());
 
     if (call AMPacket.isForMe(msg)) {
       simdbg("AM", "Received active message (%p) of type %hhu and length %hhu for me @ %s.\n", bufferPointer, call AMPacket.type(bufferPointer), len, sim_time_string());

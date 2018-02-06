@@ -66,8 +66,10 @@ module TossimPacketModelC {
     interface PacketAcknowledgements;
     interface TossimPacketModel as Packet;
   }
-  uses interface GainRadioModel;
-  uses interface Leds;
+  uses {
+    interface GainRadioModel;
+    interface Leds;
+  }
 }
 implementation {
   bool initialized = FALSE;
@@ -166,7 +168,6 @@ implementation {
     }
     sendingLength = len; 
     sending = msg;
-    getMetadata(sending)->valid_time = FALSE;
     destNode = dest;
     backoffCount = 0;
     neededFreeSamples = sim_csma_min_free_samples();

@@ -81,7 +81,7 @@ implementation {
   PacketTimeStampMilli = AM;
 
   components LocalTimeMilliC;
-  Model.LocalTime -> LocalTimeMilliC;
+  AM.LocalTime -> LocalTimeMilliC;
 
   components LedsC;
   Network.Leds -> LedsC;
