@@ -70,6 +70,8 @@ module LedsP {
     interface GeneralIO as Led0;
     interface GeneralIO as Led1;
     interface GeneralIO as Led2;
+
+    interface LocalTime<TMilli>;
   }
 }
 implementation {

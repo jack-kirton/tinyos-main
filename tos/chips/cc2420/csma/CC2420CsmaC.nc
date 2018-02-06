@@ -77,5 +77,4 @@ implementation {
 
   components new StateC();
   CsmaP.SplitControlState -> StateC;
-
 }

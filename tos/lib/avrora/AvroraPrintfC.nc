@@ -1,7 +1,7 @@
 #include "AvroraPrint.h"
 
 #ifndef AVRORA_MAX_BUFFER_SIZE
-#define AVRORA_MAX_BUFFER_SIZE 256
+#define AVRORA_MAX_BUFFER_SIZE 255
 #endif
 
 void avrora_printf(const char* fmt, ...)  __attribute__((noinline)) @C() @spontaneous()
@@ -12,9 +12,7 @@ void avrora_printf(const char* fmt, ...)  __attribute__((noinline)) @C() @sponta
 	va_start(ap, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, ap);
 
-	atomic {
-		printStr(buf);
-	}
+	printStr(buf);
 
 	va_end(ap);
 }

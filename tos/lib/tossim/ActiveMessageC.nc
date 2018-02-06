@@ -50,6 +50,8 @@ configuration ActiveMessageC {
     interface Packet;
     interface AMPacket;
     interface PacketAcknowledgements;
+
+    interface PacketTimeStamp<TMilli, uint32_t> as PacketTimeStampMilli;
   }
 }
 implementation {
@@ -75,5 +77,13 @@ implementation {
   AM.amAddress -> Address;
   
   Network.GainRadioModel -> Model;
+
+  PacketTimeStampMilli = AM;
+
+  components LocalTimeMilliC;
+  AM.LocalTime -> LocalTimeMilliC;
+
+  components LedsC;
+  Network.Leds -> LedsC;
 }
 

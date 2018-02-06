@@ -184,8 +184,7 @@ implementation {
    */
   async command void CC2420Receive.sfd( uint32_t time ) {
     if ( m_timestamp_size < TIMESTAMP_QUEUE_SIZE ) {
-      uint8_t tail =  ( ( m_timestamp_head + m_timestamp_size ) % 
-                        TIMESTAMP_QUEUE_SIZE );
+      uint8_t tail = ((m_timestamp_head + m_timestamp_size) % TIMESTAMP_QUEUE_SIZE);
       m_timestamp_queue[ tail ] = time;
       m_timestamp_size++;
     }
@@ -622,14 +621,14 @@ implementation {
       }
       
       //new packet is buffered up, or we don't have timestamp in fifo, or ack
-      if ( ( m_missed_packets && call FIFO.get() ) || !call FIFOP.get()
-            || !m_timestamp_size
-            || rxFrameLength <= 10) {
+      if ( ( m_missed_packets && call FIFO.get() ) || !call FIFOP.get() || !m_timestamp_size || rxFrameLength <= 10) {
         call PacketTimeStamp.clear(m_p_rx_buf);
       }
       else {
           if (m_timestamp_size==1)
+          {
             call PacketTimeStamp.set(m_p_rx_buf, m_timestamp_queue[ m_timestamp_head ]);
+          }
           m_timestamp_head = ( m_timestamp_head + 1 ) % TIMESTAMP_QUEUE_SIZE;
           m_timestamp_size--;
 
@@ -642,9 +641,9 @@ implementation {
 
       // We may have received an ack that should be processed by Transmit
       // buf[rxFrameLength] >> 7 checks the CRC
-      if ( ( buf[ rxFrameLength ] >> 7 ) && rx_buf ) {
-        uint8_t type = ( header->fcf >> IEEE154_FCF_FRAME_TYPE ) & 7;
-        signal CC2420Receive.receive( type, m_p_rx_buf );
+      if ((buf[rxFrameLength] >> 7 ) && rx_buf) {
+        uint8_t type = (header->fcf >> IEEE154_FCF_FRAME_TYPE) & 7;
+        signal CC2420Receive.receive(type, m_p_rx_buf);
         if ( type == IEEE154_TYPE_DATA ) {
           post receiveDone_task();
           return;
@@ -673,8 +672,8 @@ implementation {
    * get the next packet.
    */
   task void receiveDone_task() {
-    cc2420_metadata_t* metadata = call CC2420PacketBody.getMetadata( m_p_rx_buf );
-    cc2420_header_t* header = call CC2420PacketBody.getHeader( m_p_rx_buf);
+    cc2420_metadata_t* metadata = call CC2420PacketBody.getMetadata(m_p_rx_buf);
+    cc2420_header_t* header = call CC2420PacketBody.getHeader(m_p_rx_buf);
     uint8_t length = header->length;
     uint8_t tmpLen __DEPUTY_UNUSED__ = sizeof(message_t) - (offsetof(message_t, data) - sizeof(cc2420_header_t));
     uint8_t* COUNT(tmpLen) buf = TCAST(uint8_t* COUNT(tmpLen), header);
@@ -697,8 +696,7 @@ implementation {
       securityOn = 0;
       authentication = 0;
 #endif
-      m_p_rx_buf = signal Receive.receive( m_p_rx_buf, m_p_rx_buf->data,
-					   length - CC2420_SIZE);
+      m_p_rx_buf = signal Receive.receive(m_p_rx_buf, m_p_rx_buf->data, length - CC2420_SIZE);
     }
     atomic receivingPacket = FALSE;
     waitForNextPacket();
@@ -784,7 +782,7 @@ implementation {
        * there's still more data to be received.
        */
 
-      if ( ( m_missed_packets && call FIFO.get() ) || !call FIFOP.get() ) {
+      if ((m_missed_packets && call FIFO.get()) || !call FIFOP.get()) {
         // A new packet is buffered up and ready to go
         if ( m_missed_packets ) {
           m_missed_packets--;

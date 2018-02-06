@@ -56,9 +56,6 @@ implementation {
   LedsP.Led1 -> PlatformLedsC.Led1;
   LedsP.Led2 -> PlatformLedsC.Led2;
 
-#ifdef CYCLEACCURATE
   components LocalTimeMilliC;
   LedsP.LocalTime -> LocalTimeMilliC;
-#endif
 }
-

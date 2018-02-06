@@ -51,10 +51,14 @@ module TossimActiveMessageC {
     interface Packet;
     interface AMPacket;
     interface TossimPacket;
+
+    interface PacketTimeStamp<TMilli, uint32_t> as PacketTimeStampMilli;
   }
   uses {
     interface TossimPacketModel as Model;
     command am_addr_t amAddress();
+
+    interface LocalTime<TMilli>;
   }
 }
 implementation {
@@ -80,6 +84,7 @@ implementation {
     header->dest = addr;
     header->src = call AMPacket.address();
     header->length = len;
+    call PacketTimeStampMilli.clear(amsg);
     err = call Model.send((int)addr, amsg, len + sizeof(tossim_header_t) + sizeof(tossim_footer_t));
     return err;
   }
@@ -101,6 +106,7 @@ implementation {
   }
   
   event void Model.sendDone(message_t* msg, error_t result) {
+    call PacketTimeStampMilli.set(msg, call LocalTime.get());
     signal AMSend.sendDone[call AMPacket.type(msg)](msg, result);
   }
 
@@ -113,6 +119,8 @@ implementation {
     memcpy(bufferPointer, msg, sizeof(message_t));
     len = call Packet.payloadLength(bufferPointer);
     payload = call Packet.getPayload(bufferPointer, call Packet.maxPayloadLength());
+
+    call PacketTimeStampMilli.set(bufferPointer, call LocalTime.get());
 
     if (call AMPacket.isForMe(msg)) {
       simdbg("AM", "Received active message (%p) of type %hhu and length %hhu for me @ %s.\n", bufferPointer, call AMPacket.type(bufferPointer), len, sim_time_string());
@@ -255,5 +263,29 @@ implementation {
    sim_event_t* evt = allocate_deliver_event(node, msg, t);
    sim_queue_insert(evt);
  }
- 
+
+
+
+  async command bool PacketTimeStampMilli.isValid(message_t* msg)
+  {
+    return getMetadata(msg)->valid_time;
+  }
+
+  async command uint32_t PacketTimeStampMilli.timestamp(message_t* msg)
+  {
+    return getMetadata(msg)->time;
+  }
+
+  async command void PacketTimeStampMilli.clear(message_t* msg)
+  {
+    tossim_metadata_t* meta = getMetadata(msg);
+    meta->valid_time = FALSE;
+  }
+
+  async command void PacketTimeStampMilli.set(message_t* msg, uint32_t value)
+  {
+    tossim_metadata_t* meta = getMetadata(msg);
+    meta->time = value;
+    meta->valid_time = TRUE;
+  }
 }

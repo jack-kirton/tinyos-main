@@ -66,7 +66,10 @@ module TossimPacketModelC {
     interface PacketAcknowledgements;
     interface TossimPacketModel as Packet;
   }
-  uses interface GainRadioModel;
+  uses {
+    interface GainRadioModel;
+    interface Leds;
+  }
 }
 implementation {
   bool initialized = FALSE;
@@ -78,8 +81,6 @@ implementation {
   uint8_t sendingLength = 0;
   int destNode;
   sim_event_t sendEvent;
-  
-  message_t receiveBuffer;
   
   tossim_metadata_t* getMetadata(message_t* msg) {
     return (tossim_metadata_t*)(&msg->metadata);
@@ -97,11 +98,13 @@ implementation {
 
   task void startDoneTask() {
     running = TRUE;
+    call Leds.led2On(); // To monitor radio state
     signal Control.startDone(SUCCESS);
   }
 
   task void stopDoneTask() {
     running = FALSE;
+    call Leds.led2Off(); // To monitor radio state
     signal Control.stopDone(SUCCESS);
   }
   
@@ -142,16 +145,6 @@ implementation {
   async command error_t PacketAcknowledgements.wasAcked(message_t* ack) {
     tossim_metadata_t* meta = getMetadata(ack);
     return meta->ack;
-  }
-      
-  task void sendDoneTask() {
-    message_t* msg = sending;
-    tossim_metadata_t* meta = getMetadata(msg);
-    meta->ack = 0;
-    meta->strength = 0;
-    meta->time = 0;
-    sending = (message_t*)NULL;
-    signal Packet.sendDone(msg, running ? SUCCESS : EOFF);
   }
 
   command error_t Packet.cancel(message_t* msg) {
@@ -229,8 +222,7 @@ implementation {
       evt->handle = send_transmit;
       sim_queue_insert(evt);
     }
-    else if (sim_csma_max_iterations() == 0 ||
-	     backoffCount <= sim_csma_max_iterations()) {
+    else if (sim_csma_max_iterations() == 0 || backoffCount <= sim_csma_max_iterations()) {
       sim_time_t backoff = sim_random();
       sim_time_t modulo = sim_csma_high() - sim_csma_low();
       modulo *= pow(sim_csma_exponent_base(), backoffCount);
