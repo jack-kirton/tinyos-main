@@ -58,7 +58,7 @@ if (strcmp(type, #NAME) == 0) { \
     return sizeof(NAME); \
 }
 
-size_t lengthOfType(const char* type) {
+size_t lengthOfType(const char* type) noexcept {
     LENGTH_TYPE(uint8_t)
     LENGTH_TYPE(uint16_t)
     LENGTH_TYPE(uint32_t)
@@ -76,10 +76,9 @@ size_t lengthOfType(const char* type) {
     LENGTH_TYPE(unsigned long)
     LENGTH_TYPE(float)
     LENGTH_TYPE(double)
+    //LENGTH_TYPE(bool)
 
-    //printf("Unknown type (size) '%s'\n", type);
-
-    return 1;
+    return 0;
 }
 
 #define CONVERT_TYPE(NAME, CONVERT_FUNCTION) \
@@ -89,7 +88,7 @@ if (strcmp(type, #NAME) == 0) { \
     return CONVERT_FUNCTION(val); \
 }
 
-PyObject* valueFromScalar(const char* type, const void* ptr, size_t len) {
+PyObject* valueFromScalar(const char* type, const void* ptr, size_t len) noexcept {
     CONVERT_TYPE(uint8_t, PyLong_FromUnsignedLong)
     CONVERT_TYPE(uint16_t, PyLong_FromUnsignedLong)
     CONVERT_TYPE(uint32_t, PyLong_FromUnsignedLong)
@@ -106,8 +105,7 @@ PyObject* valueFromScalar(const char* type, const void* ptr, size_t len) {
     CONVERT_TYPE(unsigned long, PyLong_FromUnsignedLong)
     CONVERT_TYPE(float, PyFloat_FromDouble)
     CONVERT_TYPE(double, PyFloat_FromDouble)
-
-    //printf("Unknown type (value) '%s'\n", type);
+    //CONVERT_TYPE(bool, PyBool_FromLong)
 
 #if PY_VERSION_HEX < 0x03000000
     return PyString_FromStringAndSize((const char*)ptr, len);
@@ -116,12 +114,32 @@ PyObject* valueFromScalar(const char* type, const void* ptr, size_t len) {
 #endif
 }
 
-PyObject* listFromArray(const char* type, const void* ptr, size_t len) {
-    size_t elementLen = lengthOfType(type);
-    PyObject* list = PyList_New(0);
-    //printf("Generating list of %s\n", type);
-    for (const uint8_t* tmpPtr = (const uint8_t*)ptr; tmpPtr < (const uint8_t*)ptr + len; tmpPtr += elementLen) {
-        PyList_Append(list, valueFromScalar(type, tmpPtr, elementLen));    
+PyObject* listFromArray(const char* type, const void* ptr, size_t len) noexcept {
+    const size_t elementLen = lengthOfType(type);
+
+    if (elementLen == 0) {
+        return NULL;
+    }
+
+    const size_t numElements = len / elementLen;
+
+    PyObject* list = PyList_New(numElements);
+
+    if (!list) {
+        return NULL;
+    }
+
+    for (size_t i = 0; i != numElements; ++i) {
+        const void* tmpPtr = (const void*)((const uint8_t*)ptr + (i * elementLen));
+
+        PyObject* item = valueFromScalar(type, tmpPtr, elementLen);
+
+        if (!item) {
+            Py_DECREF(list);
+            return NULL;
+        }
+
+        PyList_SET_ITEM(list, i, item);
     }
     return list;
 }
@@ -159,54 +177,55 @@ public:
     bool operator()() const {
         PyObject *result = PyObject_CallObject(func, NULL);
 
-        if (result != NULL)
-        {
-            const bool bool_result = PyObject_IsTrue(result);
-
-            Py_DECREF(result);
-
-            return bool_result;
-        }
-        else
-        {
+        if (!result) {
             throw std::runtime_error("Python exception occurred");
         }
+
+        const bool bool_result = PyObject_IsTrue(result);
+
+        Py_DECREF(result);
+
+        return bool_result;
     }
 
     void operator()(double t) const {
         PyObject *args = PyTuple_New(1);
-        PyTuple_SetItem(args, 0, PyFloat_FromDouble(t));
+
+        if (!args) {
+            throw std::bad_alloc();
+        }
+
+        PyTuple_SET_ITEM(args, 0, PyFloat_FromDouble(t));
 
         PyObject *result = PyObject_CallObject(func, args);
 
         Py_DECREF(args);
 
-        if (result != NULL)
-        {
-            Py_DECREF(result);
-        }
-        else
-        {
+        if (!result) {
             throw std::runtime_error("Python exception occurred");
         }
+
+        Py_DECREF(result);
     }
 
     void operator()(long long int i) const {
         PyObject *args = PyTuple_New(1);
-        PyTuple_SetItem(args, 0, PyLong_FromLongLong(i));
+
+        if (!args) {
+            throw std::bad_alloc();
+        }
+
+        PyTuple_SET_ITEM(args, 0, PyLong_FromLongLong(i));
 
         PyObject *result = PyObject_CallObject(func, args);
 
         Py_DECREF(args);
 
-        if (result != NULL)
-        {
-            Py_DECREF(result);
-        }
-        else
-        {
+        if (!result) {
             throw std::runtime_error("Python exception occurred");
         }
+
+        Py_DECREF(result);
     }
 
     void operator()(const char* str, size_t length) const {
@@ -220,24 +239,27 @@ public:
         }
 
         PyObject *args = PyTuple_New(1);
-        PyTuple_SetItem(args, 0, pystring);
+
+        if (!args) {
+            Py_DECREF(pystring);
+            throw std::bad_alloc();
+        }
+
+        PyTuple_SET_ITEM(args, 0, pystring);
 
         PyObject *result = PyObject_CallObject(func, args);
 
         Py_DECREF(args);
 
-        if (result != NULL)
-        {
-            Py_DECREF(result);
-        }
-        else
-        {
+        if (!result) {
             throw std::runtime_error("Python exception occurred");
         }
+
+        Py_DECREF(result);
     }
 };
 
-FILE* object_to_file(PyObject* o)
+FILE* object_to_file(PyObject* o) noexcept
 {
 #if PY_VERSION_HEX < 0x03000000
     if (!PyFile_Check(o)) {
@@ -290,7 +312,7 @@ FILE* object_to_file(PyObject* o)
 
 %typemap(out) variable_string_t {
     if (strcmp($1.type, "<no such variable>") == 0) {
-        PyErr_Format(PyExc_RuntimeError, "no such variable");
+        PyErr_Format(PyExc_RuntimeError, "No such variable");
         SWIG_fail;
     }
 
@@ -513,7 +535,7 @@ class Mote {
             $action
         }
         catch (std::runtime_error ex) {
-            PyErr_Format(PyExc_RuntimeError, "No such variable as %s.", arg2);
+            PyErr_Format(PyExc_RuntimeError, "Error finding variable '%s'.", arg2);
             SWIG_fail;
         }
     }
@@ -533,7 +555,7 @@ class Mote {
                 return NULL;
             }
 
-            Py_ssize_t size = PyList_GET_SIZE(traces);
+            const Py_ssize_t size = PyList_GET_SIZE(traces);
 
             $self->reserveNoiseTraces(size);
 
@@ -571,7 +593,7 @@ class Mote {
 };
 
 %extend Tossim {
-    PyObject* addCallback(const char* channel, PyObject *callback) {
+    PyObject* addCallback(const char* channel, PyObject *callback) noexcept {
         try
         {
             $self->addCallback(channel, PyCallback(callback));
@@ -583,7 +605,7 @@ class Mote {
         }
     }
 
-    PyObject* register_event_callback(PyObject *callback, double current_time) {
+    PyObject* register_event_callback(PyObject *callback, double current_time) noexcept {
         try
         {
             $self->register_event_callback(PyCallback(callback), current_time);
@@ -598,7 +620,7 @@ class Mote {
     PyObject* runAllEventsWithTriggeredMaxTime(
         double duration,
         double duration_upper_bound,
-        PyObject *continue_events)
+        PyObject *continue_events) noexcept
     {
         try
         {
@@ -616,7 +638,7 @@ class Mote {
         double duration,
         double duration_upper_bound,
         PyObject *continue_events,
-        PyObject *callback)
+        PyObject *callback) noexcept
     {
         try
         {
