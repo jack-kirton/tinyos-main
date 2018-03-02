@@ -72,13 +72,21 @@ implementation
 #define TIMESYNC_RATE   10
 #endif
 
+#ifndef TIMESYNC_ENTRY_VALID_LIMIT
+#define TIMESYNC_ENTRY_VALID_LIMIT 4
+#endif
+
+#ifndef TIMESYNC_ENTRY_SEND_LIMIT
+#define TIMESYNC_ENTRY_SEND_LIMIT 3
+#endif
+
     enum {
         MAX_ENTRIES           = 8,              // number of entries in the table
         BEACON_RATE           = TIMESYNC_RATE,  // how often send the beacon msg (in seconds)
         ROOT_TIMEOUT          = 5,              //time to declare itself the root if no msg was received (in sync periods)
         IGNORE_ROOT_MSG       = 4,              // after becoming the root ignore other roots messages (in send period)
-        ENTRY_VALID_LIMIT     = 4,              // number of entries to become synchronized
-        ENTRY_SEND_LIMIT      = 3,              // number of entries to send sync messages
+        ENTRY_VALID_LIMIT     = TIMESYNC_ENTRY_VALID_LIMIT,              // number of entries to become synchronized
+        ENTRY_SEND_LIMIT      = TIMESYNC_ENTRY_SEND_LIMIT,              // number of entries to send sync messages
         ENTRY_THROWOUT_LIMIT  = 500,            // if time sync error is bigger than this clear the table
     };
 
@@ -406,7 +414,7 @@ implementation
 
     void timeSyncMsgSend()
     {
-        if( outgoingMsg->rootID == 0xFFFF && ++heartBeats >= ROOT_TIMEOUT ) {
+        if( outgoingMsg->rootID == 0xFFFF ) { //&& ++heartBeats >= ROOT_TIMEOUT ) {
             outgoingMsg->seqNum = 0;
             outgoingMsg->rootID = TOS_NODE_ID;
         }
