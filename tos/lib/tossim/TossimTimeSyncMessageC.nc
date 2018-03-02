@@ -53,10 +53,6 @@ configuration TossimTimeSyncMessageC
         interface Packet;
         interface AMPacket;
         interface PacketAcknowledgements;
-        /*interface LowPowerListening;*/
-
-        /*interface TimeSyncAMSend<T32khz, uint32_t> as TimeSyncAMSend32khz[am_id_t id];*/
-        /*interface TimeSyncPacket<T32khz, uint32_t> as TimeSyncPacket32khz;*/
 
         interface TimeSyncAMSend<TMilli, uint32_t> as TimeSyncAMSendMilli[am_id_t id];
         interface TimeSyncPacket<TMilli, uint32_t> as TimeSyncPacketMilli;
@@ -65,12 +61,7 @@ configuration TossimTimeSyncMessageC
 
 implementation
 {
-        /*components CC2420TimeSyncMessageP, CC2420ActiveMessageC, CC2420PacketC, LedsC;*/
         components TossimTimeSyncMessageP, ActiveMessageC;
-        components TossimPacketModelC;
-
-        /*TimeSyncAMSend32khz = TossimTimeSyncMessageP;*/
-        /*TimeSyncPacket32khz = TossimTimeSyncMessageP;*/
 
         TimeSyncAMSendMilli = TossimTimeSyncMessageP;
         TimeSyncPacketMilli = TossimTimeSyncMessageP;
@@ -82,21 +73,13 @@ implementation
       	TossimTimeSyncMessageP.SubAMPacket -> AMSenderC;
         TossimTimeSyncMessageP.SubPacket -> AMSenderC;
 
-        /*TossimTimeSyncMessageP.PacketTimeStamp32khz -> CC2420PacketC;*/
         TossimTimeSyncMessageP.PacketTimeStampMilli -> ActiveMessageC;
-        /*TossimTimeSyncMessageP.PacketTimeSyncOffset -> CC2420PacketC;*/
-        /*components Counter32khz32C, new CounterToLocalTimeC(T32khz) as LocalTime32khzC, LocalTimeMilliC;*/
         components LocalTimeMilliC;
-        /*LocalTime32khzC.Counter -> Counter32khz32C;*/
-        /*CC2420TimeSyncMessageP.LocalTime32khz -> LocalTime32khzC;*/
         TossimTimeSyncMessageP.LocalTimeMilli -> LocalTimeMilliC;
-        /*TossimTimeSyncMessageP.Leds -> LedsC;*/
 
-        /*components ActiveMessageC;*/
         SplitControl = ActiveMessageC;
         PacketAcknowledgements = ActiveMessageC;
-        /*LowPowerListening = ActiveMessageC;*/
-        
+
         Receive = TossimTimeSyncMessageP.Receive;
         Snoop = TossimTimeSyncMessageP.Snoop;
         AMPacket = TossimTimeSyncMessageP;

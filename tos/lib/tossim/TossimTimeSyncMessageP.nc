@@ -34,8 +34,6 @@
  */
 
 #include <message.h>
-/*#include <sim_packet.h>*/
-#include <sim_tossim.h>
 
 #include "TossimTimeSyncMessage.h"
 
@@ -43,12 +41,10 @@ module TossimTimeSyncMessageP
 {
     provides
     {
-        /*interface TimeSyncAMSend<T32khz, uint32_t> as TimeSyncAMSend32khz[uint8_t id];*/
         interface TimeSyncAMSend<TMilli, uint32_t> as TimeSyncAMSendMilli[uint8_t id];
         interface Packet;
         interface AMPacket;
 
-        /*interface TimeSyncPacket<T32khz, uint32_t> as TimeSyncPacket32khz;*/
         interface TimeSyncPacket<TMilli, uint32_t> as TimeSyncPacketMilli;
 
         interface Receive[am_id_t id];
@@ -64,19 +60,14 @@ module TossimTimeSyncMessageP
         interface Receive as SubReceive;
         interface Receive as SubSnoop;
 
-        /*interface PacketTimeStamp<T32khz,uint32_t> as PacketTimeStamp32khz;*/
         interface PacketTimeStamp<TMilli,uint32_t> as PacketTimeStampMilli;
-        /*interface PacketTimeSyncOffset;*/
 
-        /*interface LocalTime<T32khz> as LocalTime32khz;*/
         interface LocalTime<TMilli> as LocalTimeMilli;
-        /*interface Leds;*/
     }
 }
 
 implementation
 {
-    // TODO: change the Packet.payloadLength and Packet.maxPayloadLength commands to async
     inline timesync_footer_t* getFooter(message_t* msg)
     {
         // we use the payload length that we export (the smaller one)
@@ -86,7 +77,6 @@ implementation
 /*----------------- Packet -----------------*/
     command void Packet.clear(message_t* msg)
     {
-        /*call PacketTimeSyncOffset.cancel(msg);*/
         call SubPacket.clear(msg);
         return;
     }
@@ -94,25 +84,21 @@ implementation
     command void Packet.setPayloadLength(message_t* msg, uint8_t len)
     {
         call SubPacket.setPayloadLength(msg, len + sizeof(timesync_footer_t));
-        /*sim_packet_set_length(msg, len + sizeof(timesync_footer_t));*/
     }
 
     command uint8_t Packet.payloadLength(message_t* msg)
     {
         return call SubPacket.payloadLength(msg) - sizeof(timesync_footer_t);
-        /*return sim_packet_length(msg) - sizeof(timesync_footer_t);*/
     }
 
     command uint8_t Packet.maxPayloadLength()
     {
         return call SubPacket.maxPayloadLength() - sizeof(timesync_footer_t);
-        /*return TOSH_DATA_LENGTH - sizeof(timesync_footer_t);*/
     }
 
     command void* Packet.getPayload(message_t* msg, uint8_t len)
     {
         return call SubPacket.getPayload(msg, len + sizeof(timesync_footer_t));
-        /*return sim_packet_data(msg);*/
     }
 
 /*----------------- AMPacket -----------------*/
@@ -172,62 +158,20 @@ implementation
 		call SubAMPacket.setGroup(msg, grp);
 	}
 
-/*----------------- TimeSyncAMSend32khz -----------------*/
-    /*command error_t TimeSyncAMSend32khz.send[am_id_t id](am_addr_t addr, message_t* msg, uint8_t len, uint32_t event_time)*/
-    /*{*/
-        /*error_t err;*/
-        /*timesync_footer_t* footer = (timesync_footer_t*)(msg->data + len);*/
-        /*footer->type = id;*/
-        /*footer->timestamp = event_time;*/
-
-        /*err = call SubSend.send(addr, msg, len + sizeof(timesync_footer_t));*/
-        /*[>call PacketTimeSyncOffset.set(msg);<]*/
-        /*return err;*/
-    /*}*/
-
-    /*command error_t TimeSyncAMSend32khz.cancel[am_id_t id](message_t* msg)*/
-    /*{*/
-        /*[>call PacketTimeSyncOffset.cancel(msg);<]*/
-        /*return call SubSend.cancel(msg);*/
-    /*}*/
-
-    /*default event void TimeSyncAMSend32khz.sendDone[am_id_t id](message_t* msg, error_t error) {}*/
-
-    /*command uint8_t TimeSyncAMSend32khz.maxPayloadLength[am_id_t id]()*/
-    /*{*/
-        /*return call SubSend.maxPayloadLength() - sizeof(timesync_footer_t);*/
-    /*}*/
-
-    /*command void* TimeSyncAMSend32khz.getPayload[am_id_t id](message_t* msg, uint8_t len)*/
-    /*{*/
-        /*return call SubSend.getPayload(msg, len + sizeof(timesync_footer_t));*/
-    /*}*/
-
 /*----------------- TimeSyncAMSendMilli -----------------*/
     command error_t TimeSyncAMSendMilli.send[am_id_t id](am_addr_t addr, message_t* msg, uint8_t len, uint32_t event_time)
     {
         error_t err;
         timesync_footer_t* footer = (timesync_footer_t*)(msg->data + len);
-        // compute elapsed time in millisecond (old version results in zero every time)
-        /*event_time = ((event_time - call LocalTimeMilli.get()) << 5); // + call LocalTime32khz.get();*/
-        event_time = (sim_time()*1000) / sim_ticks_per_sec();
         footer->type = id;
-        footer->timestamp = event_time;
-
+        footer->timestamp = call LocalTimeMilli.get() - event_time;
 
         err = call SubSend.send(addr, msg, len + sizeof(timesync_footer_t));
-        /*if(err == SUCCESS) {*/
-            /*simdbg("stdout", "Sent timestamp: %" PRIu32 "\n", event_time);*/
-        /*}*/
-        /*else {*/
-            /*simdbg("stdout", "Send FAIL\n");*/
-        /*}*/
         return err;
     }
 
     command error_t TimeSyncAMSendMilli.cancel[am_id_t id](message_t* msg)
     {
-        /*return call TimeSyncAMSend32khz.cancel[id](msg);*/
         return call SubSend.cancel(msg);
     }
 
@@ -235,13 +179,11 @@ implementation
 
     command uint8_t TimeSyncAMSendMilli.maxPayloadLength[am_id_t id]()
     {
-        /*return call TimeSyncAMSend32khz.maxPayloadLength[id]();*/
         return call SubSend.maxPayloadLength() - sizeof(timesync_footer_t);
     }
 
     command void* TimeSyncAMSendMilli.getPayload[am_id_t id](message_t* msg, uint8_t len)
     {
-        /*return call TimeSyncAMSend32khz.getPayload[id](msg, len);*/
         return call SubSend.getPayload(msg, len + sizeof(timesync_footer_t));
     }
 
@@ -250,12 +192,9 @@ implementation
     event message_t* SubReceive.receive(message_t* msg, void* payload, uint8_t len)
     {
         timesync_footer_t* footer;
-        uint32_t timestamp;
         am_id_t id = call AMPacket.type(msg);
 
         footer = (timesync_footer_t*)(((char*)(payload)) + (len - sizeof(timesync_footer_t)));
-        timestamp = footer->timestamp;
-        /*simdbg("stdout", "Received timestamp: %" PRIu32 "\n", timestamp);*/
 
         return signal Receive.receive[id](msg, payload, len - sizeof(timesync_footer_t));
     }
@@ -276,32 +215,18 @@ implementation
     event void SubSend.sendDone(message_t* msg, error_t error)
     {
         am_id_t id = call AMPacket.type(msg);
-        /*signal TimeSyncAMSend32khz.sendDone[id](msg, error);*/
         signal TimeSyncAMSendMilli.sendDone[id](msg, error);
     }
-
-/*----------------- TimeSyncPacket32khz -----------------*/
-    /*command bool TimeSyncPacket32khz.isValid(message_t* msg)*/
-    /*{*/
-        /*[>return call PacketTimeStamp32khz.isValid(msg) && getFooter(msg)->timestamp != CC2420_INVALID_TIMESTAMP;<]*/
-        /*return call PacketTimeStampMilli.isValid(msg);*/
-    /*}*/
-
-    /*command uint32_t TimeSyncPacket32khz.eventTime(message_t* msg)*/
-    /*{*/
-        /*[>return (uint32_t)(getFooter(msg)->timestamp) + call PacketTimeStamp32khz.timestamp(msg);<]*/
-        /*return (uint32_t)(getFooter(msg)->timestamp) + call PacketTimeStampMilli.timestamp(msg);*/
-    /*}*/
 
 /*----------------- TimeSyncPacketMilli -----------------*/
     command bool TimeSyncPacketMilli.isValid(message_t* msg)
     {
-        /*return call PacketTimeStampMilli.isValid(msg) && getFooter(msg)->timestamp != CC2420_INVALID_TIMESTAMP;*/
         return call PacketTimeStampMilli.isValid(msg);
     }
 
     command uint32_t TimeSyncPacketMilli.eventTime(message_t* msg)
     {
-        return ((int32_t)(getFooter(msg)->timestamp) >> 5) + call PacketTimeStampMilli.timestamp(msg);
+        uint32_t event_time = call PacketTimeStampMilli.timestamp(msg) - getFooter(msg)->timestamp;
+        return event_time;
     }
 }
