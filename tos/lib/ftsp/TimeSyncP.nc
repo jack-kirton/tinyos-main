@@ -299,6 +299,7 @@ implementation
 
     void task processMsg()
     {
+        error_t message_accepted = FAIL;
         TimeSyncMsg* msg = (TimeSyncMsg*)(call Send.getPayload(processedMsg, sizeof(TimeSyncMsg)));
 
         if( msg->rootID < outgoingMsg->rootID &&
@@ -320,9 +321,10 @@ implementation
 
         addNewEntry(msg);
         calculateConversion();
-        signal TimeSyncNotify.msg_received();
+        message_accepted = SUCCESS;
 
     exit:
+        signal TimeSyncNotify.msg_received(message_accepted);
         state &= ~STATE_PROCESSING;
     }
 
@@ -390,7 +392,7 @@ implementation
         }
         else if( call Send.send(AM_BROADCAST_ADDR, &outgoingMsgBuffer, TIMESYNCMSG_LEN, localTime ) != SUCCESS ){
             state &= ~STATE_SENDING;
-            signal TimeSyncNotify.msg_sent();
+            signal TimeSyncNotify.msg_sent(FAIL);
         }
     }
 
@@ -409,7 +411,7 @@ implementation
         }
 
         state &= ~STATE_SENDING;
-        signal TimeSyncNotify.msg_sent();
+        signal TimeSyncNotify.msg_sent(error);
     }
 
     void timeSyncMsgSend()
@@ -505,8 +507,8 @@ implementation
     async command uint8_t   TimeSyncInfo.getNumEntries() { return numEntries; }
     async command uint8_t   TimeSyncInfo.getHeartBeats() { return heartBeats; }
 
-    default event void TimeSyncNotify.msg_received(){}
-    default event void TimeSyncNotify.msg_sent(){}
+    default event void TimeSyncNotify.msg_received(error_t err){}
+    default event void TimeSyncNotify.msg_sent(error_t err){}
 
     event void RadioControl.startDone(error_t error){}
     event void RadioControl.stopDone(error_t error){}
