@@ -376,7 +376,7 @@ implementation
         else if( heartBeats >= ROOT_TIMEOUT ) {
             heartBeats = 0; //to allow ROOT_SWITCH_IGNORE to work
             outgoingMsg->rootID = TOS_NODE_ID;
-            ++(outgoingMsg->seqNum); // maybe set it to zero?
+            outgoingMsg->seqNum += 1; //Increment operator causes strange compiler error
         }
 
         outgoingMsg->globalTime = globalTime;
@@ -405,7 +405,7 @@ implementation
             call Leds.led1Toggle();
 
             if( outgoingMsg->rootID == TOS_NODE_ID )
-                ++(outgoingMsg->seqNum);
+                outgoingMsg->seqNum += 1; //Increment operator causes strange compiler error
         }
 
         state &= ~STATE_SENDING;
