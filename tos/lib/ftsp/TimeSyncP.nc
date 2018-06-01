@@ -72,13 +72,21 @@ implementation
 #define TIMESYNC_RATE   10
 #endif
 
+#ifndef TIMESYNC_ENTRY_VALID_LIMIT
+#define TIMESYNC_ENTRY_VALID_LIMIT 4
+#endif
+
+#ifndef TIMESYNC_ENTRY_SEND_LIMIT
+#define TIMESYNC_ENTRY_SEND_LIMIT 3
+#endif
+
     enum {
         MAX_ENTRIES           = 8,              // number of entries in the table
         BEACON_RATE           = TIMESYNC_RATE,  // how often send the beacon msg (in seconds)
         ROOT_TIMEOUT          = 5,              //time to declare itself the root if no msg was received (in sync periods)
         IGNORE_ROOT_MSG       = 4,              // after becoming the root ignore other roots messages (in send period)
-        ENTRY_VALID_LIMIT     = 4,              // number of entries to become synchronized
-        ENTRY_SEND_LIMIT      = 3,              // number of entries to send sync messages
+        ENTRY_VALID_LIMIT     = TIMESYNC_ENTRY_VALID_LIMIT,              // number of entries to become synchronized
+        ENTRY_SEND_LIMIT      = TIMESYNC_ENTRY_SEND_LIMIT,              // number of entries to send sync messages
         ENTRY_THROWOUT_LIMIT  = 500,            // if time sync error is bigger than this clear the table
     };
 
@@ -291,6 +299,7 @@ implementation
 
     void task processMsg()
     {
+        error_t message_accepted = FAIL;
         TimeSyncMsg* msg = (TimeSyncMsg*)(call Send.getPayload(processedMsg, sizeof(TimeSyncMsg)));
 
         if( msg->rootID < outgoingMsg->rootID &&
@@ -312,9 +321,10 @@ implementation
 
         addNewEntry(msg);
         calculateConversion();
-        signal TimeSyncNotify.msg_received();
+        message_accepted = SUCCESS;
 
     exit:
+        signal TimeSyncNotify.msg_received(message_accepted);
         state &= ~STATE_PROCESSING;
     }
 
@@ -368,7 +378,7 @@ implementation
         else if( heartBeats >= ROOT_TIMEOUT ) {
             heartBeats = 0; //to allow ROOT_SWITCH_IGNORE to work
             outgoingMsg->rootID = TOS_NODE_ID;
-            ++(outgoingMsg->seqNum); // maybe set it to zero?
+            outgoingMsg->seqNum += 1; //Increment operator causes strange compiler error
         }
 
         outgoingMsg->globalTime = globalTime;
@@ -382,7 +392,7 @@ implementation
         }
         else if( call Send.send(AM_BROADCAST_ADDR, &outgoingMsgBuffer, TIMESYNCMSG_LEN, localTime ) != SUCCESS ){
             state &= ~STATE_SENDING;
-            signal TimeSyncNotify.msg_sent();
+            signal TimeSyncNotify.msg_sent(FAIL);
         }
     }
 
@@ -397,16 +407,16 @@ implementation
             call Leds.led1Toggle();
 
             if( outgoingMsg->rootID == TOS_NODE_ID )
-                ++(outgoingMsg->seqNum);
+                outgoingMsg->seqNum += 1; //Increment operator causes strange compiler error
         }
 
         state &= ~STATE_SENDING;
-        signal TimeSyncNotify.msg_sent();
+        signal TimeSyncNotify.msg_sent(error);
     }
 
     void timeSyncMsgSend()
     {
-        if( outgoingMsg->rootID == 0xFFFF && ++heartBeats >= ROOT_TIMEOUT ) {
+        if( outgoingMsg->rootID == 0xFFFF ) { //&& ++heartBeats >= ROOT_TIMEOUT ) {
             outgoingMsg->seqNum = 0;
             outgoingMsg->rootID = TOS_NODE_ID;
         }
@@ -497,8 +507,8 @@ implementation
     async command uint8_t   TimeSyncInfo.getNumEntries() { return numEntries; }
     async command uint8_t   TimeSyncInfo.getHeartBeats() { return heartBeats; }
 
-    default event void TimeSyncNotify.msg_received(){}
-    default event void TimeSyncNotify.msg_sent(){}
+    default event void TimeSyncNotify.msg_received(error_t err){}
+    default event void TimeSyncNotify.msg_sent(error_t err){}
 
     event void RadioControl.startDone(error_t error){}
     event void RadioControl.stopDone(error_t error){}

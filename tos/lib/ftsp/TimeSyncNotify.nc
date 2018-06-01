@@ -41,15 +41,16 @@
 interface TimeSyncNotify
 {
 	/**
-	 * fired when time-sync msg is received and accepted
+	 * fired when time-sync msg is received. err indicates whether the message
+     * was accepted
 	 */
-	event void msg_received();
+	event void msg_received(error_t err);
 
 	/**
-	 * fired when time-sync msg is sent by TimeSyncM or the sending did not
-	 * succeed
+	 * fired when time-sync msg is sent by TimeSyncM. err indicates whether
+	 * sending was successful (returns Send.sendDone error)
 	 */
-	event void msg_sent();
+	event void msg_sent(error_t err);
 	
  }
 

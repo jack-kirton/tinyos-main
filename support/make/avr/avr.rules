@@ -144,9 +144,17 @@ ihex: exe FORCE
 exe: exe0 bytes FORCE
 	@:
 
+ifeq ($(PLATFORM),micaz)
+  AVR_CHIP = -D__AVR_ATmega128__
+else ifeq ($(PLATFORM),mica2)
+  AVR_CHIP = -D__AVR_ATmega128__
+else
+  AVR_CHIP = 
+endif
+
 exe0: builddir $(BUILD_EXTRA_DEPS) $(COMPONENT).nc FORCE
 	@echo "    compiling $(COMPONENT) to a $(PLATFORM) binary"
-	$(NCC) -o $(MAIN_EXE) $(NCC_SAFE_TINYOS_FLAGS) $(OPTFLAGS) $(PFLAGS) $(CFLAGS) $(WIRING_CHECK_FLAGS) $(COMPONENT).nc $(LIBS) $(LDFLAGS)
+	$(NCC) -o $(MAIN_EXE) $(NCC_SAFE_TINYOS_FLAGS) $(OPTFLAGS) $(PFLAGS) $(CFLAGS) $(WIRING_CHECK_FLAGS) $(COMPONENT).nc $(LIBS) $(LDFLAGS) $(AVR_CHIP)
 ifdef WIRING_CHECK_FILE
 	@nescc-wiring $(WIRING_CHECK_FILE)
 endif
