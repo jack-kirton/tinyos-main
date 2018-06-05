@@ -151,6 +151,8 @@ class Tossim {
 
   void addChannel(const char* channel, FILE* file);
   bool removeChannel(const char* channel, FILE* file);
+
+  bool hasCallback(const char* channel);
   void addCallback(const char* channel, std::function<void(const char*, size_t)> callback);
 
   void randomSeed(int seed);

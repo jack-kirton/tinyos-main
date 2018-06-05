@@ -79,6 +79,8 @@ void sim_log_free(void) __attribute__ ((cold));
 
 void sim_log_add_channel(const char* output, FILE* file);
 bool sim_log_remove_channel(const char* output, FILE* file);
+
+bool sim_log_has_callback(const char* name);
 void sim_log_add_callback(const char* name, void (*handle)(void* data, const char* line, size_t line_length), void* data);
 void sim_log_commit_change(void);
 

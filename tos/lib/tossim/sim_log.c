@@ -293,6 +293,18 @@ bool sim_log_remove_channel(const char* output, FILE* file) {
   return TRUE;
 }
 
+bool sim_log_has_callback(const char* name) {
+  sim_log_channel_t* channel;
+
+  channel = (sim_log_channel_t*)hash_table_search_data(&channelTable, name);
+
+  if (channel == NULL) {
+    return FALSE;
+  }
+
+  return channel->num_callbacks > 0;
+}
+
 void sim_log_add_callback(const char* name, void (*handle)(void* data, const char* line, size_t line_length), void* data) {
   sim_log_channel_t* channel;
   sim_log_callback_t* callback;

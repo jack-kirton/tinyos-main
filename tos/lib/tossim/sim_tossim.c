@@ -206,6 +206,10 @@ bool sim_remove_channel(const char* channel, FILE* file) __attribute__ ((C, spon
   return sim_log_remove_channel(channel, file);
 }
 
+bool sim_has_callback(const char* channel) __attribute__ ((C, spontaneous)) {
+  return sim_log_has_callback(channel);
+}
+
 void sim_add_callback(const char* channel, void (*handle)(void* data, const char* line, size_t line_length), void* data) __attribute__ ((C, spontaneous)) {
   sim_log_add_callback(channel, handle, data);
 }

@@ -7412,6 +7412,40 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Tossim_hasCallback(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Tossim *arg1 = (Tossim *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject *swig_obj[2] ;
+  bool result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Tossim, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Tossim_hasCallback" "', argument " "1"" of type '" "Tossim *""'"); 
+  }
+  arg1 = reinterpret_cast< Tossim * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Tossim_hasCallback" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  result = (bool)(arg1)->hasCallback((char const *)arg2);
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Tossim_addCallback__SWIG_0(PyObject *self, int nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   Tossim *arg1 = (Tossim *) 0 ;
@@ -9223,6 +9257,7 @@ SWIGINTERN PyMethodDef SwigPyBuiltin__Tossim_methods[] = {
   { "setCurrentNode", (PyCFunction) _wrap_Tossim_setCurrentNode, METH_O, (char *) "" },
   { "addChannel", (PyCFunction) _wrap_Tossim_addChannel, METH_VARARGS, (char *) "" },
   { "removeChannel", (PyCFunction) _wrap_Tossim_removeChannel, METH_VARARGS, (char *) "" },
+  { "hasCallback", (PyCFunction) _wrap_Tossim_hasCallback, METH_O, (char *) "" },
   { "addCallback", (PyCFunction) _wrap_Tossim_addCallback, METH_VARARGS, (char *) "" },
   { "randomSeed", (PyCFunction) _wrap_Tossim_randomSeed, METH_O, (char *) "" },
   { "register_event_callback", (PyCFunction) _wrap_Tossim_register_event_callback, METH_VARARGS, (char *) "" },

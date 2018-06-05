@@ -335,6 +335,10 @@ bool Tossim::removeChannel(const char* channel, FILE* file) {
   return sim_remove_channel(channel, file);
 }
 
+bool Tossim::hasCallback(const char* channel) {
+  return sim_has_callback(channel);
+}
+
 typedef struct handle_tossim_callback_data {
   handle_tossim_callback_data(std::function<void(const char*, size_t)> provided_callback)
     : callback(std::move(provided_callback))
